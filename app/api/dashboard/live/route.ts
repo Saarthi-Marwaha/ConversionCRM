@@ -313,6 +313,22 @@ export async function GET(request: NextRequest) {
     (a, b) => new Date(b.last_seen).getTime() - new Date(a.last_seen).getTime()
   );
 
+  const { data: stageRows } = await admin
+    .from("stages")
+    .select("user_id, stage")
+    .eq("workspace_id", workspace.id);
+
+  const persistedStages = new Map<string, LifecycleStage>();
+  for (const row of stageRows ?? []) {
+    if (row.user_id && row.stage) {
+      persistedStages.set(row.user_id, row.stage as LifecycleStage);
+    }
+  }
+
+  for (const u of users) {
+    u.stage = persistedStages.get(u.user_id) ?? "signup";
+  }
+
   // Persist scores + stages so Supabase stays in sync with the dashboard.
   if (users.length > 0) {
     const computedAt = new Date().toISOString();
