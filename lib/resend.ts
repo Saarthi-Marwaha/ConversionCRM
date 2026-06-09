@@ -16,4 +16,4 @@ export function getResend(): Resend {
   return _resend;
 }
 
-export const EMAIL_FROM = `${process.env.RESEND_FROM_NAME ?? "ConversionCRM"} <${process.env.RESEND_FROM_EMAIL ?? "noreply@conversioncrm.io"}>`;
+export const EMAIL_FROM = `${process.env.RESEND_FROM_NAME ?? "ConversionCRM"} <${process.env.RESEND_FROM_EMAIL ?? "noreply@mail.conversioncrm.com"}>`;

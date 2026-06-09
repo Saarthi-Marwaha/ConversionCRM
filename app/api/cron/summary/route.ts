@@ -74,8 +74,9 @@ export async function GET(request: NextRequest) {
         react: React.createElement(DailySummaryEmail, { data: summaryData }),
         trigger: "daily_summary",
         workspaceId: ws.id,
-        // daily_summary is workspace-level, so we use a placeholder end_user_id
-        endUserId: ws.owner_id,
+        userId: "__workspace_owner__",
+        replyTo: ws.reply_to_email ?? ownerEmail,
+        metadata: { recipient_type: "workspace_owner" },
       });
 
       sent++;

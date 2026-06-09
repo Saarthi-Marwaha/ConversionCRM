@@ -86,9 +86,14 @@ export async function createWorkspace(formData: FormData) {
   const companyName = (formData.get("company_name") as string)?.trim();
   const productName = (formData.get("product_name") as string)?.trim();
   const keyFeatureName = (formData.get("key_feature_name") as string)?.trim();
+  const replyToEmail = (formData.get("reply_to_email") as string)?.trim();
 
-  if (!companyName || !productName || !keyFeatureName) {
+  if (!companyName || !productName || !keyFeatureName || !replyToEmail) {
     redirect("/onboarding?error=All+fields+are+required");
+  }
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(replyToEmail)) {
+    redirect("/onboarding?error=Enter+a+valid+reply-to+email");
   }
 
   const supabase = await createClient();
@@ -121,6 +126,7 @@ export async function createWorkspace(formData: FormData) {
     owner_id: user.id,
     api_key: apiKey,
     key_feature_name: keyFeatureName,
+    reply_to_email: replyToEmail,
     trial_length_days: 14,
   });
 

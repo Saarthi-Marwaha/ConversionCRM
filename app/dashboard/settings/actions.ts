@@ -26,3 +26,25 @@ export async function saveWebsiteUrl(formData: FormData) {
   revalidatePath("/dashboard/settings");
   return { ok: true };
 }
+
+export async function saveReplyToEmail(formData: FormData) {
+  const { workspace } = await getActiveWorkspace();
+  if (!workspace) return { error: "No workspace" };
+
+  const email = ((formData.get("reply_to_email") as string) ?? "").trim();
+  if (!email) return { error: "Email is required" };
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { error: "Enter a valid email address" };
+  }
+
+  const admin = createSupabaseAdminClient();
+  const { error } = await admin
+    .from("workspaces")
+    .update({ reply_to_email: email })
+    .eq("id", workspace.id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/settings");
+  return { ok: true };
+}

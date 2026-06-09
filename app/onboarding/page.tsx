@@ -91,6 +91,26 @@ export default async function OnboardingPage({ searchParams }: Props) {
             />
           </div>
 
+          {/* Reply-to email for automated emails */}
+          <div>
+            <label htmlFor="reply_to_email" className="block text-sm font-medium text-gray-700 mb-1.5">
+              Your Gmail (for email replies)
+            </label>
+            <input
+              id="reply_to_email"
+              name="reply_to_email"
+              type="email"
+              required
+              defaultValue={user.email ?? ""}
+              placeholder="you@gmail.com"
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            />
+            <p className="mt-1.5 text-xs text-gray-400 leading-relaxed">
+              Automated emails send from noreply@mail.conversioncrm.com. When
+              users hit reply, it goes to this address.
+            </p>
+          </div>
+
           {/* Key feature (aha moment) */}
           <div>
             <label htmlFor="key_feature_name" className="block text-sm font-medium text-gray-700 mb-1.5">

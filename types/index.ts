@@ -50,6 +50,7 @@ export interface Workspace {
   api_key: string;
   product_name: string | null;
   website_url: string | null;
+  reply_to_email: string | null;
   key_feature_name: string | null;
   key_feature_event: string | null;
   trial_length_days: number;
@@ -105,7 +106,8 @@ export interface UserStage {
 export interface EmailLog {
   id: string;
   workspace_id: string;
-  end_user_id: string;
+  user_id: string | null;
+  end_user_id: string | null;
   trigger: EmailTrigger;
   resend_message_id: string | null;
   subject: string;

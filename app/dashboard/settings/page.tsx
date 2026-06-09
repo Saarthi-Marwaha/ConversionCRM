@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { getActiveWorkspace } from "@/lib/active-workspace";
 import { CopyButton } from "@/components/CopyButton";
 import { WebsiteUrlForm } from "@/components/WebsiteUrlForm";
+import { ReplyToEmailForm } from "@/components/ReplyToEmailForm";
 
 export default async function SettingsPage() {
   const { workspace, userEmail } = await getActiveWorkspace();
@@ -161,6 +162,23 @@ user and event should appear within 3 seconds.`;
           time on each page, and button/link clicks — no extra code beyond the
           script tag. The auth block above links events to a real user and email.
         </div>
+      </section>
+
+      {/* ── Reply-to email ─────────────────────────────── */}
+      <section className="bg-white rounded-xl border border-gray-100 p-6 space-y-4">
+        <div>
+          <h2 className="text-base font-semibold text-gray-900">Email replies</h2>
+          <p className="text-sm text-gray-500 mt-0.5">
+            Required for automated emails. When users reply, the message goes to
+            your inbox.
+          </p>
+        </div>
+        {!workspace.reply_to_email && (
+          <div className="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2">
+            Set your Gmail to enable welcome, nudge, and lifecycle emails.
+          </div>
+        )}
+        <ReplyToEmailForm currentEmail={workspace.reply_to_email} />
       </section>
 
       {/* ── Website URL ────────────────────────────────── */}

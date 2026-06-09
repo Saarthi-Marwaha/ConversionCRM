@@ -1,6 +1,7 @@
+import type React from "react";
 import { getResend, EMAIL_FROM } from "@/lib/resend";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
-import type { EmailTrigger, EndUser, Workspace } from "@/types";
+import type { EmailTrigger } from "@/types";
 
 interface SendEmailOptions {
   to: string;
@@ -8,16 +9,32 @@ interface SendEmailOptions {
   react: React.ReactElement;
   trigger: EmailTrigger;
   workspaceId: string;
-  endUserId: string;
+  /** Widget-tracked user id (preferred for automated emails). */
+  userId?: string | null;
+  /** Legacy end_users row id. */
+  endUserId?: string | null;
+  replyTo?: string | null;
   metadata?: Record<string, unknown>;
 }
 
 /**
- * Sends a transactional email via Resend and logs it to the email_logs table.
+ * Sends a transactional email via Resend and logs it to email_logs.
  */
 export async function sendEmail(options: SendEmailOptions): Promise<boolean> {
-  const { to, subject, react, trigger, workspaceId, endUserId, metadata } =
-    options;
+  const {
+    to,
+    subject,
+    react,
+    trigger,
+    workspaceId,
+    userId,
+    endUserId,
+    replyTo,
+    metadata,
+  } = options;
+
+  const supabase = createSupabaseAdminClient();
+  const sentAt = new Date().toISOString();
 
   try {
     const { data, error } = await getResend().emails.send({
@@ -25,18 +42,18 @@ export async function sendEmail(options: SendEmailOptions): Promise<boolean> {
       to,
       subject,
       react,
+      ...(replyTo ? { reply_to: replyTo } : {}),
     });
-
-    const supabase = createSupabaseAdminClient();
 
     await supabase.from("email_logs").insert({
       workspace_id: workspaceId,
-      end_user_id: endUserId,
+      user_id: userId ?? null,
+      end_user_id: endUserId ?? null,
       trigger,
       resend_message_id: data?.id ?? null,
       subject,
       status: error ? "failed" : "sent",
-      sent_at: new Date().toISOString(),
+      sent_at: sentAt,
       metadata: metadata ?? {},
     });
 
@@ -48,31 +65,50 @@ export async function sendEmail(options: SendEmailOptions): Promise<boolean> {
     return true;
   } catch (err) {
     console.error(`[Email] Unexpected error sending ${trigger}:`, err);
+
+    await supabase.from("email_logs").insert({
+      workspace_id: workspaceId,
+      user_id: userId ?? null,
+      end_user_id: endUserId ?? null,
+      trigger,
+      resend_message_id: null,
+      subject,
+      status: "failed",
+      sent_at: sentAt,
+      metadata: { ...(metadata ?? {}), error: String(err) },
+    });
+
     return false;
   }
 }
 
 /**
- * Checks if a specific trigger email was already sent to a user recently.
- * Prevents duplicate sends within a given window.
+ * True if a successful send exists for this user + trigger within the window.
+ * Pass `withinHours: null` to check if it was ever sent.
  */
 export async function wasEmailSentRecently(
-  endUserId: string,
+  workspaceId: string,
+  userId: string,
   trigger: EmailTrigger,
-  withinHours = 24
+  withinHours: number | null = 24
 ): Promise<boolean> {
   const supabase = createSupabaseAdminClient();
-  const cutoff = new Date(
-    Date.now() - withinHours * 60 * 60 * 1000
-  ).toISOString();
 
-  const { count } = await supabase
+  let query = supabase
     .from("email_logs")
     .select("*", { count: "exact", head: true })
-    .eq("end_user_id", endUserId)
+    .eq("workspace_id", workspaceId)
+    .eq("user_id", userId)
     .eq("trigger", trigger)
-    .eq("status", "sent")
-    .gte("sent_at", cutoff);
+    .eq("status", "sent");
 
+  if (withinHours !== null) {
+    const cutoff = new Date(
+      Date.now() - withinHours * 60 * 60 * 1000
+    ).toISOString();
+    query = query.gte("sent_at", cutoff);
+  }
+
+  const { count } = await query;
   return (count ?? 0) > 0;
 }
