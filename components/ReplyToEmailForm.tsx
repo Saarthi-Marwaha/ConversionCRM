@@ -45,7 +45,7 @@ export function ReplyToEmailForm({
             defaultValue={currentSenderName ?? ""}
             placeholder="Acme Team"
             required
-            className="w-full text-sm bg-gray-50 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:bg-white transition-colors"
+            className="w-full text-sm bg-gray-50 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:bg-white transition-colors"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -55,12 +55,12 @@ export function ReplyToEmailForm({
             defaultValue={currentEmail ?? ""}
             placeholder="you@gmail.com"
             required
-            className="flex-1 text-sm bg-gray-50 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:bg-white transition-colors"
+            className="flex-1 text-sm bg-gray-50 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:bg-white transition-colors"
           />
           <button
             type="submit"
             disabled={isPending}
-            className="px-4 py-2 text-sm font-medium bg-sky-600 text-white rounded-lg hover:bg-sky-700 disabled:opacity-50 transition-colors shrink-0"
+            className="px-4 py-2 text-sm font-medium bg-sky-600 text-white rounded-md hover:bg-sky-700 disabled:opacity-50 transition-colors shrink-0"
           >
             {isPending ? "Saving…" : saved ? "Saved ✓" : "Save"}
           </button>

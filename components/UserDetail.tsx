@@ -21,18 +21,20 @@ import {
   UserPlus,
   CalendarDays,
   ChevronDown,
+  ClipboardCopy,
+  ClipboardCheck,
 } from "lucide-react";
 
 const NAVY = "text-[#0b3a5e]";
 
 const STAGE_BADGE: Record<LifecycleStage, { label: string; class: string }> = {
-  signup: { label: "Signup", class: "bg-sky-100 text-sky-800" },
-  onboarding: { label: "Onboarding", class: "bg-amber-100 text-amber-700" },
-  active: { label: "Active", class: "bg-emerald-100 text-emerald-700" },
-  going_quiet: { label: "Going Quiet", class: "bg-orange-100 text-orange-700" },
-  conversion_ready: { label: "Ready", class: "bg-blue-100 text-blue-800" },
-  paid: { label: "Paid", class: "bg-emerald-100 text-emerald-800" },
-  churned: { label: "Churned", class: "bg-red-100 text-red-700" },
+  signup: { label: "Signup", class: "bg-sky-100 text-sky-900" },
+  onboarding: { label: "Onboarding", class: "bg-sky-50 text-sky-700" },
+  active: { label: "Active", class: "bg-sky-500 text-white" },
+  going_quiet: { label: "Going Quiet", class: "bg-white text-gray-600 shadow-soft" },
+  conversion_ready: { label: "Ready", class: "bg-[#0b3a5e] text-white" },
+  paid: { label: "Paid", class: "bg-gray-900 text-white" },
+  churned: { label: "Churned", class: "bg-gray-100 text-gray-500" },
 };
 
 const TRIGGER_LABELS: Record<string, string> = {
@@ -88,6 +90,11 @@ type DetailUser = {
   is_anonymous: boolean;
   signed_up: boolean;
   logged_in: boolean;
+  location?: {
+    country: string | null;
+    region: string | null;
+    city: string | null;
+  };
   engagement_score: number;
   score_breakdown: WeeklyScoreBreakdown;
   first_seen: string | null;
@@ -110,6 +117,51 @@ type DetailUser = {
   emails: SentEmail[];
 };
 
+function CopyEmailButton({ email }: { email: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={async (e) => {
+        e.stopPropagation();
+        try {
+          await navigator.clipboard.writeText(email);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1500);
+        } catch {
+          /* clipboard unavailable */
+        }
+      }}
+      title="Copy email address"
+      className={cn(
+        "inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-[11px] font-medium transition-colors",
+        copied
+          ? "bg-sky-100 text-sky-800"
+          : "bg-gray-50 text-gray-500 hover:bg-sky-50 hover:text-sky-700"
+      )}
+    >
+      {copied ? (
+        <ClipboardCheck className="h-3.5 w-3.5" />
+      ) : (
+        <ClipboardCopy className="h-3.5 w-3.5" />
+      )}
+      {copied ? "Copied" : "Copy"}
+    </button>
+  );
+}
+
+/** "US" → 🇺🇸 via regional indicator symbols. */
+function countryFlag(code: string): string {
+  return code
+    .toUpperCase()
+    .replace(/./g, (c) => String.fromCodePoint(127397 + c.charCodeAt(0)));
+}
+
+function formatLocation(loc: DetailUser["location"]): string | null {
+  if (!loc?.country) return null;
+  return [loc.city, loc.country].filter(Boolean).join(", ");
+}
+
 function formatDuration(seconds: number): string {
   if (seconds < 60) return `${seconds}s`;
   const m = Math.floor(seconds / 60);
@@ -130,9 +182,9 @@ function eventIcon(type: string) {
 }
 
 function eventColor(type: string) {
-  if (/sign[_-]?up|register/i.test(type)) return "text-emerald-600 bg-emerald-50";
+  if (/sign[_-]?up|register/i.test(type)) return "text-sky-900 bg-sky-100";
   if (/login|sign[_-]?in/i.test(type)) return "text-sky-600 bg-sky-50";
-  if (type === "page_time") return "text-amber-600 bg-amber-50";
+  if (type === "page_time") return "text-sky-700 bg-sky-50";
   if (type === "click") return "text-blue-700 bg-blue-50";
   if (/page[_-]?view/i.test(type)) return "text-gray-500 bg-gray-100";
   return "text-sky-700 bg-sky-50";
@@ -143,7 +195,7 @@ function ScoreRing({ score }: { score: number }) {
   const c = 2 * Math.PI * r;
   const filled = (Math.max(0, Math.min(100, score)) / 100) * c;
   const color =
-    score >= 70 ? "#059669" : score >= 40 ? "#d97706" : "#64748b";
+    score >= 70 ? "#0b3a5e" : score >= 40 ? "#0ea5e9" : "#94a3b8";
 
   return (
     <div className="relative h-24 w-24 flex-shrink-0">
@@ -180,7 +232,7 @@ function StatCard({
   icon: React.ElementType;
 }) {
   return (
-    <div className="rounded-2xl bg-sky-50 p-4 shadow-soft">
+    <div className="rounded-lg bg-sky-50 p-4 shadow-soft">
       <div className="flex items-center justify-between">
         <p className="text-xs font-semibold text-sky-900">{label}</p>
         <Icon className="h-4 w-4 text-sky-400" />
@@ -264,7 +316,7 @@ function EmailHistory({ emails }: { emails: SentEmail[] }) {
             >
               <span
                 className={cn(
-                  "flex-shrink-0 h-7 w-7 rounded-lg flex items-center justify-center",
+                  "flex-shrink-0 h-7 w-7 rounded-md flex items-center justify-center",
                   em.status === "sent"
                     ? "bg-sky-50 text-sky-600"
                     : "bg-red-50 text-red-500"
@@ -281,7 +333,7 @@ function EmailHistory({ emails }: { emails: SentEmail[] }) {
                     className={cn(
                       "text-[10px] font-medium px-1.5 py-0.5 rounded",
                       em.status === "sent"
-                        ? "bg-emerald-50 text-emerald-700"
+                        ? "bg-sky-50 text-sky-700"
                         : "bg-red-50 text-red-600"
                     )}
                   >
@@ -315,11 +367,11 @@ function EmailHistory({ emails }: { emails: SentEmail[] }) {
                 title={`email-${i}`}
                 sandbox=""
                 srcDoc={em.html}
-                className="mt-3 w-full h-80 rounded-lg shadow-soft bg-white"
+                className="mt-3 w-full h-80 rounded-md shadow-soft bg-white"
               />
             )}
             {open && !em.html && em.body_text && (
-              <pre className="mt-3 text-xs text-gray-600 bg-gray-50 rounded-lg p-3 whitespace-pre-wrap">
+              <pre className="mt-3 text-xs text-gray-600 bg-gray-50 rounded-md p-3 whitespace-pre-wrap">
                 {em.body_text}
               </pre>
             )}
@@ -384,7 +436,7 @@ export function UserDetail({ userId }: { userId: string }) {
           {user?.email && (
             <Link
               href={`/dashboard/composer?to=${encodeURIComponent(user.email)}&uid=${encodeURIComponent(user.user_id)}`}
-              className="inline-flex items-center gap-2 rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-600 transition-colors shadow-sm"
+              className="inline-flex items-center gap-2 rounded-md bg-sky-500 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-600 transition-colors shadow-sm"
             >
               <Send className="h-4 w-4" />
               Compose email
@@ -393,7 +445,7 @@ export function UserDetail({ userId }: { userId: string }) {
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-100 text-red-700 text-sm rounded-lg px-4 py-3">
+          <div className="bg-red-50 border border-red-100 text-red-700 text-sm rounded-md px-4 py-3">
             Couldn&apos;t load this user: {error}
           </div>
         )}
@@ -410,7 +462,7 @@ export function UserDetail({ userId }: { userId: string }) {
             <div className="card p-5 sm:p-6">
               <div className="flex flex-col sm:flex-row sm:items-center gap-6">
                 <div className="flex items-center gap-4 min-w-0 flex-1">
-                  <div className="h-14 w-14 rounded-2xl bg-sky-100 text-sky-800 flex items-center justify-center text-xl font-bold flex-shrink-0">
+                  <div className="h-14 w-14 rounded-lg bg-sky-100 text-sky-800 flex items-center justify-center text-xl font-bold flex-shrink-0">
                     {(user.email ?? user.user_id).charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0">
@@ -418,6 +470,7 @@ export function UserDetail({ userId }: { userId: string }) {
                       <h1 className="text-lg font-bold text-gray-900 truncate">
                         {user.email ?? user.user_id}
                       </h1>
+                      {user.email && <CopyEmailButton email={user.email} />}
                       {stageBadge && (
                         <span
                           className={cn(
@@ -438,6 +491,14 @@ export function UserDetail({ userId }: { userId: string }) {
                       {user.user_id}
                     </p>
                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 mt-2">
+                      {formatLocation(user.location) && (
+                        <span className="inline-flex items-center gap-1">
+                          <span aria-hidden>
+                            {countryFlag(user.location!.country!)}
+                          </span>
+                          {formatLocation(user.location)}
+                        </span>
+                      )}
                       {user.first_seen && (
                         <span className="inline-flex items-center gap-1">
                           <CalendarDays className="h-3 w-3 text-gray-400" />
@@ -529,7 +590,7 @@ export function UserDetail({ userId }: { userId: string }) {
                 {/* ── Pages ─────────────────────────────── */}
                 <div className="card overflow-hidden">
                   <div className="px-6 py-4 flex items-center gap-2">
-                    <Trophy className="h-4 w-4 text-amber-500" />
+                    <Trophy className="h-4 w-4 text-sky-500" />
                     <h2 className="text-sm font-semibold text-gray-900">
                       Most visited pages
                     </h2>
@@ -563,7 +624,7 @@ export function UserDetail({ userId }: { userId: string }) {
                                 className={cn(
                                   "inline-flex h-5 w-5 items-center justify-center rounded text-[11px] font-bold",
                                   i === 0
-                                    ? "bg-amber-100 text-amber-700"
+                                    ? "bg-sky-100 text-sky-900"
                                     : "bg-gray-100 text-gray-500"
                                 )}
                               >
@@ -645,7 +706,7 @@ export function UserDetail({ userId }: { userId: string }) {
                         <div key={i} className="px-5 py-2.5 flex items-start gap-3">
                           <span
                             className={cn(
-                              "flex-shrink-0 h-7 w-7 rounded-lg flex items-center justify-center",
+                              "flex-shrink-0 h-7 w-7 rounded-md flex items-center justify-center",
                               eventColor(ev.event_type)
                             )}
                           >

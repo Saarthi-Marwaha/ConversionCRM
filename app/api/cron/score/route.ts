@@ -10,8 +10,6 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { assignStages } from "@/lib/cron/assign-stages";
-import { runAutomatedEmails } from "@/lib/cron/run-automated-emails";
-import { runLimitUpgradeEmails } from "@/lib/cron/run-limit-upgrade-emails";
 import { runScoring } from "@/lib/cron/run-scoring";
 import { validateCronSecret } from "@/lib/utils";
 
@@ -25,22 +23,18 @@ export async function GET(request: NextRequest) {
 
   const { scored, errors: scoreErrors, scoredByWorkspace } = await runScoring();
   const { assigned, errors: stageErrors } = await assignStages(scoredByWorkspace);
-  const { sent: emailsSent, errors: emailErrors } = await runAutomatedEmails();
-  const { sent: limitEmailsSent, errors: limitEmailErrors } =
-    await runLimitUpgradeEmails();
 
-  const errors = [...scoreErrors, ...stageErrors, ...emailErrors, ...limitEmailErrors];
+  // Email sending lives in /api/cron/emails (hourly, recipient-local 11 am).
+  const errors = [...scoreErrors, ...stageErrors];
 
   console.log(
-    `[Cron/score] scored=${scored} staged=${assigned} emails=${emailsSent} limit=${limitEmailsSent} errors=${errors.length}`
+    `[Cron/score] scored=${scored} staged=${assigned} errors=${errors.length}`
   );
 
   return NextResponse.json({
     ok: true,
     scored,
     assigned,
-    emailsSent,
-    limitEmailsSent,
     errors: errors.slice(0, 20),
   });
 }

@@ -14,6 +14,17 @@ export async function middleware(request: NextRequest) {
   // Auth pages — redirect logged-in users away
   const isAuthPage = pathname === "/login" || pathname === "/signup";
 
+  // Root of conversioncrm.co: signed-in users go straight to their
+  // dashboard every time; visitors see the static marketing landing page
+  // (public/landing.html) — served via an internal rewrite so the URL
+  // stays "/". "Try Beta" on the landing then links to /signup.
+  if (pathname === "/") {
+    if (user) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+    return NextResponse.rewrite(new URL("/site/landing.html", request.url));
+  }
+
   // DEV: skip the login gate so the dashboard is reachable without auth
   if (!user && isProtected && !DEV_BYPASS_AUTH) {
     const loginUrl = request.nextUrl.clone();
@@ -34,10 +45,11 @@ export const config = {
     /*
      * Match all paths except:
      * - _next/static, _next/image (Next.js internals)
-     * - favicon.ico
+     * - favicon.ico / favicon.svg
+     * - the static marketing assets folder (/assets/*)
      * - Public API routes: /api/events, /api/widget (widget embed)
-     * - Static file extensions
+     * - Static file extensions (incl. css/js/html/txt/xml for the landing)
      */
-    "/((?!_next/static|_next/image|favicon.ico|api/events|api/widget|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon\\.ico|favicon\\.svg|assets/|robots\\.txt|sitemap\\.xml|llms\\.txt|api/events|api/widget|.*\\.(?:svg|png|jpg|jpeg|gif|webp|css|js|html|txt|xml|woff|woff2|ico)$).*)",
   ],
 };

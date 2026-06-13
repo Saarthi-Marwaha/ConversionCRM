@@ -6,6 +6,8 @@
 import React from "react";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { sendEmail, wasEmailSentRecently } from "@/lib/emails/send";
+import { isWithinSendWindow } from "@/lib/emails/local-time";
+import { matchesAhaUrl, normalizeAhaPath } from "@/lib/scoring";
 import { WelcomeEmail } from "@/emails/templates/Welcome";
 import { FeatureNudgeEmail } from "@/emails/templates/FeatureNudge";
 import { ValueDemoEmail } from "@/emails/templates/ValueDemo";
@@ -27,6 +29,7 @@ type WorkspaceRow = {
   website_url: string | null;
   key_feature_name: string | null;
   key_feature_event: string | null;
+  key_feature_url: string | null;
   reply_to_email: string | null;
   email_sender_name: string | null;
 };
@@ -36,6 +39,7 @@ type EventRow = {
   email: string | null;
   event_type: string;
   page: string | null;
+  country: string | null;
   properties: Record<string, unknown> | null;
   occurred_at: string;
 };
@@ -82,7 +86,7 @@ function msAgo(days: number): number {
 function appUrlFor(ws: WorkspaceRow): string {
   const configured = (process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/+$/, "");
   if (ws.website_url) return ws.website_url.replace(/\/+$/, "");
-  return configured || "https://app.conversioncrm.io";
+  return configured || "https://conversioncrm.co";
 }
 
 function pricingUrlFor(ws: WorkspaceRow): string {
@@ -147,10 +151,12 @@ export function planStageEmail(
 
     case "onboarding": {
       const ahaEvent = ws.key_feature_event?.trim().toLowerCase() || null;
+      const ahaPath = normalizeAhaPath(ws.key_feature_url);
       const featureUsedIn5d = evts.some(
         (e) =>
           (isFeatureUsed(e.event_type) ||
-            (ahaEvent !== null && e.event_type.toLowerCase() === ahaEvent)) &&
+            (ahaEvent !== null && e.event_type.toLowerCase() === ahaEvent) ||
+            matchesAhaUrl(e, ahaPath)) &&
           new Date(e.occurred_at).getTime() >= msAgo(5)
       );
       if (featureUsedIn5d) return null;
@@ -237,7 +243,9 @@ export function planStageEmail(
   }
 }
 
-const BATCH_COOLDOWN_MS = 23 * 60 * 60 * 1000;
+// Batches run up to once an hour so each region hits its own ~11 am send
+// window; per-trigger cooldowns stop users from getting repeats.
+const BATCH_COOLDOWN_MS = 50 * 60 * 1000;
 
 export function shouldRunEmailBatch(
   emailsLastRunAt: string | null | undefined
@@ -263,9 +271,13 @@ async function processWorkspaceEmails(
           .eq("workspace_id", ws.id),
         supabase
           .from("events")
-          .select("user_id, email, event_type, page, properties, occurred_at")
+          .select(
+            "user_id, email, event_type, page, country, properties, occurred_at"
+          )
           .eq("workspace_id", ws.id)
-          .not("user_id", "is", null),
+          .not("user_id", "is", null)
+          .order("occurred_at", { ascending: false })
+          .limit(5000),
         supabase
           .from("engagement_scores")
           .select("user_id, score")
@@ -310,6 +322,14 @@ async function processWorkspaceEmails(
     const plan = planStageEmail(user, ws);
     if (!plan) continue;
 
+    // Respect the recipient's morning: everything except the welcome email
+    // waits for ~11 am in the user's captured country (newest event wins).
+    if (plan.trigger !== "welcome") {
+      const country =
+        userEvents.find((e) => e.country)?.country ?? null;
+      if (!isWithinSendWindow(country)) continue;
+    }
+
     const cooldown = COOLDOWN_HOURS[plan.trigger];
     if (
       await wasEmailSentRecently(ws.id, user.user_id, plan.trigger, cooldown)
@@ -349,7 +369,7 @@ export async function runAutomatedEmailsForWorkspace(
   const { data: ws, error } = await supabase
     .from("workspaces")
     .select(
-      "id, name, product_name, website_url, key_feature_name, key_feature_event, reply_to_email, email_sender_name, emails_last_run_at"
+      "id, name, product_name, website_url, key_feature_name, key_feature_event, key_feature_url, reply_to_email, email_sender_name, emails_last_run_at"
     )
     .eq("id", workspaceId)
     .single();
@@ -391,7 +411,7 @@ export async function runAutomatedEmails(): Promise<RunAutomatedEmailsResult> {
   const { data: workspaces, error: wsError } = await supabase
     .from("workspaces")
     .select(
-      "id, name, product_name, website_url, key_feature_name, key_feature_event, reply_to_email, email_sender_name"
+      "id, name, product_name, website_url, key_feature_name, key_feature_event, key_feature_url, reply_to_email, email_sender_name"
     )
     .not("reply_to_email", "is", null);
 

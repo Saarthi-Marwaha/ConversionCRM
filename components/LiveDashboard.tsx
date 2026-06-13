@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Fragment,
   useCallback,
   useEffect,
   useMemo,
@@ -13,18 +12,12 @@ import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import type { EmailTrigger, LifecycleStage } from "@/types";
 import type { WeeklyScoreBreakdown } from "@/lib/scoring";
-import { SCORE_LAYER_MAX } from "@/lib/scoring";
-import {
-  STAGE_EMAIL_COLUMNS,
-  type UserEmailsSent,
-} from "@/lib/emails/stage-email-columns";
+import type { UserEmailsSent } from "@/lib/emails/stage-email-columns";
 import {
   Users,
   Eye,
   MousePointerClick,
   ChevronRight,
-  Mail,
-  FileText,
   Clock,
   Check,
   Search,
@@ -54,13 +47,13 @@ const RANGE_STORAGE_KEY = "ccrm-dashboard-range";
 const NAVY = "text-[#0b3a5e]";
 
 const STAGE_BADGE: Record<LifecycleStage, { label: string; class: string }> = {
-  signup: { label: "Signup", class: "bg-sky-100 text-sky-800" },
-  onboarding: { label: "Onboarding", class: "bg-amber-100 text-amber-700" },
-  active: { label: "Active", class: "bg-emerald-100 text-emerald-700" },
-  going_quiet: { label: "Going Quiet", class: "bg-orange-100 text-orange-700" },
-  conversion_ready: { label: "Ready", class: "bg-blue-100 text-blue-800" },
-  paid: { label: "Paid", class: "bg-emerald-100 text-emerald-800" },
-  churned: { label: "Churned", class: "bg-red-100 text-red-700" },
+  signup: { label: "Signup", class: "bg-sky-100 text-sky-900" },
+  onboarding: { label: "Onboarding", class: "bg-sky-50 text-sky-700" },
+  active: { label: "Active", class: "bg-sky-500 text-white" },
+  going_quiet: { label: "Going Quiet", class: "bg-white text-gray-600 shadow-soft" },
+  conversion_ready: { label: "Ready", class: "bg-[#0b3a5e] text-white" },
+  paid: { label: "Paid", class: "bg-gray-900 text-white" },
+  churned: { label: "Churned", class: "bg-gray-100 text-gray-500" },
 };
 
 function rangeLabel(range: DashboardDateRange): string {
@@ -88,6 +81,8 @@ function scorePeriodLabel(range: DashboardDateRange): string {
 type LiveUser = {
   user_id: string;
   email: string | null;
+  country: string | null;
+  region: string | null;
   stage: LifecycleStage;
   emails_sent: UserEmailsSent;
   engagement_score: number;
@@ -134,6 +129,29 @@ export function userDetailHref(userId: string): string {
   return `/dashboard/users/${encodeURIComponent(userId)}`;
 }
 
+/** "US" → 🇺🇸 via regional indicator symbols. */
+function countryFlag(code: string): string {
+  return code
+    .toUpperCase()
+    .replace(/./g, (c) => String.fromCodePoint(127397 + c.charCodeAt(0)));
+}
+
+function RegionCell({ user }: { user: LiveUser }) {
+  if (!user.country) return <span className="text-gray-300">—</span>;
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 text-xs text-gray-700 whitespace-nowrap"
+      title={user.region ? `${user.region}, ${user.country}` : user.country}
+    >
+      <span aria-hidden>{countryFlag(user.country)}</span>
+      {user.country}
+      {user.region ? (
+        <span className="text-gray-400">· {user.region}</span>
+      ) : null}
+    </span>
+  );
+}
+
 function ScoreBadge({
   score,
   periodLabel = "7-day score",
@@ -143,9 +161,9 @@ function ScoreBadge({
 }) {
   const tier =
     score >= 70
-      ? "bg-emerald-100 text-emerald-800"
+      ? "bg-[#0b3a5e] text-white"
       : score >= 40
-        ? "bg-amber-100 text-amber-800"
+        ? "bg-sky-100 text-sky-900"
         : "bg-gray-100 text-gray-600";
 
   return (
@@ -157,21 +175,6 @@ function ScoreBadge({
       title={`Engagement score (${periodLabel}): ${score}/100`}
     >
       {score}
-    </span>
-  );
-}
-
-function EmailSentTick({ sent, label }: { sent: boolean; label?: string }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 rounded-md px-1.5 py-1",
-        sent ? "bg-emerald-50 text-emerald-600" : "bg-gray-50 text-gray-300"
-      )}
-      title={sent ? "Email sent" : "Not sent yet"}
-    >
-      <Check className="h-3 w-3" strokeWidth={3} />
-      {label && <span className="text-[10px] font-medium">{label}</span>}
     </span>
   );
 }
@@ -204,14 +207,14 @@ function DateRangeToggle({
   ];
 
   return (
-    <div className="inline-flex items-center rounded-xl bg-white shadow-soft p-1">
+    <div className="inline-flex items-center rounded-lg bg-white shadow-soft p-1">
       {options.map((opt) => (
         <button
           key={opt.value}
           type="button"
           onClick={() => onChange(opt.value)}
           className={cn(
-            "px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors",
+            "px-3 py-1.5 text-xs font-semibold rounded-md transition-colors",
             range === opt.value
               ? "bg-sky-500 text-white"
               : "text-gray-500 hover:text-gray-800"
@@ -309,14 +312,14 @@ function useLiveData(range: DashboardDateRange) {
 
 function LiveBadge({ updatedAt }: { updatedAt: Date | null }) {
   return (
-    <div className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
+    <div className="inline-flex items-center gap-1.5 text-xs font-medium text-sky-800 bg-sky-50 px-2.5 py-1 rounded-full">
       <span className="relative flex h-2 w-2">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75" />
+        <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500" />
       </span>
       Live
       {updatedAt && (
-        <span className="text-emerald-600/70 font-normal hidden sm:inline">
+        <span className="text-sky-600/70 font-normal hidden sm:inline">
           · {updatedAt.toLocaleTimeString()}
         </span>
       )}
@@ -338,7 +341,7 @@ function Metric({
   return (
     <div
       className={cn(
-        "rounded-2xl p-4 sm:p-5 shadow-soft",
+        "rounded-lg p-4 sm:p-5 shadow-soft",
         highlight ? "bg-sky-100" : "bg-sky-50"
       )}
     >
@@ -363,22 +366,22 @@ function Banners({ data }: { data: LiveData | null }) {
   return (
     <>
       {!data.filtered && (
-        <div className="bg-amber-50 rounded-xl px-4 py-2.5 text-xs text-amber-700 shadow-soft">
+        <div className="bg-sky-50 rounded-lg px-4 py-2.5 text-xs text-[#0b3a5e] shadow-soft">
           No website configured — showing all events.{" "}
-          <a href="/dashboard/settings" className="underline hover:text-amber-900">
+          <a href="/dashboard/settings" className="underline hover:text-sky-900">
             Set your website URL in Settings
           </a>
         </div>
       )}
       {data.emailBatch && data.emailBatch.sent > 0 && (
-        <div className="flex items-center gap-2 bg-emerald-50 rounded-xl px-4 py-2.5 text-xs text-emerald-800 shadow-soft">
+        <div className="flex items-center gap-2 bg-sky-50 rounded-lg px-4 py-2.5 text-xs text-[#0b3a5e] shadow-soft">
           <Check className="h-3.5 w-3.5" />
           Sent {data.emailBatch.sent} automated email
           {data.emailBatch.sent === 1 ? "" : "s"} this session.
         </div>
       )}
       {data.workspace.reply_to_configured === false && (
-        <div className="bg-amber-50 rounded-xl px-4 py-2.5 text-xs text-amber-800 shadow-soft">
+        <div className="bg-sky-50 rounded-lg px-4 py-2.5 text-xs text-[#0b3a5e] shadow-soft">
           Add your reply-to email in{" "}
           <a href="/dashboard/settings" className="underline">
             Settings
@@ -402,7 +405,7 @@ function UserCardList({ users }: { users: LiveUser[] }) {
             onClick={() => router.push(userDetailHref(u.user_id))}
             className="w-full text-left px-4 py-3.5 flex items-center gap-3 active:bg-sky-50 transition-colors"
           >
-            <div className="h-9 w-9 rounded-xl bg-sky-100 text-sky-800 flex items-center justify-center text-sm font-bold flex-shrink-0">
+            <div className="h-9 w-9 rounded-lg bg-sky-100 text-sky-800 flex items-center justify-center text-sm font-bold flex-shrink-0">
               {(u.email ?? u.user_id).charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
@@ -410,6 +413,7 @@ function UserCardList({ users }: { users: LiveUser[] }) {
                 {u.email ?? u.user_id}
               </p>
               <p className="text-[11px] text-gray-400 truncate">
+                {u.country ? `${countryFlag(u.country)} ${u.country} · ` : ""}
                 {u.total_clicks} clicks ·{" "}
                 {u.total_time_seconds > 0
                   ? formatDuration(u.total_time_seconds)
@@ -452,7 +456,7 @@ export function LiveDashboard() {
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-700 text-sm rounded-xl px-4 py-3 shadow-soft">
+        <div className="bg-red-50 text-red-700 text-sm rounded-lg px-4 py-3 shadow-soft">
           Couldn&apos;t reach the live feed: {error}
         </div>
       )}
@@ -612,12 +616,21 @@ function OverviewUsersTable({
 }
 
 /* ── Users page ──────────────────────────────────────────── */
-type SortKey = "last_seen" | "score" | "clicks" | "time";
+type SortKey = "last_seen" | "score" | "status" | "clicks" | "time";
+
+const STAGE_SORT_ORDER: Record<LifecycleStage, number> = {
+  paid: 0,
+  conversion_ready: 1,
+  active: 2,
+  onboarding: 3,
+  signup: 4,
+  going_quiet: 5,
+  churned: 6,
+};
 
 export function LiveUsersPanel() {
   const [range, setRange] = useDateRange();
   const { data, error, updatedAt } = useLiveData(range);
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("last_seen");
   const periodLabel = scorePeriodLabel(data?.range ?? range);
@@ -637,6 +650,13 @@ export function LiveUsersPanel() {
     switch (sortKey) {
       case "score":
         sorted.sort((a, b) => b.engagement_score - a.engagement_score);
+        break;
+      case "status":
+        sorted.sort(
+          (a, b) =>
+            STAGE_SORT_ORDER[a.stage] - STAGE_SORT_ORDER[b.stage] ||
+            b.engagement_score - a.engagement_score
+        );
         break;
       case "clicks":
         sorted.sort((a, b) => b.total_clicks - a.total_clicks);
@@ -671,7 +691,7 @@ export function LiveUsersPanel() {
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-700 text-sm rounded-xl px-4 py-3 shadow-soft">
+        <div className="bg-red-50 text-red-700 text-sm rounded-md px-4 py-3 shadow-soft">
           Couldn&apos;t reach the live feed: {error}
         </div>
       )}
@@ -686,30 +706,23 @@ export function LiveUsersPanel() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by email or user id…"
-            className="w-full bg-white rounded-xl shadow-soft pl-9 pr-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-300"
+            className="w-full bg-white rounded-md shadow-soft pl-9 pr-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-300"
           />
         </div>
         <select
           value={sortKey}
           onChange={(e) => setSortKey(e.target.value as SortKey)}
-          className="bg-white rounded-xl shadow-soft px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-300"
+          className="bg-white rounded-md shadow-soft px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-300"
         >
           <option value="last_seen">Sort: Last seen</option>
           <option value="score">Sort: Score</option>
+          <option value="status">Sort: Status</option>
           <option value="clicks">Sort: Clicks</option>
           <option value="time">Sort: Time spent</option>
         </select>
       </div>
 
-      <LiveUsersTable
-        users={filtered}
-        selectedUserId={selectedUserId}
-        onSelectUser={(id) =>
-          setSelectedUserId((cur) => (cur === id ? null : id))
-        }
-        showActivityInline
-        scorePeriodLabel={periodLabel}
-      />
+      <LiveUsersTable users={filtered} scorePeriodLabel={periodLabel} />
     </div>
   );
 }
@@ -718,12 +731,12 @@ function StatusBadges({ user }: { user: LiveUser }) {
   return (
     <div className="flex flex-wrap gap-1.5">
       {user.signed_up && (
-        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
+        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[#0b3a5e] text-white">
           Signed up
         </span>
       )}
       {user.logged_in && (
-        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-sky-100 text-sky-800">
+        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-sky-100 text-sky-900">
           Logged in
         </span>
       )}
@@ -736,26 +749,26 @@ function StatusBadges({ user }: { user: LiveUser }) {
   );
 }
 
+/**
+ * Users table — plain rows, no inline expansion. Clicking a row opens the
+ * user's full profile page (which has its own back button).
+ */
 export function LiveUsersTable({
   users,
-  selectedUserId,
-  onSelectUser,
-  showActivityInline,
   scorePeriodLabel = "7-day score",
 }: {
   users: LiveUser[] | null;
-  selectedUserId?: string | null;
-  onSelectUser?: (id: string) => void;
-  showActivityInline?: boolean;
   scorePeriodLabel?: string;
 }) {
+  const router = useRouter();
+
   return (
     <div className="card overflow-hidden">
       <div className="px-4 py-3 flex items-center justify-between gap-2">
         <h2 className="text-sm font-semibold text-gray-900">Tracked users</h2>
         <span className="text-xs text-gray-400 truncate">
-          {users ? `${users.length} shown · ` : ""}click to expand ·
-          double-click for the profile
+          {users ? `${users.length} shown · ` : ""}click a row for the full
+          profile
         </span>
       </div>
 
@@ -780,27 +793,74 @@ export function LiveUsersTable({
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-sky-500 text-left text-xs font-semibold text-white">
-                  <th className="px-3 py-3 font-semibold w-8"></th>
-                  <th className="px-3 py-3 font-semibold">User</th>
-                  <th className="px-3 py-3 font-semibold">Stage</th>
-                  <th className="px-3 py-3 font-semibold">Status</th>
-                  <th className="px-3 py-3 font-semibold text-center">Score</th>
-                  <th className="px-3 py-3 font-semibold text-right">Events</th>
-                  <th className="px-3 py-3 font-semibold text-right">Time</th>
-                  <th className="px-3 py-3 font-semibold text-right">Clicks</th>
-                  <th className="px-3 py-3 font-semibold">Last seen</th>
+                  <th className="px-4 py-3 font-semibold">User</th>
+                  <th className="px-4 py-3 font-semibold">Region</th>
+                  <th className="px-4 py-3 font-semibold">Stage</th>
+                  <th className="px-4 py-3 font-semibold">Status</th>
+                  <th className="px-4 py-3 font-semibold text-center">Score</th>
+                  <th className="px-4 py-3 font-semibold text-right">Events</th>
+                  <th className="px-4 py-3 font-semibold text-right">Time</th>
+                  <th className="px-4 py-3 font-semibold text-right">Clicks</th>
+                  <th className="px-4 py-3 font-semibold">Last seen</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {users.map((u) => (
-                  <UserRow
-                    key={u.user_id}
-                    user={u}
-                    isSelected={selectedUserId === u.user_id}
-                    onSelect={() => onSelectUser?.(u.user_id)}
-                    showActivityInline={showActivityInline}
-                    scorePeriodLabel={scorePeriodLabel}
-                  />
+                {users.map((user) => (
+                  <tr
+                    key={user.user_id}
+                    onClick={() => router.push(userDetailHref(user.user_id))}
+                    title="Open full profile"
+                    className="cursor-pointer transition-colors hover:bg-sky-50/60"
+                  >
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="min-w-0">
+                          <p className="text-sm text-gray-900 font-medium truncate max-w-[14rem]">
+                            {user.email ?? user.user_id}
+                          </p>
+                          <p className="text-[11px] text-gray-400 font-mono truncate max-w-[14rem]">
+                            {user.user_id}
+                          </p>
+                        </div>
+                        {user.is_anonymous && (
+                          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 flex-shrink-0">
+                            anon
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <RegionCell user={user} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <StageBadge stage={user.stage} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <StatusBadges user={user} />
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <ScoreBadge
+                        score={user.engagement_score}
+                        periodLabel={scorePeriodLabel}
+                      />
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-700 tabular-nums">
+                      {user.events}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-700 text-xs tabular-nums whitespace-nowrap">
+                      {user.total_time_seconds > 0
+                        ? formatDuration(user.total_time_seconds)
+                        : "—"}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-700 tabular-nums">
+                      {user.total_clicks > 0 ? user.total_clicks : "—"}
+                    </td>
+                    <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">
+                      {formatDistanceToNow(new Date(user.last_seen), {
+                        addSuffix: true,
+                      })}
+                    </td>
+                  </tr>
                 ))}
               </tbody>
             </table>
@@ -808,332 +868,5 @@ export function LiveUsersTable({
         </>
       )}
     </div>
-  );
-}
-
-export function ScoreBreakdownTiles({
-  breakdown,
-}: {
-  breakdown: WeeklyScoreBreakdown;
-}) {
-  const layers: [string, number, number][] = [
-    ["Recency", breakdown.recency ?? 0, SCORE_LAYER_MAX.recency],
-    ["Frequency", breakdown.frequency ?? 0, SCORE_LAYER_MAX.frequency],
-    ["Depth", breakdown.depth ?? 0, SCORE_LAYER_MAX.depth],
-    ["Key feature", breakdown.key_feature ?? 0, SCORE_LAYER_MAX.key_feature],
-    ["Time", breakdown.time_spent ?? 0, SCORE_LAYER_MAX.time_spent],
-    ["Intent", breakdown.buying_intent ?? 0, SCORE_LAYER_MAX.buying_intent],
-  ];
-
-  return (
-    <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 text-xs">
-      {layers.map(([label, pts, max]) => (
-        <div key={label} className="bg-white rounded-lg shadow-soft px-2.5 py-2">
-          <p className="text-gray-400">{label}</p>
-          <p className={cn("font-semibold tabular-nums", NAVY)}>
-            {pts}/{max}
-          </p>
-          <div className="mt-1 h-1 rounded-full bg-sky-50 overflow-hidden">
-            <div
-              className="h-full rounded-full bg-sky-400"
-              style={{ width: `${Math.min(100, (pts / max) * 100)}%` }}
-            />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function PageAnalyticsPanel({
-  user,
-  showActivityInline,
-  scorePeriodLabel = "7-day score",
-}: {
-  user: LiveUser;
-  showActivityInline?: boolean;
-  scorePeriodLabel?: string;
-}) {
-  const [expandedPage, setExpandedPage] = useState<string | null>(null);
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-4 text-xs text-gray-600">
-        {user.email && (
-          <span className="flex items-center gap-1.5">
-            <Mail className="h-3.5 w-3.5 text-gray-400" />
-            {user.email}
-          </span>
-        )}
-        <span className="flex items-center gap-1.5">
-          <Clock className="h-3.5 w-3.5 text-gray-400" />
-          {formatDuration(user.total_time_seconds)} total on site
-        </span>
-        <span className="flex items-center gap-1.5">
-          <MousePointerClick className="h-3.5 w-3.5 text-gray-400" />
-          {user.total_clicks} clicks
-        </span>
-        <span className="flex items-center gap-1.5">
-          <StageBadge stage={user.stage} />
-        </span>
-        <span className="flex items-center gap-1.5">
-          <ScoreBadge
-            score={user.engagement_score}
-            periodLabel={scorePeriodLabel}
-          />
-          <span className="text-gray-500">{scorePeriodLabel}</span>
-        </span>
-        <a
-          href={userDetailHref(user.user_id)}
-          className="ml-auto text-sky-700 font-semibold hover:underline"
-          onClick={(e) => e.stopPropagation()}
-        >
-          Full profile →
-        </a>
-      </div>
-
-      <ScoreBreakdownTiles breakdown={user.score_breakdown} />
-
-      {/* Automated email status (moved out of the main table) */}
-      <div>
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 mb-2">
-          <Mail className="h-3.5 w-3.5 text-sky-500" />
-          Automated emails
-        </div>
-        <div className="flex flex-wrap gap-1.5">
-          {STAGE_EMAIL_COLUMNS.map((col) => (
-            <EmailSentTick
-              key={`${col.stage}-${col.trigger}`}
-              sent={user.emails_sent?.[col.trigger as EmailTrigger] ?? false}
-              label={col.emailLabel}
-            />
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 mb-2">
-          <FileText className="h-3.5 w-3.5 text-sky-500" />
-          Page analytics ({user.page_count} pages)
-        </div>
-
-        {user.pages.length === 0 ? (
-          <p className="text-xs text-gray-400">No page data yet.</p>
-        ) : (
-          <div className="bg-white rounded-xl shadow-soft overflow-hidden">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="bg-sky-50 text-sky-900">
-                  <th className="text-left px-3 py-2 font-medium w-6"></th>
-                  <th className="text-left px-3 py-2 font-medium">Page</th>
-                  <th className="text-right px-3 py-2 font-medium">Views</th>
-                  <th className="text-right px-3 py-2 font-medium">Time</th>
-                  <th className="text-right px-3 py-2 font-medium">Clicks</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {user.pages.map((p) => {
-                  const pageOpen = expandedPage === p.page;
-                  return (
-                    <Fragment key={p.page}>
-                      <tr
-                        className="hover:bg-gray-50 cursor-pointer"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setExpandedPage(pageOpen ? null : p.page);
-                        }}
-                      >
-                        <td className="px-3 py-2">
-                          <ChevronRight
-                            className={cn(
-                              "h-3.5 w-3.5 text-gray-400 transition-transform",
-                              pageOpen && "rotate-90 text-sky-500"
-                            )}
-                          />
-                        </td>
-                        <td className="px-3 py-2">
-                          <p className="font-mono text-gray-800 truncate max-w-[16rem]">
-                            {p.page}
-                          </p>
-                          {p.title && (
-                            <p className="text-gray-400 truncate max-w-[16rem]">
-                              {p.title}
-                            </p>
-                          )}
-                        </td>
-                        <td className="px-3 py-2 text-right tabular-nums text-gray-700">
-                          {p.views || "—"}
-                        </td>
-                        <td className="px-3 py-2 text-right tabular-nums text-gray-700 whitespace-nowrap">
-                          {p.time_seconds > 0
-                            ? formatDuration(p.time_seconds)
-                            : "—"}
-                        </td>
-                        <td className="px-3 py-2 text-right tabular-nums text-gray-700">
-                          {p.clicks || "—"}
-                        </td>
-                      </tr>
-                      {pageOpen && p.click_targets.length > 0 && (
-                        <tr key={`${p.page}-clicks`} className="bg-gray-50/80">
-                          <td colSpan={5} className="px-6 py-2">
-                            <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-1.5">
-                              Clicks on this page
-                            </p>
-                            <ul className="flex flex-wrap gap-1.5">
-                              {p.click_targets.map((c) => (
-                                <li
-                                  key={c.label}
-                                  className="text-xs bg-white shadow-soft rounded px-2 py-0.5 text-gray-700"
-                                >
-                                  {c.label}
-                                  <span className="text-gray-400 ml-1">
-                                    ×{c.count}
-                                  </span>
-                                </li>
-                              ))}
-                            </ul>
-                          </td>
-                        </tr>
-                      )}
-                    </Fragment>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {showActivityInline && (
-        <div>
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 mb-2">
-            <Clock className="h-3.5 w-3.5 text-sky-500" />
-            Recent activity
-          </div>
-          {user.activity.length === 0 ? (
-            <p className="text-xs text-gray-400">No activity recorded.</p>
-          ) : (
-            <ul className="space-y-1 max-h-48 overflow-y-auto">
-              {user.activity.slice(0, 15).map((ev, i) => (
-                <li
-                  key={i}
-                  className="flex items-center justify-between text-xs bg-white rounded-lg shadow-soft px-2.5 py-1.5"
-                >
-                  <span className="font-medium text-gray-700 truncate">
-                    {ev.detail || ev.event_type}
-                    {ev.page ? (
-                      <span className="text-gray-400 font-normal">
-                        {" "}
-                        · {ev.page}
-                      </span>
-                    ) : null}
-                  </span>
-                  <span className="text-gray-400 whitespace-nowrap ml-2">
-                    {formatDistanceToNow(new Date(ev.occurred_at), {
-                      addSuffix: true,
-                    })}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function UserRow({
-  user,
-  isSelected,
-  onSelect,
-  showActivityInline,
-  scorePeriodLabel = "7-day score",
-}: {
-  user: LiveUser;
-  isSelected: boolean;
-  onSelect: () => void;
-  showActivityInline?: boolean;
-  scorePeriodLabel?: string;
-}) {
-  const router = useRouter();
-  const expanded = isSelected;
-
-  return (
-    <>
-      <tr
-        onClick={onSelect}
-        onDoubleClick={() => router.push(userDetailHref(user.user_id))}
-        title="Click to expand · double-click for the full profile"
-        className={cn(
-          "cursor-pointer transition-colors select-none",
-          isSelected ? "bg-sky-50/70" : "hover:bg-gray-50"
-        )}
-      >
-        <td className="px-3 py-3 align-top">
-          <ChevronRight
-            className={cn(
-              "h-4 w-4 text-gray-400 transition-transform",
-              expanded && "rotate-90 text-sky-500"
-            )}
-          />
-        </td>
-        <td className="px-3 py-3">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="min-w-0">
-              <p className="text-sm text-gray-900 font-medium truncate max-w-[14rem]">
-                {user.email ?? user.user_id}
-              </p>
-              <p className="text-[11px] text-gray-400 font-mono truncate max-w-[14rem]">
-                {user.user_id}
-              </p>
-            </div>
-            {user.is_anonymous && (
-              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 flex-shrink-0">
-                anon
-              </span>
-            )}
-          </div>
-        </td>
-        <td className="px-3 py-3">
-          <StageBadge stage={user.stage} />
-        </td>
-        <td className="px-3 py-3">
-          <StatusBadges user={user} />
-        </td>
-        <td className="px-3 py-3 text-center">
-          <ScoreBadge
-            score={user.engagement_score}
-            periodLabel={scorePeriodLabel}
-          />
-        </td>
-        <td className="px-3 py-3 text-right text-gray-700 tabular-nums">
-          {user.events}
-        </td>
-        <td className="px-3 py-3 text-right text-gray-700 text-xs tabular-nums whitespace-nowrap">
-          {user.total_time_seconds > 0
-            ? formatDuration(user.total_time_seconds)
-            : "—"}
-        </td>
-        <td className="px-3 py-3 text-right text-gray-700 tabular-nums">
-          {user.total_clicks > 0 ? user.total_clicks : "—"}
-        </td>
-        <td className="px-3 py-3 text-gray-500 text-xs whitespace-nowrap">
-          {formatDistanceToNow(new Date(user.last_seen), { addSuffix: true })}
-        </td>
-      </tr>
-
-      {expanded && (
-        <tr className="bg-sky-50/40">
-          <td colSpan={9} className="px-4 py-4">
-            <PageAnalyticsPanel
-              user={user}
-              showActivityInline={showActivityInline}
-              scorePeriodLabel={scorePeriodLabel}
-            />
-          </td>
-        </tr>
-      )}
-    </>
   );
 }

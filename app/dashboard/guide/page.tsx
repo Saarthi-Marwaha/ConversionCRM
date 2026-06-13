@@ -78,27 +78,27 @@ const BANDS: { range: string; label: string; chip: string; meaning: string }[] =
   {
     range: "0",
     label: "Signup",
-    chip: "bg-sky-100 text-sky-800",
+    chip: "bg-sky-100 text-sky-900",
     meaning: "Tracked but no scored activity yet — the welcome email goes out.",
   },
   {
     range: "1–30",
     label: "Onboarding",
-    chip: "bg-amber-100 text-amber-700",
+    chip: "bg-sky-50 text-sky-700",
     meaning:
       "Poking around but hasn't hit the aha moment. Gets the feature nudge if 5 days pass without it.",
   },
   {
     range: "31–70",
     label: "Active",
-    chip: "bg-emerald-100 text-emerald-700",
+    chip: "bg-sky-500 text-white",
     meaning:
       "Using the product regularly. Gets a value-demo email once they've explored enough (3+ page views in a week).",
   },
   {
     range: "71–100",
     label: "Conversion Ready",
-    chip: "bg-blue-100 text-blue-800",
+    chip: "bg-[#0b3a5e] text-white",
     meaning:
       "Highly engaged — the best moment to ask. Gets the upgrade offer, or the urgency email if they visited pricing.",
   },
@@ -107,18 +107,18 @@ const BANDS: { range: string; label: string; chip: string; meaning: string }[] =
 const RULES: { label: string; chip: string; meaning: string }[] = [
   {
     label: "Going Quiet",
-    chip: "bg-orange-100 text-orange-700",
+    chip: "bg-white text-gray-600 shadow-soft",
     meaning:
       "Previously scored, but no events for 14+ days. Gets a friendly check-in.",
   },
   {
     label: "Churned",
-    chip: "bg-red-100 text-red-700",
+    chip: "bg-gray-100 text-gray-500",
     meaning: "No events for 30+ days. Gets one win-back email every ~25 days.",
   },
   {
     label: "Paid",
-    chip: "bg-emerald-100 text-emerald-800",
+    chip: "bg-gray-900 text-white",
     meaning:
       'Any "paid" event ever — sticky forever, and automated emails stop.',
   },
@@ -217,7 +217,7 @@ export default async function GuidePage() {
           {PIPELINE.map((step, i) => (
             <li key={step.title}>
               <div className="flex items-start gap-3">
-                <div className="h-9 w-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center flex-shrink-0">
+                <div className="h-9 w-9 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center flex-shrink-0">
                   <step.icon className="h-4 w-4" />
                 </div>
                 <div className="pb-1">
@@ -250,7 +250,7 @@ export default async function GuidePage() {
           {LAYERS.map((l) => (
             <div key={l.name} className="flex items-start gap-3">
               <span
-                className={`min-w-[3.5rem] text-center text-xs font-bold tabular-nums rounded-lg bg-sky-50 px-2 py-1.5 ${NAVY}`}
+                className={`min-w-[3.5rem] text-center text-xs font-bold tabular-nums rounded-md bg-sky-50 px-2 py-1.5 ${NAVY}`}
               >
                 {l.max} pts
               </span>
@@ -261,7 +261,7 @@ export default async function GuidePage() {
             </div>
           ))}
         </div>
-        <div className="mt-4 rounded-xl bg-sky-50 px-4 py-3 text-xs text-sky-900 flex items-start gap-2">
+        <div className="mt-4 rounded-lg bg-sky-50 px-4 py-3 text-xs text-sky-900 flex items-start gap-2">
           <Sparkles className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
           <span>
             Tip: setting your{" "}
@@ -287,7 +287,7 @@ export default async function GuidePage() {
           {BANDS.map((b) => (
             <div
               key={b.label}
-              className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 rounded-xl bg-gray-50/80 px-3.5 py-2.5"
+              className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 rounded-lg bg-gray-50/80 px-3.5 py-2.5"
             >
               <span
                 className={`font-bold tabular-nums text-sm sm:min-w-[4.5rem] ${NAVY}`}
@@ -310,7 +310,7 @@ export default async function GuidePage() {
           {RULES.map((b) => (
             <div
               key={b.label}
-              className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 rounded-xl bg-gray-50/80 px-3.5 py-2.5"
+              className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 rounded-lg bg-gray-50/80 px-3.5 py-2.5"
             >
               <span
                 className={`self-start text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap sm:ml-[5.25rem] ${b.chip}`}
@@ -381,7 +381,7 @@ export default async function GuidePage() {
         <ul className="space-y-2.5">
           {EVENTS.map((ev) => (
             <li key={ev.code}>
-              <code className="block bg-gray-50 rounded-lg px-3 py-2 text-[11px] sm:text-xs text-sky-800 font-mono overflow-x-auto whitespace-nowrap">
+              <code className="block bg-gray-50 rounded-md px-3 py-2 text-[11px] sm:text-xs text-sky-800 font-mono overflow-x-auto whitespace-nowrap">
                 {ev.code}
               </code>
               <p className="text-[11px] text-gray-400 mt-1 ml-1">{ev.note}</p>

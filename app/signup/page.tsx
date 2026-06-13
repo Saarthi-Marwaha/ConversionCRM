@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { signUp } from "@/app/auth/actions";
+import { GoogleAuthButton, OrDivider } from "@/components/GoogleAuthButton";
+import { BrandLogo } from "@/components/BrandLogo";
 
 interface Props {
   searchParams: { error?: string };
@@ -12,13 +14,8 @@ export default function SignupPage({ searchParams }: Props) {
     <main className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-purple-50 flex items-center justify-center px-4">
       <div className="bg-white w-full max-w-md p-8 rounded-2xl border border-gray-100 shadow-sm">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 mb-8">
-          <div className="bg-sky-600 text-white p-1.5 rounded-lg">
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-          <span className="font-bold text-gray-900">ConversionCRM</span>
+        <Link href="/" className="inline-block mb-8">
+          <BrandLogo />
         </Link>
 
         <h1 className="text-2xl font-bold text-gray-900 mb-1">Create your account</h1>
@@ -27,10 +24,13 @@ export default function SignupPage({ searchParams }: Props) {
         </p>
 
         {error && (
-          <div className="mb-4 px-4 py-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-700">
+          <div className="mb-4 px-4 py-3 bg-red-50 rounded-md text-sm text-red-700">
             {decodeURIComponent(error)}
           </div>
         )}
+
+        <GoogleAuthButton label="Sign up with Google" />
+        <OrDivider />
 
         <form action={signUp} className="space-y-4">
           <div>

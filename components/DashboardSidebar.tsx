@@ -1,7 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import logoImage from "@/assets/logo_CRM-removebg-preview.png";
 import { useEffect, useState, useTransition } from "react";
 import { signOut } from "@/app/auth/actions";
 import type { Workspace } from "@/types";
@@ -11,11 +13,11 @@ import {
   Users,
   Settings,
   LogOut,
-  Zap,
   Mail,
   LifeBuoy,
   CreditCard,
   BookOpen,
+  MessageSquarePlus,
   Menu,
   X,
 } from "lucide-react";
@@ -25,6 +27,7 @@ const NAV_ITEMS = [
   { href: "/dashboard/users", label: "Users", icon: Users },
   { href: "/dashboard/composer", label: "Email Composer", icon: Mail },
   { href: "/dashboard/guide", label: "Guide", icon: BookOpen },
+  { href: "/dashboard/feedback", label: "Feedback", icon: MessageSquarePlus },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
   { href: "/dashboard/support", label: "Support", icon: LifeBuoy },
   { href: "/pricing", label: "Pricing", icon: CreditCard },
@@ -37,13 +40,16 @@ interface Props {
 
 function Logo({ workspace }: { workspace: Workspace | null }) {
   return (
-    <div className="flex items-center gap-2 min-w-0">
-      <div className="bg-sky-500 text-white p-1.5 rounded-lg flex-shrink-0">
-        <Zap className="h-4 w-4" />
-      </div>
+    <div className="min-w-0 flex items-center gap-2">
+      <Image
+        src={logoImage}
+        alt="ConversionCRM logo"
+        className="h-6 w-auto flex-shrink-0"
+        priority
+      />
       <div className="min-w-0">
         <span className="font-bold text-gray-900 text-sm block leading-tight">
-          ConversionCRM
+          Conversion CRM
         </span>
         {workspace && (
           <span className="text-[11px] text-gray-400 block truncate leading-tight">
@@ -75,7 +81,7 @@ function NavLinks({
             href={href}
             onClick={onNavigate}
             className={cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
+              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
               active
                 ? "bg-sky-50 text-sky-800"
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
@@ -108,7 +114,6 @@ export function DashboardSidebar({ workspace, userEmail }: Props) {
 
   const footer = (
     <div className="px-4 py-4">
-      <p className="text-xs text-gray-400 truncate mb-2">{userEmail}</p>
       <button
         onClick={handleSignOut}
         disabled={pending}
@@ -130,7 +135,7 @@ export function DashboardSidebar({ workspace, userEmail }: Props) {
             type="button"
             onClick={() => setOpen(true)}
             aria-label="Open menu"
-            className="p-2 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+            className="p-2 rounded-md text-gray-600 hover:bg-gray-50 transition-colors"
           >
             <Menu className="h-5 w-5" />
           </button>
@@ -151,7 +156,7 @@ export function DashboardSidebar({ workspace, userEmail }: Props) {
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Close menu"
-                className="p-2 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+                className="p-2 rounded-md text-gray-600 hover:bg-gray-50 transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>

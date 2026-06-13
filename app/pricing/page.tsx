@@ -96,7 +96,7 @@ export default function PricingPage() {
       <header className="shadow-soft bg-white">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="bg-sky-500 text-white p-1.5 rounded-lg">
+            <div className="bg-sky-500 text-white p-1.5 rounded-md">
               <Zap className="h-4 w-4" />
             </div>
             <span className="font-bold text-sm">ConversionCRM</span>
@@ -110,7 +110,7 @@ export default function PricingPage() {
             </Link>
             <Link
               href="/signup"
-              className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-600 transition-colors"
+              className="rounded-md bg-sky-500 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-600 transition-colors"
             >
               Start free
             </Link>
@@ -130,6 +130,11 @@ export default function PricingPage() {
           One converted user usually covers a month of ConversionCRM. Start
           free, upgrade when the emails start working.
         </p>
+        <div className="mt-6 inline-flex items-center gap-2 rounded-md bg-sky-50 px-4 py-2.5 text-sm font-medium text-[#0b3a5e] shadow-soft">
+          <span aria-hidden>🎉</span>
+          These prices are allocated for later — beta customers enjoy free
+          access to everything while we&apos;re in beta.
+        </div>
       </section>
 
       {/* ── Tiers ──────────────────────────────────── */}
@@ -140,8 +145,8 @@ export default function PricingPage() {
               key={tier.name}
               className={
                 tier.highlight
-                  ? "relative rounded-2xl ring-2 ring-sky-400 bg-sky-50/60 p-7 flex flex-col shadow-card-lg"
-                  : "rounded-2xl bg-white p-7 flex flex-col shadow-card"
+                  ? "relative rounded-lg ring-2 ring-sky-400 bg-sky-50/60 p-7 flex flex-col shadow-card-lg"
+                  : "rounded-lg bg-white p-7 flex flex-col shadow-card"
               }
             >
               {tier.highlight && (
@@ -167,8 +172,8 @@ export default function PricingPage() {
                 title="Billing launches soon"
                 className={
                   tier.highlight
-                    ? "mt-6 w-full rounded-lg bg-sky-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-sky-600 transition-colors cursor-default"
-                    : "mt-6 w-full rounded-lg bg-white shadow-soft px-4 py-2.5 text-sm font-semibold text-gray-800 hover:text-sky-800 transition-colors cursor-default"
+                    ? "mt-6 w-full rounded-md bg-sky-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-sky-600 transition-colors cursor-default"
+                    : "mt-6 w-full rounded-md bg-white shadow-soft px-4 py-2.5 text-sm font-semibold text-gray-800 hover:text-sky-800 transition-colors cursor-default"
                 }
               >
                 {tier.cta}
@@ -186,8 +191,8 @@ export default function PricingPage() {
           ))}
         </div>
         <p className="text-center text-xs text-gray-400 mt-6">
-          Prices shown are a preview — self-serve billing launches soon. No
-          card required for Starter.
+          Pricing kicks in after beta — everyone using ConversionCRM today
+          keeps free access to every feature until then. No card required.
         </p>
       </section>
 
@@ -197,7 +202,7 @@ export default function PricingPage() {
           <h2 className={`text-2xl font-bold text-center ${NAVY}`}>
             Questions, answered
           </h2>
-          <div className="mt-8 divide-y divide-sky-50 bg-white rounded-2xl shadow-card px-6">
+          <div className="mt-8 divide-y divide-sky-50 bg-white rounded-lg shadow-card px-6">
             {FAQS.map((faq) => (
               <details key={faq.q} className="group py-4">
                 <summary className="flex items-center justify-between cursor-pointer list-none text-sm font-semibold text-gray-900 hover:text-sky-800 transition-colors">
@@ -225,7 +230,7 @@ export default function PricingPage() {
         </p>
         <Link
           href="/signup"
-          className="inline-block mt-6 rounded-lg bg-sky-500 px-6 py-3 text-sm font-semibold text-white hover:bg-sky-600 transition-colors"
+          className="inline-block mt-6 rounded-md bg-sky-500 px-6 py-3 text-sm font-semibold text-white hover:bg-sky-600 transition-colors"
         >
           Start free
         </Link>

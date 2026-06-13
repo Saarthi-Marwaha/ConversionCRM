@@ -60,6 +60,7 @@ export interface Workspace {
   emails_last_run_at: string | null;
   key_feature_name: string | null;
   key_feature_event: string | null;
+  key_feature_url: string | null;
   trial_length_days: number;
   email_provider: EmailProvider | null;
   smtp_host: string | null;

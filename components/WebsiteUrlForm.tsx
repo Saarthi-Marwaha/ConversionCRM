@@ -69,12 +69,12 @@ export function WebsiteUrlForm({ currentUrl, apiKey, eventsEndpoint }: Props) {
           name="website_url"
           defaultValue={currentUrl ?? ""}
           placeholder="https://www.yourproduct.com"
-          className="flex-1 text-sm bg-gray-50 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:bg-white transition-colors"
+          className="flex-1 text-sm bg-gray-50 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:bg-white transition-colors"
         />
         <button
           type="submit"
           disabled={isPending}
-          className="px-4 py-2 text-sm font-medium bg-sky-600 text-white rounded-lg hover:bg-sky-700 disabled:opacity-50 transition-colors"
+          className="px-4 py-2 text-sm font-medium bg-sky-600 text-white rounded-md hover:bg-sky-700 disabled:opacity-50 transition-colors"
         >
           {isPending ? "Saving…" : saved ? "Saved ✓" : "Save"}
         </button>
@@ -101,18 +101,18 @@ export function WebsiteUrlForm({ currentUrl, apiKey, eventsEndpoint }: Props) {
         <button
           onClick={sendTestEvent}
           disabled={testing}
-          className="px-4 py-2 text-sm font-medium text-sky-700 bg-sky-50 rounded-lg hover:bg-sky-100 disabled:opacity-50 transition-colors"
+          className="px-4 py-2 text-sm font-medium text-sky-700 bg-sky-50 rounded-md hover:bg-sky-100 disabled:opacity-50 transition-colors"
         >
           {testing ? "Sending…" : "Send test event"}
         </button>
 
         {testResult === "success" && (
-          <p className="text-xs font-medium text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2">
+          <p className="text-xs font-medium text-emerald-700 bg-emerald-50 rounded-md px-3 py-2">
             ✓ {testMessage}
           </p>
         )}
         {testResult === "error" && (
-          <p className="text-xs text-red-700 bg-red-50 rounded-lg px-3 py-2">
+          <p className="text-xs text-red-700 bg-red-50 rounded-md px-3 py-2">
             ✗ {testMessage}
           </p>
         )}

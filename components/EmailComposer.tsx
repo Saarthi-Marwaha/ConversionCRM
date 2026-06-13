@@ -23,8 +23,23 @@ const NAVY = "text-[#0b3a5e]";
 type SendState =
   | { kind: "idle" }
   | { kind: "sending" }
-  | { kind: "sent"; to: string }
+  | { kind: "sent"; summary: string }
   | { kind: "error"; message: string };
+
+type AudienceData = {
+  total: number;
+  stageCounts: Record<string, number>;
+};
+
+const STAGE_OPTIONS: { value: string; label: string }[] = [
+  { value: "signup", label: "Signup" },
+  { value: "onboarding", label: "Onboarding" },
+  { value: "active", label: "Active" },
+  { value: "going_quiet", label: "Going Quiet" },
+  { value: "conversion_ready", label: "Conversion Ready" },
+  { value: "paid", label: "Paid" },
+  { value: "churned", label: "Churned" },
+];
 
 function Field({
   label,
@@ -49,7 +64,7 @@ function Field({
 }
 
 const inputClass =
-  "w-full rounded-lg bg-gray-50 px-3 py-2 text-sm focus:bg-white text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-300";
+  "w-full rounded-md bg-gray-50 px-3 py-2 text-sm focus:bg-white text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-300";
 
 function ColorInput({
   label,
@@ -83,6 +98,9 @@ export function EmailComposer({
 }) {
   const params = useSearchParams();
 
+  const [audienceData, setAudienceData] = useState<AudienceData | null>(null);
+  // "all" | "stage:<stage>" | "user:<email>" | "custom"
+  const [target, setTarget] = useState("custom");
   const [to, setTo] = useState("");
   const [subject, setSubject] = useState("");
   const [preheader, setPreheader] = useState("");
@@ -99,8 +117,34 @@ export function EmailComposer({
 
   useEffect(() => {
     const qpTo = params.get("to");
-    if (qpTo) setTo(qpTo);
+    if (qpTo) {
+      setTo(qpTo);
+      setTarget("custom");
+    }
   }, [params]);
+
+  // Load audience counts for the dropdown labels.
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/emails/recipients", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json: AudienceData | null) => {
+        if (!cancelled && json) setAudienceData(json);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const targetCount = (() => {
+    if (!audienceData) return null;
+    if (target === "all") return audienceData.total;
+    if (target.startsWith("stage:")) {
+      return audienceData.stageCounts[target.slice(6)] ?? 0;
+    }
+    return 1;
+  })();
 
   const uid = params.get("uid") ?? undefined;
 
@@ -148,13 +192,30 @@ export function EmailComposer({
 
   async function send() {
     if (sendState.kind === "sending") return;
+
+    const isBulk = target === "all" || target.startsWith("stage:");
+    if (isBulk) {
+      const label =
+        target === "all"
+          ? `ALL ${targetCount ?? "?"} users`
+          : `${targetCount ?? "?"} users in the "${
+              STAGE_OPTIONS.find((s) => s.value === target.slice(6))?.label ??
+              target.slice(6)
+            }" stage`;
+      if (!window.confirm(`Send this email to ${label}?`)) return;
+    }
+
     setSendState({ kind: "sending" });
     try {
+      const recipientFields = isBulk
+        ? { audience: target === "all" ? "all" : target.slice(6) }
+        : { to, userId: uid };
+
       const res = await fetch("/api/emails/send-custom", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          to,
+          ...recipientFields,
           subject,
           preheader: preheader || undefined,
           heading: heading || undefined,
@@ -162,7 +223,6 @@ export function EmailComposer({
           ctaLabel: ctaLabel || undefined,
           ctaUrl: ctaUrl || undefined,
           footerText: footerText || undefined,
-          userId: uid,
           theme,
         }),
       });
@@ -170,7 +230,13 @@ export function EmailComposer({
       if (!res.ok) {
         throw new Error(json?.error ?? `HTTP ${res.status}`);
       }
-      setSendState({ kind: "sent", to });
+      const summary =
+        json?.total > 1
+          ? `Sent to ${json.sent}/${json.total} users${
+              json.failed ? ` (${json.failed} failed)` : ""
+            }`
+          : `Sent to ${to}`;
+      setSendState({ kind: "sent", summary });
     } catch (e) {
       setSendState({
         kind: "error",
@@ -179,9 +245,13 @@ export function EmailComposer({
     }
   }
 
+  const recipientValid =
+    target === "all" ||
+    target.startsWith("stage:") ||
+    (to.trim().length > 3 && to.includes("@"));
+
   const canSend =
-    to.trim().length > 3 &&
-    to.includes("@") &&
+    recipientValid &&
     subject.trim().length > 0 &&
     body.trim().length > 0 &&
     sendState.kind !== "sending";
@@ -197,7 +267,7 @@ export function EmailComposer({
       </div>
 
       {!replyToConfigured && (
-        <div className="flex items-center gap-2 bg-amber-50 rounded-xl px-4 py-2.5 text-xs text-amber-800 shadow-soft">
+        <div className="flex items-center gap-2 bg-sky-50 rounded-lg px-4 py-2.5 text-xs text-[#0b3a5e] shadow-soft">
           <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" />
           No reply-to email configured — replies won&apos;t reach your inbox.
           Set it in Settings.
@@ -207,15 +277,57 @@ export function EmailComposer({
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
         {/* ── Form ───────────────────────────────────── */}
         <div className="card p-5 sm:p-6 space-y-4">
-          <Field label="To">
-            <input
-              type="email"
-              value={to}
-              onChange={(e) => setTo(e.target.value)}
-              placeholder="user@example.com"
+          <Field label="Send to">
+            <select
+              value={target}
+              onChange={(e) => setTarget(e.target.value)}
               className={inputClass}
-            />
+            >
+              <option value="all">
+                All{audienceData ? ` · ${audienceData.total} users` : ""}
+              </option>
+              <optgroup label="By status">
+                {STAGE_OPTIONS.map((s) => (
+                  <option key={s.value} value={`stage:${s.value}`}>
+                    {s.label}
+                    {audienceData
+                      ? ` · ${audienceData.stageCounts[s.value] ?? 0}`
+                      : ""}
+                  </option>
+                ))}
+              </optgroup>
+              <option value="custom">Individual</option>
+            </select>
           </Field>
+
+          {target === "custom" && (
+            <Field label="Email address">
+              <input
+                type="email"
+                value={to}
+                onChange={(e) => setTo(e.target.value)}
+                placeholder="user@example.com"
+                className={inputClass}
+              />
+            </Field>
+          )}
+
+          {(target === "all" || target.startsWith("stage:")) && (
+            <p className="text-xs text-sky-800 bg-sky-50 rounded-md px-3 py-2">
+              This will send to{" "}
+              <strong>
+                {targetCount ?? "…"} user{targetCount === 1 ? "" : "s"}
+              </strong>{" "}
+              with an email address
+              {target.startsWith("stage:")
+                ? ` in the ${
+                    STAGE_OPTIONS.find((s) => s.value === target.slice(6))
+                      ?.label
+                  } stage`
+                : ""}
+              . Each send is logged on the user&apos;s profile.
+            </p>
+          )}
 
           <Field label="Subject">
             <input
@@ -303,7 +415,7 @@ export function EmailComposer({
                   type="button"
                   onClick={() => applyPreset(p.id)}
                   className={cn(
-                    "flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors",
+                    "flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
                     presetId === p.id
                       ? "bg-sky-50 text-sky-900 ring-2 ring-sky-300"
                       : "bg-gray-50 text-gray-600 hover:bg-gray-100"
@@ -317,7 +429,7 @@ export function EmailComposer({
                 </button>
               ))}
               {presetId === "custom" && (
-                <span className="flex items-center rounded-lg bg-sky-50 ring-2 ring-sky-300 px-2.5 py-1.5 text-xs font-medium text-sky-900">
+                <span className="flex items-center rounded-md bg-sky-50 ring-2 ring-sky-300 px-2.5 py-1.5 text-xs font-medium text-sky-900">
                   Custom
                 </span>
               )}
@@ -353,7 +465,7 @@ export function EmailComposer({
               onClick={send}
               disabled={!canSend}
               className={cn(
-                "inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition-colors shadow-sm",
+                "inline-flex items-center gap-2 rounded-md px-5 py-2.5 text-sm font-semibold text-white transition-colors shadow-sm",
                 canSend
                   ? "bg-sky-500 hover:bg-sky-600"
                   : "bg-gray-300 cursor-not-allowed"
@@ -365,10 +477,10 @@ export function EmailComposer({
             <button
               type="button"
               onClick={copyHtml}
-              className="inline-flex items-center gap-2 rounded-lg bg-white shadow-soft px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              className="inline-flex items-center gap-2 rounded-md bg-white shadow-soft px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             >
               {copied ? (
-                <Check className="h-4 w-4 text-emerald-500" />
+                <Check className="h-4 w-4 text-sky-500" />
               ) : (
                 <Copy className="h-4 w-4" />
               )}
@@ -376,8 +488,8 @@ export function EmailComposer({
             </button>
 
             {sendState.kind === "sent" && (
-              <span className="text-xs font-medium text-emerald-700 bg-emerald-50 rounded-full px-3 py-1.5">
-                ✓ Sent to {sendState.to}
+              <span className="text-xs font-medium text-sky-800 bg-sky-100 rounded-full px-3 py-1.5">
+                ✓ {sendState.summary}
               </span>
             )}
             {sendState.kind === "error" && (
@@ -430,7 +542,7 @@ export function EmailComposer({
               sandbox=""
               srcDoc={html}
               className={cn(
-                "bg-white rounded-lg shadow-card h-[34rem] transition-all",
+                "bg-white rounded-md shadow-card h-[34rem] transition-all",
                 mobilePreview ? "w-[375px]" : "w-full"
               )}
             />

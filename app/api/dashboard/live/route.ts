@@ -51,6 +51,8 @@ type EventRow = {
   page: string | null;
   origin: string | null;
   email: string | null;
+  country: string | null;
+  region: string | null;
   properties: Record<string, unknown> | null;
   occurred_at: string;
 };
@@ -76,6 +78,8 @@ type UserActivity = {
 type LiveUser = {
   user_id: string;
   email: string | null;
+  country: string | null;
+  region: string | null;
   stage: LifecycleStage;
   emails_sent: UserEmailsSent;
   engagement_score: number;
@@ -137,6 +141,14 @@ function emptyPageStats(page: string): PageStats {
   };
 }
 
+// Heavy write-side work (score sync, stage assignment, email batch) only
+// runs once per interval per workspace — polls in between are read-only,
+// which keeps the dashboard feeling instant.
+const PERSIST_INTERVAL_MS = 60_000;
+const lastPersistAt = new Map<string, number>();
+const EMAIL_ATTEMPT_INTERVAL_MS = 5 * 60_000;
+const lastEmailAttemptAt = new Map<string, number>();
+
 export async function GET(request: NextRequest) {
   const { workspace } = await getActiveWorkspace();
   if (!workspace) {
@@ -150,7 +162,9 @@ export async function GET(request: NextRequest) {
 
   let query = admin
     .from("events")
-    .select("user_id, event_type, page, origin, email, properties, occurred_at")
+    .select(
+      "user_id, event_type, page, origin, email, country, region, properties, occurred_at"
+    )
     .eq("workspace_id", workspace.id)
     .gte("occurred_at", since)
     .order("occurred_at", { ascending: false })
@@ -165,7 +179,26 @@ export async function GET(request: NextRequest) {
     query = query.or(`origin.eq.${safeOrigin},origin.is.null`);
   }
 
-  const { data, error } = await query;
+  // All three reads are independent — fire them together instead of one
+  // after another (this alone removes two network round-trips of latency).
+  const [
+    { data, error },
+    { data: stageRows },
+    { data: emailLogRows },
+  ] = await Promise.all([
+    query,
+    admin
+      .from("stages")
+      .select("user_id, stage")
+      .eq("workspace_id", workspace.id),
+    admin
+      .from("email_logs")
+      .select("user_id, trigger")
+      .eq("workspace_id", workspace.id)
+      .eq("status", "sent")
+      .not("user_id", "is", null)
+      .limit(2000),
+  ]);
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -200,6 +233,8 @@ export async function GET(request: NextRequest) {
       user = {
         user_id: ev.user_id,
         email: ev.email ?? null,
+        country: ev.country ?? null,
+        region: ev.region ?? null,
         stage: "signup",
         emails_sent: emptyEmailsSent(),
         engagement_score: 0,
@@ -228,6 +263,10 @@ export async function GET(request: NextRequest) {
     user.signed_up = user.signed_up || isSignup;
     user.logged_in = user.logged_in || isLogin;
     if (!user.email && ev.email) user.email = ev.email;
+    if (!user.country && ev.country) {
+      user.country = ev.country;
+      user.region = ev.region;
+    }
 
     if (new Date(ev.occurred_at).getTime() >= scoreSinceMs) {
       const scoringList = scoringEventsByUser.get(ev.user_id) ?? [];
@@ -308,11 +347,11 @@ export async function GET(request: NextRequest) {
     user.page_count = pages.length;
 
     const scoringEvts = scoringEventsByUser.get(uid) ?? [];
-    const { score, breakdown } = computeWeeklyEngagementScore(
-      scoringEvts,
-      workspace.key_feature_name,
-      workspace.key_feature_event
-    );
+    const { score, breakdown } = computeWeeklyEngagementScore(scoringEvts, {
+      name: workspace.key_feature_name,
+      event: workspace.key_feature_event,
+      url: workspace.key_feature_url,
+    });
     user.engagement_score = score;
     user.score_breakdown = breakdown;
   });
@@ -320,11 +359,6 @@ export async function GET(request: NextRequest) {
   const users = Array.from(byUser.values()).sort(
     (a, b) => new Date(b.last_seen).getTime() - new Date(a.last_seen).getTime()
   );
-
-  const { data: stageRows } = await admin
-    .from("stages")
-    .select("user_id, stage")
-    .eq("workspace_id", workspace.id);
 
   const persistedStages = new Map<string, LifecycleStage>();
   for (const row of stageRows ?? []) {
@@ -340,8 +374,16 @@ export async function GET(request: NextRequest) {
   // Persist scores + stages so Supabase stays in sync with the dashboard.
   // Only the canonical 7-day score is persisted — otherwise switching the
   // dashboard to "today" would overwrite the weekly scores that drive stage
-  // assignment and automated emails with much lower numbers.
-  if (users.length > 0 && range === "7d") {
+  // assignment and automated emails with much lower numbers. Throttled so
+  // the every-few-seconds polls stay read-only.
+  const now = Date.now();
+  const shouldPersist =
+    users.length > 0 &&
+    range === "7d" &&
+    now - (lastPersistAt.get(workspace.id) ?? 0) >= PERSIST_INTERVAL_MS;
+
+  if (shouldPersist) {
+    lastPersistAt.set(workspace.id, now);
     const computedAt = new Date().toISOString();
     const { error: syncError } = await admin.from("engagement_scores").upsert(
       users.map((u) => ({
@@ -374,13 +416,6 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  const { data: emailLogRows } = await admin
-    .from("email_logs")
-    .select("user_id, trigger")
-    .eq("workspace_id", workspace.id)
-    .eq("status", "sent")
-    .not("user_id", "is", null);
-
   const sentTriggersByUser = new Map<string, Set<EmailTrigger>>();
   for (const row of emailLogRows ?? []) {
     if (!row.user_id || !row.trigger) continue;
@@ -402,7 +437,11 @@ export async function GET(request: NextRequest) {
   }
 
   let emailBatch = { sent: 0, errors: [] as string[] };
-  if (workspace.reply_to_email?.trim()) {
+  const shouldAttemptEmails =
+    workspace.reply_to_email?.trim() &&
+    now - (lastEmailAttemptAt.get(workspace.id) ?? 0) >= EMAIL_ATTEMPT_INTERVAL_MS;
+  if (shouldAttemptEmails) {
+    lastEmailAttemptAt.set(workspace.id, now);
     emailBatch = await runAutomatedEmailsForWorkspace(workspace.id);
     if (emailBatch.sent > 0) {
       const { data: freshLogs } = await admin

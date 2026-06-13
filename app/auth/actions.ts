@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
@@ -25,6 +26,37 @@ export async function signUp(formData: FormData) {
 
   // Redirect to onboarding — workspace will be created there
   redirect("/onboarding");
+}
+
+// ─────────────────────────────────────────────
+// Google OAuth (works for both sign up and sign in)
+// ─────────────────────────────────────────────
+
+export async function signInWithGoogle() {
+  const hdrs = headers();
+  const host = hdrs.get("x-forwarded-host") ?? hdrs.get("host") ?? "";
+  const proto =
+    hdrs.get("x-forwarded-proto") ??
+    (host.includes("localhost") ? "http" : "https");
+  const origin = host ? `${proto}://${host}` : "";
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${origin}/auth/callback`,
+    },
+  });
+
+  if (error || !data?.url) {
+    redirect(
+      `/login?error=${encodeURIComponent(
+        error?.message ?? "Google sign-in is not available right now"
+      )}`
+    );
+  }
+
+  redirect(data.url);
 }
 
 // ─────────────────────────────────────────────
@@ -82,21 +114,71 @@ export async function signOut() {
 // Create Workspace (called from /onboarding)
 // ─────────────────────────────────────────────
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function fail(message: string): never {
+  redirect(`/onboarding?error=${encodeURIComponent(message)}`);
+}
+
 export async function createWorkspace(formData: FormData) {
-  const companyName = (formData.get("company_name") as string)?.trim();
-  const productName = (formData.get("product_name") as string)?.trim();
-  const keyFeatureName = (formData.get("key_feature_name") as string)?.trim();
-  const replyToEmail = (formData.get("reply_to_email") as string)?.trim();
-  const emailSenderName =
-    (formData.get("email_sender_name") as string)?.trim() || productName;
+  const get = (k: string) => ((formData.get(k) as string) ?? "").trim();
 
-  if (!companyName || !productName || !keyFeatureName || !replyToEmail) {
-    redirect("/onboarding?error=All+fields+are+required");
+  const companyName = get("company_name");
+  const productName = get("product_name");
+  const emailSenderName = get("email_sender_name") || productName;
+  const provider = get("email_provider") === "smtp" ? "smtp" : "resend";
+  const replyToEmail = get("reply_to_email");
+  const keyFeatureName = get("key_feature_name");
+  const keyFeatureUrl = get("key_feature_url");
+  const rawEvent = get("key_feature_event");
+  let websiteUrl = get("website_url").replace(/\/+$/, "");
+
+  if (!companyName || !productName) fail("Company and product name are required");
+  if (!keyFeatureName) fail("Name your aha-moment feature");
+  if (!keyFeatureUrl) fail("The feature button link is required");
+  if (!keyFeatureUrl.startsWith("/") && !/^https?:\/\/\S+$/i.test(keyFeatureUrl)) {
+    fail("Feature link must be a full URL or a path starting with /");
+  }
+  if (!websiteUrl) fail("Your website URL is required");
+  if (!websiteUrl.startsWith("http")) websiteUrl = `https://${websiteUrl}`;
+
+  // ── Email delivery (Gmail/any inbox via built-in sender, or own SMTP) ──
+  const smtp: Record<string, unknown> = {};
+  if (provider === "smtp") {
+    const host = get("smtp_host");
+    const port = Number(get("smtp_port"));
+    const user = get("smtp_user");
+    const pass = (formData.get("smtp_pass") as string) ?? "";
+    const fromEmail = get("smtp_from_email");
+    if (!host || host.length > 255) fail("Enter a valid SMTP host");
+    if (!Number.isInteger(port) || port < 1 || port > 65535) {
+      fail("Enter a valid SMTP port (465 or 587)");
+    }
+    if (!user) fail("SMTP username is required");
+    if (!pass) fail("SMTP password is required");
+    if (fromEmail && !EMAIL_RE.test(fromEmail)) {
+      fail("SMTP from address must be a valid email");
+    }
+    smtp.smtp_host = host;
+    smtp.smtp_port = port;
+    smtp.smtp_user = user;
+    smtp.smtp_pass = pass;
+    smtp.smtp_secure = get("smtp_secure") !== "starttls";
+    smtp.smtp_from_email = fromEmail || null;
+    // Replies default to the SMTP identity when not set explicitly.
+    if (replyToEmail && !EMAIL_RE.test(replyToEmail)) {
+      fail("Enter a valid reply-to email");
+    }
+  } else {
+    if (!replyToEmail) fail("Enter the inbox that should receive replies");
+    if (!EMAIL_RE.test(replyToEmail)) fail("Enter a valid reply-to email");
   }
 
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(replyToEmail)) {
-    redirect("/onboarding?error=Enter+a+valid+reply-to+email");
-  }
+  const resolvedReplyTo =
+    replyToEmail ||
+    (smtp.smtp_from_email as string | null) ||
+    (smtp.smtp_user as string | undefined) ||
+    null;
 
   const supabase = await createClient();
   const {
@@ -119,23 +201,34 @@ export async function createWorkspace(formData: FormData) {
     redirect("/dashboard/settings");
   }
 
-  // Generate a unique API key
+  // Production API key for this workspace's widget
   const apiKey = `ccrm_${crypto.randomUUID().replace(/-/g, "")}`;
+
+  const event = rawEvent
+    .toLowerCase()
+    .replace(/\s+/g, "_")
+    .replace(/[^a-z0-9_-]/g, "")
+    .slice(0, 64);
 
   const { error } = await admin.from("workspaces").insert({
     name: companyName,
     product_name: productName,
     owner_id: user.id,
     api_key: apiKey,
+    website_url: websiteUrl,
     key_feature_name: keyFeatureName,
-    reply_to_email: replyToEmail,
+    key_feature_url: keyFeatureUrl,
+    key_feature_event: event || null,
+    reply_to_email: resolvedReplyTo,
     email_sender_name: emailSenderName,
+    email_provider: provider,
+    ...smtp,
     trial_length_days: 14,
   });
 
   if (error) {
     console.error("[createWorkspace]", error);
-    redirect(`/onboarding?error=${encodeURIComponent("Failed to create workspace. Please try again.")}`);
+    fail("Failed to create workspace. Please try again.");
   }
 
   redirect("/dashboard/settings");

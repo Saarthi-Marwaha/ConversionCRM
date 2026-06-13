@@ -6,7 +6,7 @@ import { saveEmailDelivery } from "@/app/dashboard/settings/actions";
 import { Server, Zap, CheckCircle2, XCircle } from "lucide-react";
 
 const inputClass =
-  "w-full text-sm bg-gray-50 rounded-lg px-3 py-2 text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:bg-white transition-colors";
+  "w-full text-sm bg-gray-50 rounded-md px-3 py-2 text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:bg-white transition-colors";
 
 export function EmailDeliveryForm({
   currentProvider,
@@ -74,7 +74,7 @@ export function EmailDeliveryForm({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <label
           className={cn(
-            "rounded-xl p-4 cursor-pointer transition-all",
+            "rounded-lg p-4 cursor-pointer transition-all",
             provider === "resend"
               ? "bg-sky-50 ring-2 ring-sky-400"
               : "bg-gray-50 hover:bg-gray-100"
@@ -100,7 +100,7 @@ export function EmailDeliveryForm({
 
         <label
           className={cn(
-            "rounded-xl p-4 cursor-pointer transition-all",
+            "rounded-lg p-4 cursor-pointer transition-all",
             provider === "smtp"
               ? "bg-sky-50 ring-2 ring-sky-400"
               : "bg-gray-50 hover:bg-gray-100"
@@ -126,7 +126,7 @@ export function EmailDeliveryForm({
       </div>
 
       {provider === "smtp" && (
-        <div className="rounded-xl bg-gray-50/70 p-4 space-y-3">
+        <div className="rounded-lg bg-gray-50/70 p-4 space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <label className="block sm:col-span-2">
               <span className="text-xs font-semibold text-gray-700">Host</span>
@@ -200,7 +200,9 @@ export function EmailDeliveryForm({
           <p className="text-[11px] text-gray-400 leading-relaxed">
             Gmail/Outlook need an app password (not your login password).
             Credentials are stored server-side and never sent back to the
-            browser.
+            browser. <strong>No DNS setup needed</strong> — your email
+            provider already signs its own mail (SPF/DKIM), so messages
+            deliver exactly like ones sent from your inbox.
           </p>
         </div>
       )}
@@ -209,7 +211,7 @@ export function EmailDeliveryForm({
         <button
           type="submit"
           disabled={isPending}
-          className="px-4 py-2 text-sm font-semibold bg-sky-500 text-white rounded-lg hover:bg-sky-600 disabled:opacity-50 transition-colors"
+          className="px-4 py-2 text-sm font-semibold bg-sky-500 text-white rounded-md hover:bg-sky-600 disabled:opacity-50 transition-colors"
         >
           {isPending ? "Saving…" : saved ? "Saved ✓" : "Save delivery settings"}
         </button>
@@ -217,14 +219,14 @@ export function EmailDeliveryForm({
           type="button"
           onClick={sendTest}
           disabled={testState.kind === "testing"}
-          className="px-4 py-2 text-sm font-medium bg-white text-gray-700 rounded-lg shadow-sm ring-1 ring-gray-200 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+          className="px-4 py-2 text-sm font-medium bg-white text-gray-700 rounded-md shadow-sm ring-1 ring-gray-200 hover:bg-gray-50 disabled:opacity-50 transition-colors"
         >
           {testState.kind === "testing" ? "Sending test…" : "Send test email"}
         </button>
 
         {testState.kind === "ok" && (
-          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 rounded-full px-3 py-1.5">
-            <CheckCircle2 className="h-3.5 w-3.5" />
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-sky-800 bg-sky-100 rounded-full px-3 py-1.5">
+            <CheckCircle2 className="h-3.5 w-3.5 text-sky-600" />
             Delivered to {testState.to} via {testState.provider}
           </span>
         )}

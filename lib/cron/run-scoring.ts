@@ -23,6 +23,7 @@ type WorkspaceRow = {
   id: string;
   key_feature_name: string | null;
   key_feature_event: string | null;
+  key_feature_url: string | null;
 };
 
 type EventRow = {
@@ -39,7 +40,7 @@ export async function runScoring(): Promise<RunScoringResult> {
 
   const { data: workspaces, error: wsError } = await supabase
     .from("workspaces")
-    .select("id, key_feature_name, key_feature_event");
+    .select("id, key_feature_name, key_feature_event, key_feature_url");
 
   if (wsError) {
     throw new Error(`Failed to fetch workspaces: ${wsError.message}`);
@@ -81,11 +82,11 @@ export async function runScoring(): Promise<RunScoringResult> {
 
     for (const [userId, userEvents] of Array.from(byUser.entries())) {
       try {
-        const { score, breakdown } = computeWeeklyEngagementScore(
-          userEvents,
-          workspace.key_feature_name,
-          workspace.key_feature_event
-        );
+        const { score, breakdown } = computeWeeklyEngagementScore(userEvents, {
+          name: workspace.key_feature_name,
+          event: workspace.key_feature_event,
+          url: workspace.key_feature_url,
+        });
 
         const { error: upsertError } = await supabase
           .from("engagement_scores")

@@ -84,17 +84,22 @@ export async function assignStagesForWorkspace(
   const scoreWeekAgoCutoff = daysAgo(7);
 
   const [eventsRes, paidRes, scoresRes, stagesRes] = await Promise.all([
+    // 45 days covers every churn/going-quiet rule (30d cutoff + margin);
+    // users with no events in the window keep their persisted stage.
     supabase
       .from("events")
       .select("user_id, event_type, occurred_at")
       .eq("workspace_id", workspaceId)
-      .not("user_id", "is", null),
+      .gte("occurred_at", daysAgo(45))
+      .not("user_id", "is", null)
+      .limit(5000),
     supabase
       .from("events")
       .select("user_id")
       .eq("workspace_id", workspaceId)
       .eq("event_type", "paid")
-      .not("user_id", "is", null),
+      .not("user_id", "is", null)
+      .limit(2000),
     supabase
       .from("engagement_scores")
       .select("user_id, score, computed_at")

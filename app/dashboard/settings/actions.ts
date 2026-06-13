@@ -33,6 +33,20 @@ export async function saveAhaMoment(formData: FormData) {
 
   const name = ((formData.get("key_feature_name") as string) ?? "").trim();
   const rawEvent = ((formData.get("key_feature_event") as string) ?? "").trim();
+  const rawUrl = ((formData.get("key_feature_url") as string) ?? "").trim();
+
+  // The button link is the backbone of the aha catcher — required.
+  if (!rawUrl) {
+    return { error: "The feature button link is required" };
+  }
+  if (rawUrl.length > 500) return { error: "Link is too long" };
+  const isPath = rawUrl.startsWith("/");
+  const isHttp = /^https?:\/\/[^\s]+$/i.test(rawUrl);
+  if (!isPath && !isHttp) {
+    return {
+      error: "Enter a full URL (https://…) or a path starting with /",
+    };
+  }
 
   // Event names are snake_case identifiers like the widget sends.
   const event = rawEvent
@@ -49,6 +63,7 @@ export async function saveAhaMoment(formData: FormData) {
     .update({
       key_feature_name: name || null,
       key_feature_event: event || null,
+      key_feature_url: rawUrl,
     })
     .eq("id", workspace.id);
 

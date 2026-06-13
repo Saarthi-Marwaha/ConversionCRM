@@ -134,7 +134,7 @@ user and event should appear within 3 seconds.`;
           </div>
         </div>
 
-        <pre className="bg-gray-950 text-green-400 text-xs leading-relaxed rounded-lg p-4 overflow-x-auto whitespace-pre-wrap font-mono">
+        <pre className="bg-gray-950 text-green-400 text-xs leading-relaxed rounded-md p-4 overflow-x-auto whitespace-pre-wrap font-mono">
           {embedSnippet}
         </pre>
 
@@ -151,12 +151,12 @@ user and event should appear within 3 seconds.`;
             </div>
             <CopyButton text={authSnippet} label="Copy auth code" />
           </div>
-          <pre className="bg-gray-950 text-amber-300 text-xs leading-relaxed rounded-lg p-4 overflow-x-auto whitespace-pre-wrap font-mono">
+          <pre className="bg-gray-950 text-amber-300 text-xs leading-relaxed rounded-md p-4 overflow-x-auto whitespace-pre-wrap font-mono">
             {authSnippet}
           </pre>
         </div>
 
-        <div className="flex items-start gap-2 bg-sky-50 rounded-lg px-4 py-3 text-xs text-sky-700">
+        <div className="flex items-start gap-2 bg-sky-50 rounded-md px-4 py-3 text-xs text-sky-700">
           <span className="text-base leading-none mt-0.5">🤖</span>
           <span>
             <strong>Using Cursor or another AI agent?</strong> Click{" "}
@@ -167,7 +167,7 @@ user and event should appear within 3 seconds.`;
           </span>
         </div>
 
-        <div className="bg-sky-50 rounded-lg px-4 py-3 text-xs text-sky-700 leading-relaxed">
+        <div className="bg-sky-50 rounded-md px-4 py-3 text-xs text-sky-700 leading-relaxed">
           <strong>Auto-tracked:</strong> every page visit (including SPA routes),
           time on each page, and button/link clicks — no extra code beyond the
           script tag. The auth block above links events to a real user and email.
@@ -184,7 +184,7 @@ user and event should appear within 3 seconds.`;
           </p>
         </div>
         {!workspace.reply_to_email && (
-          <div className="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2">
+          <div className="text-xs text-amber-700 bg-amber-50 rounded-md px-3 py-2">
             Set your Gmail to enable welcome, nudge, and lifecycle emails.
           </div>
         )}
@@ -230,6 +230,7 @@ user and event should appear within 3 seconds.`;
         <AhaMomentForm
           currentName={workspace.key_feature_name}
           currentEvent={workspace.key_feature_event}
+          currentUrl={workspace.key_feature_url}
         />
       </section>
 
@@ -245,7 +246,7 @@ user and event should appear within 3 seconds.`;
         </div>
 
         {workspace.website_url && (
-          <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2">
+          <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 rounded-md px-3 py-2">
             <span>●</span>
             <span>
               Currently tracking: <strong>{workspace.website_url}</strong>
@@ -268,7 +269,7 @@ user and event should appear within 3 seconds.`;
             Your widget is authenticated by this key. Keep it secret.
           </p>
           <div className="flex items-center gap-2">
-            <code className="flex-1 text-sm text-sky-700 bg-sky-50 px-3 py-2.5 rounded-lg font-mono break-all">
+            <code className="flex-1 text-sm text-sky-700 bg-sky-50 px-3 py-2.5 rounded-md font-mono break-all">
               {workspace.api_key}
             </code>
             <CopyButton text={workspace.api_key} label="Copy" compact />

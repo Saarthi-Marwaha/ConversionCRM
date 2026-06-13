@@ -89,6 +89,50 @@ function matchesKeyFeature(
   return feature.toLowerCase() === keyFeature.toLowerCase();
 }
 
+/** Aha-moment configuration from workspace settings. */
+export type AhaConfig = {
+  /** Human label ("Export report"). */
+  name: string | null;
+  /** Optional custom event name fired via track(). */
+  event: string | null;
+  /** The link the main-feature button opens — clicks on it count. */
+  url: string | null;
+};
+
+/** Normalize a URL or path to a comparable pathname ("/app/export"). */
+export function normalizeAhaPath(value: string | null | undefined): string | null {
+  const v = value?.trim();
+  if (!v) return null;
+  try {
+    const url = new URL(v.startsWith("http") ? v : `https://x.invalid${v.startsWith("/") ? "" : "/"}${v}`);
+    const path = url.pathname.replace(/\/+$/, "");
+    return (path || "/").toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
+/** True when this click/visit hits the configured aha link. */
+export function matchesAhaUrl(
+  ev: Pick<ScoringEvent, "event_type" | "page" | "properties">,
+  ahaPath: string | null
+): boolean {
+  if (!ahaPath) return false;
+  const type = ev.event_type.toLowerCase();
+  if (type === "click") {
+    const href = ev.properties?.href;
+    if (typeof href === "string" && normalizeAhaPath(href) === ahaPath) {
+      return true;
+    }
+  }
+  // Landing on the feature page also counts — covers SPAs where the click
+  // target isn't an <a> with an href.
+  if (/page[_-]?view/.test(type)) {
+    return normalizeAhaPath(ev.page) === ahaPath;
+  }
+  return false;
+}
+
 /** Clamped, validated duration from event properties — never negative or huge. */
 function durationSeconds(properties: Record<string, unknown> | null): number {
   const raw = properties?.duration_seconds;
@@ -117,15 +161,22 @@ function isPricingHit(ev: ScoringEvent): boolean {
  */
 export function computeWeeklyEngagementScore(
   events: ScoringEvent[],
-  keyFeatureName: string | null,
-  keyFeatureEvent: string | null = null,
+  aha: AhaConfig | string | null,
+  legacyEvent: string | null = null,
   now: Date = new Date()
 ): { score: number; breakdown: WeeklyScoreBreakdown } {
   if (events.length === 0) {
     return { score: 0, breakdown: emptyScoreBreakdown() };
   }
 
-  const ahaEvent = keyFeatureEvent?.trim().toLowerCase() || null;
+  // Back-compat: older callers passed (events, name, event).
+  const cfg: AhaConfig =
+    typeof aha === "string" || aha === null
+      ? { name: aha, event: legacyEvent, url: null }
+      : aha;
+  const keyFeatureName = cfg.name;
+  const ahaEvent = cfg.event?.trim().toLowerCase() || null;
+  const ahaPath = normalizeAhaPath(cfg.url);
 
   let lastSeenMs = 0;
   const activeDays = new Set<string>();
@@ -154,10 +205,13 @@ export function computeWeeklyEngagementScore(
       meaningfulEvents++;
     }
 
-    // Aha-moment catcher: a custom event name set in Settings counts
-    // directly; otherwise feature_used events matching the configured
-    // feature name count. Generic feature_used grants partial credit.
-    if (ahaEvent && type === ahaEvent) {
+    // Aha-moment catcher, in priority order: a click on the configured
+    // feature link, a custom event name, or a feature_used event matching
+    // the configured name. Generic feature_used grants partial credit.
+    if (matchesAhaUrl(ev, ahaPath)) {
+      anyFeatureUsed = true;
+      keyFeatureMatches++;
+    } else if (ahaEvent && type === ahaEvent) {
       anyFeatureUsed = true;
       keyFeatureMatches++;
     } else if (isFeatureUsed(type)) {

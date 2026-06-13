@@ -24,6 +24,9 @@ type EventRow = {
   page: string | null;
   origin: string | null;
   email: string | null;
+  country: string | null;
+  region: string | null;
+  city: string | null;
   properties: Record<string, unknown> | null;
   occurred_at: string;
 };
@@ -75,7 +78,9 @@ export async function GET(request: NextRequest) {
 
   let query = admin
     .from("events")
-    .select("event_type, page, origin, email, properties, occurred_at")
+    .select(
+      "event_type, page, origin, email, country, region, city, properties, occurred_at"
+    )
     .eq("workspace_id", workspace.id)
     .eq("user_id", userId)
     .gte("occurred_at", since)
@@ -125,6 +130,9 @@ export async function GET(request: NextRequest) {
   let pageViews = 0;
   let firstSeen: string | null = null;
   let lastSeen: string | null = null;
+  let country: string | null = null;
+  let region: string | null = null;
+  let city: string | null = null;
 
   const pageMap = new Map<
     string,
@@ -149,6 +157,12 @@ export async function GET(request: NextRequest) {
   for (const ev of events) {
     const props = (ev.properties ?? {}) as Record<string, unknown>;
     if (!email && ev.email) email = ev.email;
+    // Events iterate newest→oldest, so the first geo seen is the latest.
+    if (!country && ev.country) {
+      country = ev.country;
+      region = ev.region;
+      city = ev.city;
+    }
     if (/sign[_-]?up|register/i.test(ev.event_type)) signedUp = true;
     if (/login|sign[_-]?in/i.test(ev.event_type)) loggedIn = true;
     if (!lastSeen) lastSeen = ev.occurred_at;
@@ -224,11 +238,11 @@ export async function GET(request: NextRequest) {
 
   const { score, breakdown } =
     scoringEvents.length > 0
-      ? computeWeeklyEngagementScore(
-          scoringEvents,
-          workspace.key_feature_name,
-          workspace.key_feature_event
-        )
+      ? computeWeeklyEngagementScore(scoringEvents, {
+          name: workspace.key_feature_name,
+          event: workspace.key_feature_event,
+          url: workspace.key_feature_url,
+        })
       : { score: 0, breakdown: emptyScoreBreakdown() };
 
   const emails = (emailRows ?? []).map((row) => {
@@ -259,6 +273,7 @@ export async function GET(request: NextRequest) {
       is_anonymous: userId.startsWith("anon_"),
       signed_up: signedUp,
       logged_in: loggedIn,
+      location: { country, region, city },
       engagement_score: score,
       score_breakdown: breakdown,
       first_seen: firstSeen,

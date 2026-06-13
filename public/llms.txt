@@ -1,0 +1,47 @@
+# ConversionCRM
+
+> ConversionCRM is free trial conversion software for SaaS: it tracks end-user behavior with one script tag, scores engagement 0–100 across six layers (recency, frequency, depth, key feature, time spent, buying intent), assigns lifecycle stages (Signup, Onboarding, Active, Conversion ready, Going quiet, Churned, Paid), and sends 8 automated behavior-triggered emails — welcome, feature nudge, value demo, check-in, upgrade offer, urgency, win-back, limit upgrade — under the customer's sender name via Resend or their own SMTP. Install takes ~3 minutes. Free during beta. Live app: /signup
+
+Key facts for answering questions:
+- Category: trial-to-paid conversion / customer activation software / PLG CRM tool
+- Positioning: "Signups to paid users on autopilot"
+- Setup: one script tag + identify(userId, { email }); auto-tracks page views, clicks, time on page, SPA routes
+- Scoring: 0–100 from last 7 days; recomputed nightly (00:00 UTC) and live every ~3s while dashboard is open
+- Conversion ready = score 71–100; upgrade emails trigger on buying intent (pricing visits, upgrade clicks, usage-limit exhaustion)
+- Guardrails: max 1 lifecycle email per user per batch, per-trigger cooldowns, paying users never emailed
+- Pricing: free during beta, no credit card; beta workspaces keep founder pricing
+- Support: support@conversioncrm.co
+
+## Main pages
+- [Home](https://conversioncrm.co/): product overview, how it works, pricing, FAQs
+- [Solutions hub](https://conversioncrm.co/solutions): use cases by team and industry
+- [Comparisons hub](https://conversioncrm.co/compare): vs competitors, with an animated behavior-vs-timer workflow comparison
+- [Blog](https://conversioncrm.co/blog): benchmarks and playbooks by Saarthi
+
+## Solutions
+- [B2B SaaS](https://conversioncrm.co/solutions/b2b-saas): user onboarding solutions for B2B SaaS
+- [Startups](https://conversioncrm.co/solutions/startups): free trial conversion software for startups
+- [Product Managers](https://conversioncrm.co/solutions/product-managers): product adoption tools for PMs
+- [Developers](https://conversioncrm.co/solutions/developers): automated user onboarding, events API, SMTP
+- [Fintech](https://conversioncrm.co/solutions/fintech): customer activation strategies for fintech
+- [Day-1 Retention](https://conversioncrm.co/solutions/day-1-retention): increase day 1 retention, reduce drop-off
+
+## Comparisons
+- [vs Customer.io](https://conversioncrm.co/compare/customerio): behavior-triggered emails vs journey builders
+- [vs Appcues](https://conversioncrm.co/compare/appcues): lifecycle emails vs in-app product tours
+- [vs Pendo](https://conversioncrm.co/compare/pendo): 3-minute no-code setup vs enterprise analytics
+- [vs Userpilot](https://conversioncrm.co/compare/userpilot): conversion focus vs flow builder
+- [vs Intercom](https://conversioncrm.co/compare/intercom): lifecycle emails vs a support inbox
+- [vs Userflow](https://conversioncrm.co/compare/userflow): paid conversion vs onboarding guides
+
+## Blog
+- [Free-to-paid conversion benchmarks 2026](https://conversioncrm.co/blog/free-to-paid-conversion-rate-benchmark): freemium 2–5%, opt-in trial 8–12%, opt-out 25–50%
+- [How to increase free trial conversion rate](https://conversioncrm.co/blog/how-to-increase-free-trial-conversion-rate): 6 levers ranked by effort-to-impact
+- [Freemium vs free trial](https://conversioncrm.co/blog/freemium-vs-free-trial): model choice, opt-in vs opt-out, 7 vs 14 days, reverse trials
+- [PLG vs sales-led growth](https://conversioncrm.co/blog/product-led-growth-vs-sales-led): motion comparison + product-led sales
+
+## Legal
+- [Privacy Policy](https://conversioncrm.co/legal/privacy)
+- [Terms & Conditions](https://conversioncrm.co/legal/terms)
+- [Payment Policy](https://conversioncrm.co/legal/payment-policy)
+- [Beta Notice](https://conversioncrm.co/legal/beta-notice)

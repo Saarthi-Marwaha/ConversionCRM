@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getActiveWorkspace } from "@/lib/active-workspace";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
+import { TestimonialWidget } from "@/components/TestimonialWidget";
 
 export default async function DashboardLayout({
   children,
@@ -20,6 +21,7 @@ export default async function DashboardLayout({
           {children}
         </div>
       </main>
+      <TestimonialWidget />
     </div>
   );
 }

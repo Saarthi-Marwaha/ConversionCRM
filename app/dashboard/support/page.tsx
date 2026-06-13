@@ -9,7 +9,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-const SUPPORT_EMAIL = "support@conversioncrm.co";
+const SUPPORT_EMAIL = "ceo.conversioncrm@gmail.com";
 
 const FAQS: { q: string; a: string }[] = [
   {
@@ -66,7 +66,7 @@ export default async function SupportPage() {
           href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
             `[${workspace.name}] Support request`
           )}`}
-          className="group bg-sky-50 rounded-2xl p-5 shadow-soft hover:shadow-card transition-shadow"
+          className="group bg-sky-50 rounded-lg p-5 shadow-soft hover:shadow-card transition-shadow"
         >
           <div className="flex items-center gap-2 text-sky-900">
             <Mail className="h-4 w-4" />

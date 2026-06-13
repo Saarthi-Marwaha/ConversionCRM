@@ -14,7 +14,6 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
-import { DEV_BYPASS_AUTH, TEST_WORKSPACE_ID } from "@/lib/flags";
 import {
   isSignupEventType,
   maybeSendWelcomeOnSignup,
@@ -136,6 +135,32 @@ export async function POST(request: NextRequest) {
     })();
   const origin = rawOrigin ? rawOrigin.slice(0, 256) : null;
 
+  // Geo from the edge: Vercel resolves visitor IP → country/region/city and
+  // forwards them as headers (Cloudflare fallback for country). No IP is
+  // ever stored — only the coarse location, like any analytics tool.
+  const country = (
+    request.headers.get("x-vercel-ip-country") ||
+    request.headers.get("cf-ipcountry") ||
+    ""
+  )
+    .trim()
+    .toUpperCase()
+    .slice(0, 2);
+  const regionHeader = request.headers.get("x-vercel-ip-country-region") ?? "";
+  const cityHeader = request.headers.get("x-vercel-ip-city") ?? "";
+  const safeDecode = (v: string) => {
+    try {
+      return decodeURIComponent(v);
+    } catch {
+      return v;
+    }
+  };
+  const geo = {
+    country: /^[A-Z]{2}$/.test(country) ? country : null,
+    region: regionHeader ? safeDecode(regionHeader).slice(0, 64) : null,
+    city: cityHeader ? safeDecode(cityHeader).slice(0, 128) : null,
+  };
+
   const supabase = createSupabaseAdminClient();
 
   // Look up the workspace this api_key belongs to
@@ -145,20 +170,15 @@ export async function POST(request: NextRequest) {
     .eq("api_key", apiKey)
     .maybeSingle();
 
-  // Unknown keys only fall back to the seeded test workspace while auth is
-  // bypassed for local development — in production they are rejected so
-  // strangers can't write junk into anyone's data.
-  let workspaceId: string;
-  if (workspace?.id) {
-    workspaceId = workspace.id;
-  } else if (DEV_BYPASS_AUTH) {
-    workspaceId = TEST_WORKSPACE_ID;
-  } else {
+  // Every workspace has its own real api_key (issued at onboarding) —
+  // unknown keys are rejected outright, no test-workspace fallback.
+  if (!workspace?.id) {
     return NextResponse.json(
       { error: "Unknown api_key" },
       { status: 401, headers: CORS_HEADERS }
     );
   }
+  const workspaceId = workspace.id;
 
   const eventType = asTrimmedString(body.event_type, 64) ?? "page_view";
   const userId = asTrimmedString(body.user_id, 128);
@@ -194,6 +214,9 @@ export async function POST(request: NextRequest) {
     email,
     page,
     origin,
+    country: geo.country,
+    region: geo.region,
+    city: geo.city,
     properties: props,
     occurred_at: safeTimestamp(body.timestamp),
   });

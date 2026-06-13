@@ -61,7 +61,7 @@
 @layer components {
   /* Borderless surface card — soft shadow instead of borders */
   .card {
-    @apply bg-white rounded-2xl shadow-card;
+    @apply bg-white rounded-lg shadow-card;
   }
 }
 
