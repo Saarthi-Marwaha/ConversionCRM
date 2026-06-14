@@ -35,16 +35,13 @@ export function PricingTable({ loggedIn, currentPlan, mustChoose }: Props) {
 
   const stop = VOLUME_STOPS[stopIdx];
 
-  // Premium scales with the slider above its base; otherwise shows its base.
+  // Premium scales self-serve with the slider (200k → 2.5M); below premium
+  // volumes it shows its base. 3M+ is Enterprise (its own card / Contact us).
   const premium = useMemo(() => {
-    if (stop.plan === "premium" && stop.contactSales) {
-      return { emails: stop.emails, price: stop.priceUsd, contactSales: true };
+    if (stop.plan === "premium") {
+      return { emails: stop.emails, price: stop.priceUsd };
     }
-    return {
-      emails: PLANS.premium.emailQuota,
-      price: PLANS.premium.priceUsd,
-      contactSales: false,
-    };
+    return { emails: PLANS.premium.emailQuota, price: PLANS.premium.priceUsd };
   }, [stop]);
 
   async function selectFree() {
@@ -65,14 +62,14 @@ export function PricingTable({ loggedIn, currentPlan, mustChoose }: Props) {
     }
   }
 
-  async function checkout(plan: PlanId) {
+  async function checkout(plan: PlanId, emails?: number) {
     setError(null);
     setBusy(plan);
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan }),
+        body: JSON.stringify(emails ? { plan, emails } : { plan }),
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.url) {
@@ -109,13 +106,11 @@ export function PricingTable({ loggedIn, currentPlan, mustChoose }: Props) {
     if (plan === "free") {
       return { label: "Choose Free", onClick: selectFree };
     }
-    if (plan === "premium" && premium.contactSales) {
-      return {
-        label: "Contact sales",
-        onClick: () => mailtoSales(`Premium plan — ${formatEmails(premium.emails)} emails/mo`),
-      };
-    }
-    return { label: `Choose ${PLANS[plan].name}`, onClick: () => checkout(plan) };
+    return {
+      label: `Choose ${PLANS[plan].name}`,
+      onClick: () =>
+        checkout(plan, plan === "premium" ? premium.emails : undefined),
+    };
   }
 
   return (

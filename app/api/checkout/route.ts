@@ -12,11 +12,26 @@ import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getWorkspaceByOwnerId, updateWorkspacePlan } from "@/db/queries";
 import { createSubscription, razorpayConfigured } from "@/lib/razorpay";
-import { PLANS, PURCHASABLE_PLANS, type PlanId } from "@/lib/plans";
+import {
+  PLANS,
+  PURCHASABLE_PLANS,
+  PREMIUM_VOLUMES,
+  type PlanId,
+} from "@/lib/plans";
 
 const schema = z.object({
   plan: z.enum(["basic", "pro", "premium"]),
+  /** Selected Premium slider volume (200k–2.5M). Ignored for other plans. */
+  emails: z.number().int().positive().optional(),
 });
+
+/** Quota for a checkout: Premium honours the chosen slider volume. */
+function quotaFor(plan: PlanId, emails?: number): number {
+  if (plan === "premium" && emails && PREMIUM_VOLUMES.includes(emails)) {
+    return emails;
+  }
+  return PLANS[plan].emailQuota;
+}
 
 export async function POST(request: NextRequest) {
   const supabase = await createSupabaseServerClient();
@@ -50,7 +65,7 @@ export async function POST(request: NextRequest) {
     // payment blocker. (Once Razorpay keys are set, real checkout kicks in.)
     await updateWorkspacePlan(workspace.id, {
       plan,
-      email_quota: PLANS[plan].emailQuota,
+      email_quota: quotaFor(plan, parsed.data.emails),
       plan_status: "active",
       plan_selected_at: new Date().toISOString(),
     });

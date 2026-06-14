@@ -211,12 +211,18 @@ export const VOLUME_STOPS: VolumeStop[] = [
   { emails: 15_000, priceUsd: 20, plan: "basic" },
   { emails: 100_000, priceUsd: 180, plan: "pro" },
   { emails: 200_000, priceUsd: 360, plan: "premium" },
-  { emails: 500_000, priceUsd: 900, plan: "premium", contactSales: true },
-  { emails: 1_000_000, priceUsd: 1_800, plan: "premium", contactSales: true },
-  { emails: 1_500_000, priceUsd: 2_700, plan: "premium", contactSales: true },
-  { emails: 2_500_000, priceUsd: 4_500, plan: "premium", contactSales: true },
+  // Premium scales self-serve up to 2.5M; only 3M+ routes to sales.
+  { emails: 500_000, priceUsd: 900, plan: "premium" },
+  { emails: 1_000_000, priceUsd: 1_800, plan: "premium" },
+  { emails: 1_500_000, priceUsd: 2_700, plan: "premium" },
+  { emails: 2_500_000, priceUsd: 4_500, plan: "premium" },
   { emails: 3_000_000, priceUsd: null, plan: "enterprise", contactSales: true },
 ];
+
+/** Self-serve Premium volumes (used to validate a chosen slider stop). */
+export const PREMIUM_VOLUMES = VOLUME_STOPS.filter(
+  (s) => s.plan === "premium"
+).map((s) => s.emails);
 
 export function formatEmails(n: number): string {
   if (n >= 1_000_000) return `${n / 1_000_000}M`;
