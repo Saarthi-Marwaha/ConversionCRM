@@ -69,6 +69,10 @@ export interface Workspace {
   smtp_pass: string | null;
   smtp_secure: boolean | null;
   smtp_from_email: string | null;
+  // ── Persistent follow-up automation ──
+  followup_enabled: boolean | null;
+  followup_interval_days: number | null;
+  followup_max_sends: number | null;
   // ── Billing (Razorpay) ──
   /** null = the owner hasn't chosen a plan yet (gated to /pricing). */
   plan: "free" | "basic" | "pro" | "scale" | "enterprise" | null;

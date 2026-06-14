@@ -78,10 +78,10 @@ export const PLANS: Record<PlanId, PlanDef> = {
     blurb: "See the whole loop work — for real.",
     features: [
       "All 8 behaviour-triggered emails",
+      "Persistent follow-ups — re-nudge until they convert",
       "6-layer engagement scoring + lifecycle stages",
       "Auto-tracking + identify() / track()",
       "Tracking snippet + REST API key",
-      "Live dashboard, user profiles & intent detection",
       "Guardrails: cooldowns, never email paying users",
     ],
     notIncluded: [

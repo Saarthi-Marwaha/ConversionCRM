@@ -5,7 +5,11 @@
  */
 import React from "react";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
-import { sendEmail, wasEmailSentRecently } from "@/lib/emails/send";
+import {
+  sendEmail,
+  wasEmailSentRecently,
+  countEmailsSentToUser,
+} from "@/lib/emails/send";
 import { isWithinSendWindow } from "@/lib/emails/local-time";
 import { matchesAhaUrl, normalizeAhaPath } from "@/lib/scoring";
 import { WelcomeEmail } from "@/emails/templates/Welcome";
@@ -33,7 +37,24 @@ type WorkspaceRow = {
   reply_to_email: string | null;
   email_sender_name: string | null;
   plan: string | null;
+  followup_enabled: boolean | null;
+  followup_interval_days: number | null;
+  followup_max_sends: number | null;
 };
+
+/**
+ * The repeating "follow-up" nudges. While a user stays in a non-converted
+ * stage and keeps not acting, these re-send every `followup_interval_days`
+ * (configurable, default 7) up to `followup_max_sends`. They stop the moment
+ * the user converts/upgrades (→ paid stage, no email) or takes the desired
+ * action (→ stage advances), because stage assignment is behaviour-based.
+ */
+const NUDGE_TRIGGERS: ReadonlySet<EmailTrigger> = new Set<EmailTrigger>([
+  "feature_nudge",
+  "value_demo",
+  "check_in",
+  "upgrade_offer",
+]);
 
 type EventRow = {
   user_id: string | null;
@@ -333,11 +354,34 @@ async function processWorkspaceEmails(
       if (!isWithinSendWindow(country)) continue;
     }
 
-    const cooldown = COOLDOWN_HOURS[plan.trigger];
+    // ── Persistent follow-up cadence + guardrails ──────────────────────
+    // The repeating nudges re-send every `followup_interval_days` (default 7)
+    // while the user stays in this non-converted stage and keeps not acting —
+    // capped at `followup_max_sends` so they can never spam. Other triggers
+    // keep their built-in cooldowns. Stop conditions (convert / upgrade / paid
+    // / took the desired action) are handled upstream by stage assignment.
+    const isNudge = NUDGE_TRIGGERS.has(plan.trigger);
+    const intervalDays = ws.followup_interval_days ?? 7;
+    const cooldown = isNudge
+      ? intervalDays * 24
+      : COOLDOWN_HOURS[plan.trigger];
+
     if (
       await wasEmailSentRecently(ws.id, user.user_id, plan.trigger, cooldown)
     ) {
       continue;
+    }
+
+    if (isNudge) {
+      // followup_enabled=false → send the nudge once, then stop following up.
+      const maxSends =
+        ws.followup_enabled === false ? 1 : ws.followup_max_sends ?? 4;
+      const alreadySent = await countEmailsSentToUser(
+        ws.id,
+        user.user_id,
+        plan.trigger
+      );
+      if (alreadySent >= maxSends) continue;
     }
 
     const ok = await sendEmail({
@@ -372,7 +416,7 @@ export async function runAutomatedEmailsForWorkspace(
   const { data: ws, error } = await supabase
     .from("workspaces")
     .select(
-      "id, name, product_name, website_url, key_feature_name, key_feature_event, key_feature_url, reply_to_email, email_sender_name, plan, emails_last_run_at"
+      "id, name, product_name, website_url, key_feature_name, key_feature_event, key_feature_url, reply_to_email, email_sender_name, plan, followup_enabled, followup_interval_days, followup_max_sends, emails_last_run_at"
     )
     .eq("id", workspaceId)
     .single();
@@ -414,7 +458,7 @@ export async function runAutomatedEmails(): Promise<RunAutomatedEmailsResult> {
   const { data: workspaces, error: wsError } = await supabase
     .from("workspaces")
     .select(
-      "id, name, product_name, website_url, key_feature_name, key_feature_event, key_feature_url, reply_to_email, email_sender_name, plan"
+      "id, name, product_name, website_url, key_feature_name, key_feature_event, key_feature_url, reply_to_email, email_sender_name, plan, followup_enabled, followup_interval_days, followup_max_sends"
     )
     .not("reply_to_email", "is", null);
 

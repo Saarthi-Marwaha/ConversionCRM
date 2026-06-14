@@ -124,6 +124,37 @@ export async function saveEmailDelivery(formData: FormData) {
   return { ok: true };
 }
 
+export async function saveFollowup(formData: FormData) {
+  const { workspace } = await getActiveWorkspace();
+  if (!workspace) return { error: "No workspace" };
+
+  const enabled = formData.get("followup_enabled") === "on";
+  const interval = Number((formData.get("followup_interval_days") as string) ?? "");
+  const maxSends = Number((formData.get("followup_max_sends") as string) ?? "");
+
+  if (!Number.isInteger(interval) || interval < 1 || interval > 90) {
+    return { error: "Re-send interval must be between 1 and 90 days" };
+  }
+  if (!Number.isInteger(maxSends) || maxSends < 1 || maxSends > 20) {
+    return { error: "Max follow-ups must be between 1 and 20" };
+  }
+
+  const admin = createSupabaseAdminClient();
+  const { error } = await admin
+    .from("workspaces")
+    .update({
+      followup_enabled: enabled,
+      followup_interval_days: interval,
+      followup_max_sends: maxSends,
+    })
+    .eq("id", workspace.id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/settings");
+  return { ok: true };
+}
+
 export async function saveReplyToEmail(formData: FormData) {
   const { workspace } = await getActiveWorkspace();
   if (!workspace) return { error: "No workspace" };

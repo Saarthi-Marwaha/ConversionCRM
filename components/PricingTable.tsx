@@ -165,6 +165,7 @@ export function PricingTable({ loggedIn, currentPlan, mustChoose }: Props) {
       <div className="mx-auto mb-8 max-w-4xl rounded-xl bg-white px-6 py-4 text-center text-sm text-gray-600 shadow-card">
         <span className="font-semibold text-[#0b3a5e]">Every plan, including Free, includes:</span>{" "}
         the tracking snippet + REST API · all 8 behaviour-triggered emails ·
+        <span className="font-semibold text-[#0b3a5e]"> persistent follow-ups that re-nudge every 7 days until a user converts</span> ·
         6-layer scoring · lifecycle stages · guardrails (cooldowns, never email
         paying users).
       </div>

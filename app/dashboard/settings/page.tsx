@@ -9,6 +9,7 @@ import { WebsiteUrlForm } from "@/components/WebsiteUrlForm";
 import { ReplyToEmailForm } from "@/components/ReplyToEmailForm";
 import { EmailDeliveryForm } from "@/components/EmailDeliveryForm";
 import { AhaMomentForm } from "@/components/AhaMomentForm";
+import { FollowupForm } from "@/components/FollowupForm";
 import { BillingSection } from "@/components/BillingSection";
 import type { PlanId } from "@/lib/plans";
 
@@ -242,6 +243,24 @@ user and event should appear within 3 seconds.`;
             </span>
           </div>
         )}
+      </section>
+
+      {/* ── Follow-up automation ───────────────────────── */}
+      <section className="card p-5 sm:p-6 space-y-4">
+        <div>
+          <h2 className="text-base font-semibold text-gray-900">
+            Persistent follow-up
+          </h2>
+          <p className="text-sm text-gray-500 mt-0.5">
+            Keep nudging users who haven&apos;t converted yet — automatically —
+            until they act, with cooldowns and a max-send cap so it never spams.
+          </p>
+        </div>
+        <FollowupForm
+          enabled={workspace.followup_enabled ?? true}
+          intervalDays={workspace.followup_interval_days ?? 7}
+          maxSends={workspace.followup_max_sends ?? 4}
+        />
       </section>
 
       {/* ── Aha moment ─────────────────────────────────── */}

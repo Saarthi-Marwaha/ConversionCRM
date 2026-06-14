@@ -212,6 +212,26 @@ export async function wasEmailSentRecently(
   return (count ?? 0) > 0;
 }
 
+/**
+ * Lifetime count of successful sends of a given trigger to a user. Used by the
+ * persistent follow-up cap so a nudge can't repeat past followup_max_sends.
+ */
+export async function countEmailsSentToUser(
+  workspaceId: string,
+  userId: string,
+  trigger: EmailTrigger
+): Promise<number> {
+  const supabase = createSupabaseAdminClient();
+  const { count } = await supabase
+    .from("email_logs")
+    .select("*", { count: "exact", head: true })
+    .eq("workspace_id", workspaceId)
+    .eq("user_id", userId)
+    .eq("trigger", trigger)
+    .eq("status", "sent");
+  return count ?? 0;
+}
+
 /** Cooldown scoped to limit_type metadata on limit_upgrade sends. */
 export async function wasLimitUpgradeSentRecently(
   workspaceId: string,
