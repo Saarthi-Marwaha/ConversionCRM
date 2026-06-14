@@ -83,6 +83,9 @@ export interface Workspace {
   rollover_emails: number | null;
   /** First day (UTC) of the period rollover was last reconciled for. */
   usage_period: string | null;
+  /** A scheduled upgrade that starts when the current paid month ends. */
+  pending_plan: "free" | "basic" | "pro" | "premium" | "enterprise" | null;
+  pending_plan_starts_at: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -3,7 +3,7 @@ import { getActiveWorkspace } from "@/lib/active-workspace";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { TestimonialWidget } from "@/components/TestimonialWidget";
 import { PlanUsageBar } from "@/components/PlanUsageBar";
-import { getQuotaState, reconcileRollover } from "@/lib/usage";
+import { getQuotaState, reconcileRollover, reconcilePlan } from "@/lib/usage";
 
 export default async function DashboardLayout({
   children,
@@ -19,7 +19,9 @@ export default async function DashboardLayout({
   // past /pricing for a logged-in workspace until a plan is selected.
   if (!workspace.plan) redirect("/pricing");
 
-  // Carry any unused emails from last month into this one, then snapshot usage.
+  // Apply a scheduled upgrade whose start date has arrived (webhook back-up),
+  // then carry unused emails from last month into this one and snapshot usage.
+  await reconcilePlan(workspace);
   workspace.rollover_emails = await reconcileRollover(workspace);
   const quota = await getQuotaState(workspace);
 

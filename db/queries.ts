@@ -58,6 +58,8 @@ export type WorkspacePlanUpdate = Partial<
     | "plan_renews_at"
     | "rollover_emails"
     | "usage_period"
+    | "pending_plan"
+    | "pending_plan_starts_at"
   >
 >;
 

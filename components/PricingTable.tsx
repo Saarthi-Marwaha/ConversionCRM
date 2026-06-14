@@ -32,6 +32,7 @@ export function PricingTable({ loggedIn, currentPlan, mustChoose }: Props) {
   );
   const [busy, setBusy] = useState<PlanId | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const stop = VOLUME_STOPS[stopIdx];
 
@@ -64,6 +65,7 @@ export function PricingTable({ loggedIn, currentPlan, mustChoose }: Props) {
 
   async function checkout(plan: PlanId, emails?: number) {
     setError(null);
+    setNotice(null);
     setBusy(plan);
     try {
       const res = await fetch("/api/checkout", {
@@ -72,10 +74,24 @@ export function PricingTable({ loggedIn, currentPlan, mustChoose }: Props) {
         body: JSON.stringify(emails ? { plan, emails } : { plan }),
       });
       const data = await res.json().catch(() => ({}));
-      if (res.ok && data.url) {
-        window.location.assign(data.url); // real Razorpay checkout
+
+      // New subscription → open Razorpay Checkout.js.
+      if (res.ok && data.subscriptionId && data.keyId) {
+        await openRazorpayCheckout(data.subscriptionId, data.keyId, plan);
+        return;
+      }
+      // Already subscribed → change scheduled for the next cycle.
+      if (res.ok && data.scheduled) {
+        const when = data.startsAt
+          ? new Date(data.startsAt).toLocaleDateString()
+          : "the end of your current cycle";
+        setNotice(
+          `Upgrade scheduled — your ${PLANS[plan].name} plan starts on ${when}, once your current month ends. You keep your current plan until then.`
+        );
       } else if (res.ok && data.redirect) {
-        window.location.assign(data.redirect); // test mode — plan activated
+        window.location.assign(data.redirect);
+      } else if (res.ok && data.url) {
+        window.location.assign(data.url);
       } else {
         setError(data.error ?? "Could not start checkout.");
       }
@@ -84,6 +100,62 @@ export function PricingTable({ loggedIn, currentPlan, mustChoose }: Props) {
     } finally {
       setBusy(null);
     }
+  }
+
+  function loadRazorpay(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (typeof window !== "undefined" && (window as Window & { Razorpay?: unknown }).Razorpay) {
+        return resolve();
+      }
+      const s = document.createElement("script");
+      s.src = "https://checkout.razorpay.com/v1/checkout.js";
+      s.onload = () => resolve();
+      s.onerror = () => reject(new Error("sdk"));
+      document.body.appendChild(s);
+    });
+  }
+
+  async function openRazorpayCheckout(
+    subscriptionId: string,
+    keyId: string,
+    plan: PlanId
+  ) {
+    try {
+      await loadRazorpay();
+    } catch {
+      setError("Could not load the payment window. Check your connection.");
+      return;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const Razorpay = (window as any).Razorpay;
+    const rzp = new Razorpay({
+      key: keyId,
+      subscription_id: subscriptionId,
+      name: "ConversionCRM",
+      description: `${PLANS[plan].name} plan`,
+      theme: { color: "#0ea5e9" },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      handler: async (resp: any) => {
+        try {
+          const v = await fetch("/api/billing/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              razorpay_payment_id: resp.razorpay_payment_id,
+              razorpay_subscription_id: resp.razorpay_subscription_id,
+              razorpay_signature: resp.razorpay_signature,
+            }),
+          });
+          const vd = await v.json().catch(() => ({}));
+          if (v.ok) window.location.assign(vd.redirect ?? "/dashboard");
+          else setError(vd.error ?? "Payment verification failed.");
+        } catch {
+          setError("Payment verification failed. Please contact support.");
+        }
+      },
+      modal: { ondismiss: () => setBusy(null) },
+    });
+    rzp.open();
   }
 
   function mailtoSales(subject: string) {
@@ -183,6 +255,11 @@ export function PricingTable({ loggedIn, currentPlan, mustChoose }: Props) {
       {error && (
         <div className="mx-auto mb-6 max-w-2xl rounded-md border border-red-200 bg-red-50 px-4 py-3 text-center text-sm text-red-700">
           {error}
+        </div>
+      )}
+      {notice && (
+        <div className="mx-auto mb-6 max-w-2xl rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-center text-sm text-emerald-700">
+          {notice}
         </div>
       )}
 

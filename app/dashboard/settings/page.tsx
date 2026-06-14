@@ -1,11 +1,16 @@
+import Link from "next/link";
+import { Lock } from "lucide-react";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { getActiveWorkspace } from "@/lib/active-workspace";
+import { planAllows } from "@/lib/entitlements";
 import { CopyButton } from "@/components/CopyButton";
 import { WebsiteUrlForm } from "@/components/WebsiteUrlForm";
 import { ReplyToEmailForm } from "@/components/ReplyToEmailForm";
 import { EmailDeliveryForm } from "@/components/EmailDeliveryForm";
 import { AhaMomentForm } from "@/components/AhaMomentForm";
+import { BillingSection } from "@/components/BillingSection";
+import type { PlanId } from "@/lib/plans";
 
 export default async function SettingsPage() {
   const { workspace, userEmail } = await getActiveWorkspace();
@@ -109,6 +114,15 @@ user and event should appear within 3 seconds.`;
         </p>
       </div>
 
+      {/* ── Billing ─────────────────────────────────────── */}
+      <BillingSection
+        plan={(workspace.plan as PlanId) ?? "free"}
+        planStatus={workspace.plan_status}
+        renewsAt={workspace.plan_renews_at}
+        pendingPlan={(workspace.pending_plan as PlanId) ?? null}
+        pendingStartsAt={workspace.pending_plan_starts_at}
+      />
+
       {/* ── Embed Snippet ─────────────────────────────── */}
       <section className="card p-5 sm:p-6 space-y-4">
         <div className="flex items-start justify-between gap-4">
@@ -205,15 +219,29 @@ user and event should appear within 3 seconds.`;
             SMTP server to send from your domain.
           </p>
         </div>
-        <EmailDeliveryForm
-          currentProvider={workspace.email_provider === "smtp" ? "smtp" : "resend"}
-          smtpHost={workspace.smtp_host}
-          smtpPort={workspace.smtp_port}
-          smtpUser={workspace.smtp_user}
-          smtpSecure={workspace.smtp_secure ?? true}
-          smtpFromEmail={workspace.smtp_from_email}
-          hasPassword={!!workspace.smtp_pass}
-        />
+        {planAllows(workspace.plan, "custom_smtp") ? (
+          <EmailDeliveryForm
+            currentProvider={workspace.email_provider === "smtp" ? "smtp" : "resend"}
+            smtpHost={workspace.smtp_host}
+            smtpPort={workspace.smtp_port}
+            smtpUser={workspace.smtp_user}
+            smtpSecure={workspace.smtp_secure ?? true}
+            smtpFromEmail={workspace.smtp_from_email}
+            hasPassword={!!workspace.smtp_pass}
+          />
+        ) : (
+          <div className="flex items-start gap-2 rounded-md bg-sky-50 px-4 py-3 text-sm text-sky-700">
+            <Lock className="mt-0.5 h-4 w-4 flex-shrink-0" />
+            <span>
+              Sending from your own domain (SMTP) is available on{" "}
+              <strong>Basic</strong> and above. Your emails currently send
+              through ConversionCRM&apos;s shared infrastructure.{" "}
+              <Link href="/pricing" className="font-semibold underline">
+                Upgrade
+              </Link>
+            </span>
+          </div>
+        )}
       </section>
 
       {/* ── Aha moment ─────────────────────────────────── */}

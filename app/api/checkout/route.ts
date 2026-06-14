@@ -1,17 +1,24 @@
 /**
- * POST /api/checkout
+ * POST /api/checkout  — body: { plan, emails? }
  *
- * Starts a Razorpay subscription for the signed-in workspace owner and
- * returns the hosted checkout URL. The webhook (/api/webhooks/razorpay) is
- * what actually activates the plan once payment is authorised.
- *
- * Body: { plan: "basic" | "pro" | "premium" }
+ * Two paths:
+ *  • No active subscription (Free / new)  → create a Razorpay subscription and
+ *    return { subscriptionId, keyId } for Razorpay Checkout.js. The plan is
+ *    activated by /api/billing/verify once payment succeeds.
+ *  • Already subscribed (active paid plan) → schedule the plan change at the
+ *    END of the current cycle (Razorpay schedule_change_at=cycle_end), so the
+ *    new plan only starts once the current paid month is over.
  */
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getWorkspaceByOwnerId, updateWorkspacePlan } from "@/db/queries";
-import { createSubscription, razorpayConfigured } from "@/lib/razorpay";
+import {
+  createSubscription,
+  razorpayConfigured,
+  razorpayPlanId,
+  updateSubscriptionPlan,
+} from "@/lib/razorpay";
 import {
   PLANS,
   PURCHASABLE_PLANS,
@@ -38,17 +45,16 @@ export async function POST(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
   if (!user) {
     return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
   }
 
-  const body = await request.json().catch(() => null);
-  const parsed = schema.safeParse(body);
+  const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid plan" }, { status: 422 });
   }
   const plan = parsed.data.plan as PlanId;
+  const emails = parsed.data.emails;
 
   if (!PURCHASABLE_PLANS.includes(plan)) {
     return NextResponse.json({ error: "Plan not purchasable" }, { status: 422 });
@@ -59,35 +65,64 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Complete setup first" }, { status: 404 });
   }
 
+  const quota = quotaFor(plan, emails);
+
+  // Pre-launch fallback: no gateway configured → activate immediately.
   if (!razorpayConfigured()) {
-    // No payment gateway wired up yet → test/pre-launch mode. Activate the
-    // chosen plan immediately so the whole flow can be exercised without a
-    // payment blocker. (Once Razorpay keys are set, real checkout kicks in.)
     await updateWorkspacePlan(workspace.id, {
       plan,
-      email_quota: quotaFor(plan, parsed.data.emails),
+      email_quota: quota,
       plan_status: "active",
       plan_selected_at: new Date().toISOString(),
     });
     return NextResponse.json({ ok: true, redirect: "/dashboard" });
   }
 
-  const planEnv = PLANS[plan].razorpayPlanEnv!;
-  const planId = process.env[planEnv];
+  const planId = razorpayPlanId(plan, emails);
   if (!planId) {
     return NextResponse.json(
-      { error: `Missing ${planEnv} in environment.` },
+      { error: "This plan isn't configured for billing yet." },
       { status: 503 }
     );
   }
 
+  const hasActiveSub =
+    !!workspace.razorpay_subscription_id &&
+    workspace.plan_status === "active" &&
+    !!workspace.plan &&
+    workspace.plan !== "free";
+
+  // ── Already subscribed → schedule the change for the next cycle ──
+  if (hasActiveSub) {
+    const result = await updateSubscriptionPlan(
+      workspace.razorpay_subscription_id!,
+      planId,
+      "cycle_end"
+    );
+    if (!result) {
+      return NextResponse.json(
+        { error: "Could not schedule the plan change. Please try again." },
+        { status: 502 }
+      );
+    }
+    const startsAt = result.currentEnd
+      ? new Date(result.currentEnd * 1000).toISOString()
+      : null;
+    await updateWorkspacePlan(workspace.id, {
+      pending_plan: plan,
+      pending_plan_starts_at: startsAt,
+    });
+    return NextResponse.json({ scheduled: true, plan, startsAt });
+  }
+
+  // ── New subscription → Razorpay Checkout.js in the browser ──
   const subscription = await createSubscription({
     planId,
     workspaceId: workspace.id,
     plan,
+    quota,
     notifyEmail: user.email ?? undefined,
   });
-
   if (!subscription) {
     return NextResponse.json(
       { error: "Could not start checkout. Please try again." },
@@ -95,12 +130,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Record the pending subscription id so the webhook can reconcile even if
-  // its notes are stripped. Plan stays inactive until the webhook confirms.
+  // Remember the (pending) subscription so the webhook can reconcile too.
   await updateWorkspacePlan(workspace.id, {
     razorpay_subscription_id: subscription.id,
     plan_status: "none",
   });
 
-  return NextResponse.json({ url: subscription.shortUrl });
+  return NextResponse.json({
+    subscriptionId: subscription.id,
+    keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+    plan,
+  });
 }

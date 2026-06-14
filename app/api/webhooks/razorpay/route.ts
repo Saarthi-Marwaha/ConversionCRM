@@ -9,7 +9,7 @@
  *   subscription.cancelled  subscription.halted     subscription.pending
  */
 import { NextRequest, NextResponse } from "next/server";
-import { verifyWebhookSignature } from "@/lib/razorpay";
+import { verifyWebhookSignature, planFromRazorpayPlanId } from "@/lib/razorpay";
 import {
   getWorkspaceByRazorpaySubscription,
   updateWorkspacePlan,
@@ -49,8 +49,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, unmapped: true });
   }
 
-  const plan = (sub.notes?.plan as PlanId) || "pro";
-  const quota = planById(plan).emailQuota;
+  // plan_id is authoritative (it reflects a scheduled change once it takes
+  // effect); the subscription notes are the fallback.
+  const mapped = sub.plan_id ? planFromRazorpayPlanId(sub.plan_id) : null;
+  const plan: PlanId =
+    mapped?.plan ?? (sub.notes?.plan as PlanId) ?? "pro";
+  const quota =
+    mapped?.quota ??
+    Number(sub.notes?.email_quota) ??
+    planById(plan).emailQuota;
   const renewsAt = sub.current_end
     ? new Date(sub.current_end * 1000).toISOString()
     : null;
@@ -68,6 +75,9 @@ export async function POST(request: NextRequest) {
           plan_selected_at: new Date().toISOString(),
           razorpay_subscription_id: sub.id,
           plan_renews_at: renewsAt,
+          // A scheduled change that has now taken effect is no longer pending.
+          pending_plan: null,
+          pending_plan_starts_at: null,
         });
         break;
       }
@@ -107,8 +117,9 @@ export async function POST(request: NextRequest) {
 interface RazorpaySubscriptionEntity {
   id: string;
   status: string;
+  plan_id?: string;
   current_end?: number;
-  notes?: { workspace_id?: string; plan?: string };
+  notes?: { workspace_id?: string; plan?: string; email_quota?: string };
 }
 interface RazorpayEvent {
   event: string;

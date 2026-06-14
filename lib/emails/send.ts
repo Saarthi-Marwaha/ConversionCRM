@@ -122,7 +122,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<boolean> {
   }
 
   // ── Custom-domain (SMTP) entitlement ────────────────────────────────
-  // Only Pro+ may send from their own SMTP; lower plans fall back to the
+  // Only Basic+ may send from their own SMTP; the Free plan falls back to the
   // platform Resend sender even if SMTP creds linger from onboarding.
   if (
     delivery.email_provider === "smtp" &&

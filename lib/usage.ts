@@ -20,6 +20,38 @@ export interface PlanBearingWorkspace {
   plan_renews_at?: string | null;
   rollover_emails?: number | null;
   usage_period?: string | null;
+  pending_plan?: PlanId | string | null;
+  pending_plan_starts_at?: string | null;
+}
+
+/**
+ * Applies a scheduled upgrade once its start date (the previous cycle's end)
+ * has passed. The Razorpay webhook normally does this via plan_id; this is the
+ * safety net so the dashboard reflects the change even if a webhook is delayed.
+ * Returns the plan id now in effect.
+ */
+export async function reconcilePlan(
+  ws: PlanBearingWorkspace
+): Promise<PlanId> {
+  const current = (ws.plan as PlanId) || "free";
+  if (!ws.pending_plan || !ws.pending_plan_starts_at) return current;
+  if (Date.now() < Date.parse(ws.pending_plan_starts_at)) return current;
+
+  const plan = ws.pending_plan as PlanId;
+  const quota = planById(plan).emailQuota;
+  await updateWorkspacePlan(ws.id, {
+    plan,
+    email_quota: quota,
+    plan_status: "active",
+    pending_plan: null,
+    pending_plan_starts_at: null,
+  });
+  // Keep the in-memory object consistent for the rest of this render.
+  ws.plan = plan;
+  ws.email_quota = quota;
+  ws.pending_plan = null;
+  ws.pending_plan_starts_at = null;
+  return plan;
 }
 
 /** Start of the current month in UTC, ISO string. */
