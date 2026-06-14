@@ -1,12 +1,14 @@
 /**
- * Monthly email-send quota — the hard cap that stops sending once a
- * workspace exhausts its plan's allowance for the calendar month.
+ * Monthly email-send quota with rollover.
  *
- * Data collection (the tracking widget → /api/events) is intentionally NOT
- * gated here: even a workspace that has blown past its email quota keeps
- * ingesting events, scores and profiles. Only outbound *email* stops.
+ * Effective quota for the current month = the plan's base quota + any unused
+ * emails carried over from last month (`rollover_emails`, capped at one
+ * month's base so it can't grow without bound). Once a workspace exhausts
+ * the effective quota, outbound email stops for the month — but data
+ * collection (the tracking widget → /api/events) keeps running regardless.
  */
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import { updateWorkspacePlan } from "@/db/queries";
 import { planById, type PlanId } from "@/lib/plans";
 
 /** Minimal shape needed to resolve a workspace's effective plan + quota. */
@@ -16,6 +18,8 @@ export interface PlanBearingWorkspace {
   email_quota?: number | null;
   plan_status?: string | null;
   plan_renews_at?: string | null;
+  rollover_emails?: number | null;
+  usage_period?: string | null;
 }
 
 /** Start of the current month in UTC, ISO string. */
@@ -23,10 +27,15 @@ export function startOfCurrentMonthIso(now = new Date()): string {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
 }
 
+/** Current month as a YYYY-MM-01 date string (UTC). */
+function currentPeriod(now = new Date()): string {
+  return startOfCurrentMonthIso(now).slice(0, 10);
+}
+
 /**
- * Resolve the plan + monthly quota that actually applies right now.
- * A cancelled / past-due subscription keeps its quota until the paid period
- * ends (plan_renews_at), then falls back to Free.
+ * Resolve the plan + BASE monthly quota that applies right now (before
+ * rollover). A cancelled / past-due subscription keeps its quota until the
+ * paid period ends (plan_renews_at), then falls back to Free.
  */
 export function effectivePlan(ws: PlanBearingWorkspace): {
   plan: PlanId;
@@ -51,22 +60,78 @@ export function effectivePlan(ws: PlanBearingWorkspace): {
   return { plan: planId, quota };
 }
 
-/** Count of successfully-sent emails this calendar month for a workspace. */
-export async function getMonthlyEmailUsage(workspaceId: string): Promise<number> {
+/** Count successfully-sent emails for a workspace within [startIso, endIso). */
+async function countSentBetween(
+  workspaceId: string,
+  startIso: string,
+  endIso?: string
+): Promise<number> {
   const supabase = createSupabaseAdminClient();
-  const { count } = await supabase
+  let q = supabase
     .from("email_logs")
     .select("*", { count: "exact", head: true })
     .eq("workspace_id", workspaceId)
     .eq("status", "sent")
-    .gte("sent_at", startOfCurrentMonthIso());
+    .gte("sent_at", startIso);
+  if (endIso) q = q.lt("sent_at", endIso);
+  const { count } = await q;
   return count ?? 0;
+}
+
+/** Emails sent so far in the current calendar month. */
+export async function getMonthlyEmailUsage(workspaceId: string): Promise<number> {
+  return countSentBetween(workspaceId, startOfCurrentMonthIso());
+}
+
+/**
+ * Roll unused emails into the current month. Idempotent: only does work the
+ * first time it's called in a new month. Returns the rollover credit that
+ * now applies. Safe to call on every dashboard load.
+ */
+export async function reconcileRollover(
+  ws: PlanBearingWorkspace
+): Promise<number> {
+  const period = currentPeriod();
+  const stored = ws.usage_period ? String(ws.usage_period).slice(0, 10) : null;
+
+  if (stored === period) {
+    return ws.rollover_emails ?? 0;
+  }
+
+  // First time we've ever reconciled — nothing to carry over yet.
+  if (!stored) {
+    await updateWorkspacePlan(ws.id, {
+      rollover_emails: 0,
+      usage_period: period,
+    });
+    return 0;
+  }
+
+  const { quota: baseQuota } = effectivePlan(ws);
+  const prevStartIso = `${stored}T00:00:00.000Z`;
+  const usedPrev = await countSentBetween(
+    ws.id,
+    prevStartIso,
+    startOfCurrentMonthIso()
+  );
+  const prevEffective = baseQuota + (ws.rollover_emails ?? 0);
+  // Carry leftover, capped at one month's base quota.
+  const leftover = Math.max(0, Math.min(baseQuota, prevEffective - usedPrev));
+
+  await updateWorkspacePlan(ws.id, {
+    rollover_emails: leftover,
+    usage_period: period,
+  });
+  return leftover;
 }
 
 export interface QuotaState {
   plan: PlanId;
   used: number;
+  /** Effective cap this month = baseQuota + rollover. */
   quota: number;
+  baseQuota: number;
+  rollover: number;
   remaining: number;
   allowed: boolean;
   /** 0–100, clamped. */
@@ -77,13 +142,17 @@ export interface QuotaState {
 export async function getQuotaState(
   ws: PlanBearingWorkspace
 ): Promise<QuotaState> {
-  const { plan, quota } = effectivePlan(ws);
+  const { plan, quota: baseQuota } = effectivePlan(ws);
+  const rollover = ws.rollover_emails ?? 0;
+  const quota = baseQuota + rollover;
   const used = await getMonthlyEmailUsage(ws.id);
   const remaining = Math.max(0, quota - used);
   return {
     plan,
     used,
     quota,
+    baseQuota,
+    rollover,
     remaining,
     allowed: used < quota,
     percent: quota > 0 ? Math.min(100, Math.round((used / quota) * 100)) : 100,
@@ -91,8 +160,8 @@ export async function getQuotaState(
 }
 
 /**
- * Cheap pre-send gate: true when the workspace still has email headroom
- * this month. Used right before delivering any outbound email.
+ * Cheap pre-send gate: true when the workspace still has email headroom this
+ * month (base quota + rollover). Used right before delivering any email.
  */
 export async function canSendEmail(ws: PlanBearingWorkspace): Promise<{
   allowed: boolean;
@@ -100,7 +169,8 @@ export async function canSendEmail(ws: PlanBearingWorkspace): Promise<{
   quota: number;
   plan: PlanId;
 }> {
-  const { plan, quota } = effectivePlan(ws);
+  const { plan, quota: baseQuota } = effectivePlan(ws);
+  const quota = baseQuota + (ws.rollover_emails ?? 0);
   const used = await getMonthlyEmailUsage(ws.id);
   return { allowed: used < quota, used, quota, plan };
 }

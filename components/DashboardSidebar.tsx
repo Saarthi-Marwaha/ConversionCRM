@@ -18,11 +18,23 @@ import {
   CreditCard,
   BookOpen,
   MessageSquarePlus,
+  Send,
   Menu,
   X,
+  type LucideIcon,
 } from "lucide-react";
 
-const NAV_ITEMS = [
+type NavItem = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  /** Renders as a plain <a> (e.g. mailto) instead of a router link. */
+  external?: boolean;
+};
+
+const CONTACT_EMAIL = "ceo.conversioncrm@gmail.com";
+
+const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/dashboard/users", label: "Users", icon: Users },
   { href: "/dashboard/composer", label: "Email Composer", icon: Mail },
@@ -31,6 +43,14 @@ const NAV_ITEMS = [
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
   { href: "/dashboard/support", label: "Support", icon: LifeBuoy },
   { href: "/pricing", label: "Pricing", icon: CreditCard },
+  {
+    href: `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
+      "ConversionCRM — Contact"
+    )}`,
+    label: "Contact",
+    icon: Send,
+    external: true,
+  },
 ];
 
 interface Props {
@@ -70,23 +90,26 @@ function NavLinks({
 }) {
   return (
     <nav className="flex-1 px-2 py-4 space-y-1">
-      {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-        const active =
-          href === "/dashboard"
-            ? pathname === "/dashboard"
-            : pathname.startsWith(href);
+      {NAV_ITEMS.map(({ href, label, icon: Icon, external }) => {
+        const className = cn(
+          "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+          !external && (href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href))
+            ? "bg-sky-50 text-sky-800"
+            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+        );
+
+        // mailto / external opens the user's mail client directly.
+        if (external) {
+          return (
+            <a key={href} href={href} onClick={onNavigate} className={className}>
+              <Icon className="h-4 w-4 flex-shrink-0" />
+              {label}
+            </a>
+          );
+        }
+
         return (
-          <Link
-            key={href}
-            href={href}
-            onClick={onNavigate}
-            className={cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-              active
-                ? "bg-sky-50 text-sky-800"
-                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-            )}
-          >
+          <Link key={href} href={href} onClick={onNavigate} className={className}>
             <Icon className="h-4 w-4 flex-shrink-0" />
             {label}
           </Link>

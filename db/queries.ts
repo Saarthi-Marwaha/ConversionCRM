@@ -56,6 +56,8 @@ export type WorkspacePlanUpdate = Partial<
     | "razorpay_customer_id"
     | "razorpay_subscription_id"
     | "plan_renews_at"
+    | "rollover_emails"
+    | "usage_period"
   >
 >;
 

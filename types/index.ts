@@ -79,6 +79,10 @@ export interface Workspace {
   razorpay_customer_id: string | null;
   razorpay_subscription_id: string | null;
   plan_renews_at: string | null;
+  /** Unused emails carried into the current period from the previous one. */
+  rollover_emails: number | null;
+  /** First day (UTC) of the period rollover was last reconciled for. */
+  usage_period: string | null;
   created_at: string;
   updated_at: string;
 }

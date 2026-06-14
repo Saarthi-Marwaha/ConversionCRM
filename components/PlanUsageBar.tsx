@@ -12,11 +12,13 @@ export function PlanUsageBar({
   used,
   quota,
   percent,
+  rollover = 0,
 }: {
   plan: PlanId;
   used: number;
   quota: number;
   percent: number;
+  rollover?: number;
 }) {
   const def = planById(plan);
   const overLimit = used >= quota;
@@ -43,6 +45,11 @@ export function PlanUsageBar({
             {used.toLocaleString()} / {quota.toLocaleString()}
           </span>
           <span className="text-gray-400">emails this month</span>
+          {rollover > 0 && (
+            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+              +{rollover.toLocaleString()} rolled over
+            </span>
+          )}
         </div>
 
         <Link

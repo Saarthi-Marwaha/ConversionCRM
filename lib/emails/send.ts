@@ -30,7 +30,7 @@ interface SendEmailOptions {
 
 /** Workspace fields needed to pick + drive the delivery provider + quota. */
 const DELIVERY_FIELDS =
-  "id, name, product_name, email_sender_name, reply_to_email, email_provider, smtp_host, smtp_port, smtp_user, smtp_pass, smtp_secure, smtp_from_email, plan, email_quota, plan_status, plan_renews_at";
+  "id, name, product_name, email_sender_name, reply_to_email, email_provider, smtp_host, smtp_port, smtp_user, smtp_pass, smtp_secure, smtp_from_email, plan, email_quota, plan_status, plan_renews_at, rollover_emails";
 
 /**
  * Sends a transactional email through the workspace's configured provider
@@ -84,6 +84,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<boolean> {
     email_quota?: number | null;
     plan_status?: string | null;
     plan_renews_at?: string | null;
+    rollover_emails?: number | null;
   } | null;
 
   const quota = await canSendEmail({
@@ -92,6 +93,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<boolean> {
     email_quota: planRow?.email_quota,
     plan_status: planRow?.plan_status,
     plan_renews_at: planRow?.plan_renews_at,
+    rollover_emails: planRow?.rollover_emails,
   });
 
   if (!quota.allowed) {

@@ -4,26 +4,26 @@
  * Dependency-free so it can be imported from the edge middleware, server
  * routes, and client components alike.
  *
- * ── PRICING & MARGIN ──────────────────────────────────────────────────
- * Our only variable cost is outbound email (Resend). Resend's monthly cost
- * to us, by volume (the figures the founder supplied):
+ * ── PRICING & MARGIN (target: ≥50% gross profit) ──────────────────────
+ * Our only variable cost is outbound email (Resend, transactional).
+ * Resend's real cost to us (from resend.com/pricing?product=transactional):
+ *   Free  $0   3,000/mo  ·  Pro $20  50,000/mo  ·  Scale $90  100,000/mo
+ *   overage $0.90 / 1,000 emails  ·  Enterprise custom
  *
- *     volume      Resend cost      our price     gross margin
- *     ─────────────────────────────────────────────────────────
- *       1,000        $0              $0           — (free tier)
- *      20,000        ~$4 (pooled)    $20          ~80%
- *     100,000        $20             $99          ~80%
- *     200,000        $160            $399         ~60%
- *     500,000        $360            $850         ~58%
- *   1,000,000        $650            $1,500       ~57%
- *   1,500,000        $825            $1,950       ~58%
- *   2,500,000        $1,150          $2,700       ~57%
- *   2,500,000+       custom          Contact us   —
+ *     volume        Resend cost     our price     gross margin
+ *     ───────────────────────────────────────────────────────────
+ *       1,000          $0             $0          — (free)
+ *      15,000          ~$6–13         $20         ~50–70% (pooled)
+ *     100,000          $90            $180        50%
+ *     200,000          $180           $360        50%
+ *     500,000          $450           $900        50%
+ *   1,000,000          $900           $1,800      50%
+ *   1,500,000          $1,350         $2,700      50%
+ *   2,500,000          $2,250         $4,500      50%
+ *   2,500,000+         custom         Contact us  —
  *
- * Every paid step clears the 50–60% gross-margin target. Email cost is
- * pooled across all customers on one Resend account, so the marginal cost
- * of the small tiers is well under the tier list price (hence the high
- * margin on Basic/Pro). Higher volumes are priced at ~2.3× Resend cost.
+ * Price = 2 × Resend cost ⇒ a clean 50% gross margin at every paid step.
+ * (Pro is $180, not $150 — at Resend's $90/100k, $150 would be only 40%.)
  */
 
 export type PlanId = "free" | "basic" | "pro" | "premium" | "enterprise";
@@ -33,7 +33,7 @@ export interface PlanDef {
   name: string;
   /** Monthly price in USD. `null` = custom / contact sales. */
   priceUsd: number | null;
-  /** Hard monthly email-send cap. */
+  /** Base monthly email-send cap (before rollover). */
   emailQuota: number;
   /** Short marketing line. */
   blurb: string;
@@ -54,10 +54,14 @@ export type Entitlement =
   | "custom_smtp"
   | "api_access"
   | "unlimited_sites"
-  | "priority_support";
+  | "priority_access";
 
 export const SALES_EMAIL =
   process.env.NEXT_PUBLIC_SALES_EMAIL || "ceo.conversioncrm@gmail.com";
+
+// Tracking (snippet/widget), live overview, the users table and an API key
+// are available on EVERY plan — they're how data gets collected, never gated.
+const ALWAYS_ON: Entitlement[] = ["api_access"];
 
 export const PLANS: Record<PlanId, PlanDef> = {
   free: {
@@ -65,85 +69,82 @@ export const PLANS: Record<PlanId, PlanDef> = {
     name: "Free",
     priceUsd: 0,
     emailQuota: 1_000,
-    blurb: "See who's using your product, live.",
+    blurb: "Track every signup and watch them activate, live.",
     features: [
       "1,000 emails / month",
-      "Live overview dashboard",
-      "6-layer engagement scoring",
-      "Lifecycle stages",
-      "7-day event history",
-      "Email & ticket support",
+      "Tracking snippet & live overview",
+      "Full users table & profiles",
+      "6-layer engagement scoring & stages",
+      "API key access",
     ],
     notIncluded: [
       "Automated lifecycle emails",
-      "Hand-written email composer",
       "Custom sending domain (SMTP)",
+      "Email composer (custom HTML)",
     ],
-    entitlements: [],
+    entitlements: [...ALWAYS_ON],
   },
   basic: {
     id: "basic",
     name: "Basic",
     priceUsd: 20,
-    emailQuota: 20_000,
-    blurb: "Convert sign-ups with automated lifecycle emails.",
+    emailQuota: 15_000,
+    blurb: "Convert signups with automated lifecycle emails.",
     features: [
-      "20,000 emails / month",
+      "15,000 emails / month",
       "Everything in Free",
       "Automated lifecycle emails",
-      "Hand-written email composer",
-      "Full user profiles & activity",
+      "Custom sending domain (SMTP)",
+      "Full users table & API access",
       "30-day event history",
     ],
-    notIncluded: ["Custom sending domain (SMTP)", "REST API access"],
-    entitlements: ["automated_emails", "custom_composer"],
+    notIncluded: ["Email composer (custom HTML)"],
+    entitlements: [...ALWAYS_ON, "automated_emails", "custom_smtp"],
     razorpayPlanEnv: "RAZORPAY_PLAN_BASIC",
   },
   pro: {
     id: "pro",
     name: "Pro",
-    priceUsd: 99,
+    priceUsd: 180,
     emailQuota: 100_000,
-    blurb: "For products with real volume and their own domain.",
+    blurb: "Everything unlocked — including the custom HTML composer.",
     recommended: true,
     features: [
       "100,000 emails / month",
       "Everything in Basic",
-      "Custom sending domain (your SMTP)",
-      "REST API & widget access",
+      "Email composer (custom HTML)",
+      "All features unlocked",
+      "Custom sending domain (SMTP)",
       "90-day event history",
-      "Priority support",
     ],
-    notIncluded: ["Dedicated success manager"],
     entitlements: [
+      ...ALWAYS_ON,
       "automated_emails",
-      "custom_composer",
       "custom_smtp",
-      "api_access",
+      "custom_composer",
     ],
     razorpayPlanEnv: "RAZORPAY_PLAN_PRO",
   },
   premium: {
     id: "premium",
     name: "Premium",
-    priceUsd: 399,
+    priceUsd: 360,
     emailQuota: 200_000,
-    blurb: "Serious scale with a dedicated team behind you.",
+    blurb: "Serious scale with priority access.",
     features: [
       "200,000 emails / month",
       "Everything in Pro",
       "Unlimited websites / workspaces",
+      "Priority access",
       "1-year event history",
-      "Dedicated success manager",
-      "Priority SLA",
     ],
     entitlements: [
+      ...ALWAYS_ON,
       "automated_emails",
-      "custom_composer",
       "custom_smtp",
-      "api_access",
+      "custom_composer",
       "unlimited_sites",
-      "priority_support",
+      "priority_access",
     ],
     razorpayPlanEnv: "RAZORPAY_PLAN_PREMIUM",
   },
@@ -158,15 +159,15 @@ export const PLANS: Record<PlanId, PlanDef> = {
       "Everything in Premium",
       "Custom volume & pricing",
       "Dedicated infrastructure",
-      "Custom contracts & invoicing",
+      "Priority access",
     ],
     entitlements: [
+      ...ALWAYS_ON,
       "automated_emails",
-      "custom_composer",
       "custom_smtp",
-      "api_access",
+      "custom_composer",
       "unlimited_sites",
-      "priority_support",
+      "priority_access",
     ],
   },
 };
@@ -192,8 +193,8 @@ export function planAtLeast(a: PlanId, b: PlanId): boolean {
 export const PURCHASABLE_PLANS: PlanId[] = ["basic", "pro", "premium"];
 
 /**
- * The volume slider used on the pricing page.
- * Each stop maps a monthly email volume to its price and the plan it implies.
+ * The volume slider used on the pricing page. Each stop maps a monthly email
+ * volume to its price (2× Resend cost ⇒ 50% margin) and the plan it implies.
  * Volumes above Premium's 200k are quoted but routed to sales (Contact us).
  */
 export interface VolumeStop {
@@ -207,13 +208,13 @@ export interface VolumeStop {
 
 export const VOLUME_STOPS: VolumeStop[] = [
   { emails: 1_000, priceUsd: 0, plan: "free" },
-  { emails: 20_000, priceUsd: 20, plan: "basic" },
-  { emails: 100_000, priceUsd: 99, plan: "pro" },
-  { emails: 200_000, priceUsd: 399, plan: "premium" },
-  { emails: 500_000, priceUsd: 850, plan: "premium", contactSales: true },
-  { emails: 1_000_000, priceUsd: 1_500, plan: "premium", contactSales: true },
-  { emails: 1_500_000, priceUsd: 1_950, plan: "premium", contactSales: true },
-  { emails: 2_500_000, priceUsd: 2_700, plan: "premium", contactSales: true },
+  { emails: 15_000, priceUsd: 20, plan: "basic" },
+  { emails: 100_000, priceUsd: 180, plan: "pro" },
+  { emails: 200_000, priceUsd: 360, plan: "premium" },
+  { emails: 500_000, priceUsd: 900, plan: "premium", contactSales: true },
+  { emails: 1_000_000, priceUsd: 1_800, plan: "premium", contactSales: true },
+  { emails: 1_500_000, priceUsd: 2_700, plan: "premium", contactSales: true },
+  { emails: 2_500_000, priceUsd: 4_500, plan: "premium", contactSales: true },
   { emails: 3_000_000, priceUsd: null, plan: "enterprise", contactSales: true },
 ];
 

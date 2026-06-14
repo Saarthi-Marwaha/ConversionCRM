@@ -45,13 +45,16 @@ export async function POST(request: NextRequest) {
   }
 
   if (!razorpayConfigured()) {
-    return NextResponse.json(
-      {
-        error:
-          "Billing isn't configured yet. Add your Razorpay keys to .env.local (RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET / RAZORPAY_PLAN_*).",
-      },
-      { status: 503 }
-    );
+    // No payment gateway wired up yet → test/pre-launch mode. Activate the
+    // chosen plan immediately so the whole flow can be exercised without a
+    // payment blocker. (Once Razorpay keys are set, real checkout kicks in.)
+    await updateWorkspacePlan(workspace.id, {
+      plan,
+      email_quota: PLANS[plan].emailQuota,
+      plan_status: "active",
+      plan_selected_at: new Date().toISOString(),
+    });
+    return NextResponse.json({ ok: true, redirect: "/dashboard" });
   }
 
   const planEnv = PLANS[plan].razorpayPlanEnv!;

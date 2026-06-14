@@ -3,7 +3,7 @@ import { getActiveWorkspace } from "@/lib/active-workspace";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { TestimonialWidget } from "@/components/TestimonialWidget";
 import { PlanUsageBar } from "@/components/PlanUsageBar";
-import { getQuotaState } from "@/lib/usage";
+import { getQuotaState, reconcileRollover } from "@/lib/usage";
 
 export default async function DashboardLayout({
   children,
@@ -19,6 +19,8 @@ export default async function DashboardLayout({
   // past /pricing for a logged-in workspace until a plan is selected.
   if (!workspace.plan) redirect("/pricing");
 
+  // Carry any unused emails from last month into this one, then snapshot usage.
+  workspace.rollover_emails = await reconcileRollover(workspace);
   const quota = await getQuotaState(workspace);
 
   return (
@@ -31,6 +33,7 @@ export default async function DashboardLayout({
             used={quota.used}
             quota={quota.quota}
             percent={quota.percent}
+            rollover={quota.rollover}
           />
           {children}
         </div>

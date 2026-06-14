@@ -35,12 +35,16 @@ export function PricingTable({ loggedIn, currentPlan, mustChoose }: Props) {
 
   const stop = VOLUME_STOPS[stopIdx];
 
-  // Premium scales with the slider above its 200k base.
+  // Premium scales with the slider above its base; otherwise shows its base.
   const premium = useMemo(() => {
     if (stop.plan === "premium" && stop.contactSales) {
       return { emails: stop.emails, price: stop.priceUsd, contactSales: true };
     }
-    return { emails: 200_000, price: 399, contactSales: false };
+    return {
+      emails: PLANS.premium.emailQuota,
+      price: PLANS.premium.priceUsd,
+      contactSales: false,
+    };
   }, [stop]);
 
   async function selectFree() {
@@ -72,7 +76,9 @@ export function PricingTable({ loggedIn, currentPlan, mustChoose }: Props) {
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.url) {
-        window.location.assign(data.url);
+        window.location.assign(data.url); // real Razorpay checkout
+      } else if (res.ok && data.redirect) {
+        window.location.assign(data.redirect); // test mode — plan activated
       } else {
         setError(data.error ?? "Could not start checkout.");
       }
@@ -245,7 +251,13 @@ export function PricingTable({ loggedIn, currentPlan, mustChoose }: Props) {
               </button>
 
               <ul className="mt-6 flex-1 space-y-2.5 text-sm text-gray-600">
-                {plan.features.map((f) => (
+                {(isPremium
+                  ? [
+                      `${quota.toLocaleString()} emails / month`,
+                      ...plan.features.slice(1),
+                    ]
+                  : plan.features
+                ).map((f) => (
                   <li key={f} className="flex items-start gap-2.5">
                     <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-sky-500" />
                     {f}
