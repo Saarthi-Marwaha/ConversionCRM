@@ -9,8 +9,6 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-const SUPPORT_EMAIL = "team@heyvirtual.me";
-
 const FAQS: { q: string; a: string }[] = [
   {
     q: "Why don't I see any users in the dashboard?",
@@ -62,24 +60,22 @@ export default async function SupportPage() {
 
       {/* ── Contact cards ─────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <a
-          href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
-            `[${workspace.name}] Support request`
-          )}`}
+        <Link
+          href="/dashboard/feedback"
           className="group bg-sky-50 rounded-lg p-5 shadow-soft hover:shadow-card transition-shadow"
         >
           <div className="flex items-center gap-2 text-sky-900">
             <Mail className="h-4 w-4" />
-            <span className="text-sm font-semibold">Email support</span>
+            <span className="text-sm font-semibold">Message the team</span>
           </div>
           <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">
-            A real person answers every message — usually within one business
-            day.
+            Tell us what&apos;s broken or what you need — a real person answers,
+            usually within one business day.
           </p>
           <p className="text-sm font-semibold text-[#0b3a5e] mt-3 group-hover:underline">
-            {SUPPORT_EMAIL} →
+            Open the form →
           </p>
-        </a>
+        </Link>
 
         <Link
           href="/dashboard/settings"
@@ -148,13 +144,10 @@ export default async function SupportPage() {
       </section>
 
       <p className="text-xs text-gray-400 text-center pb-4">
-        Still stuck? Email{" "}
-        <a
-          href={`mailto:${SUPPORT_EMAIL}`}
-          className="text-sky-600 hover:underline"
-        >
-          {SUPPORT_EMAIL}
-        </a>{" "}
+        Still stuck?{" "}
+        <Link href="/dashboard/feedback" className="text-sky-600 hover:underline">
+          Send us a message
+        </Link>{" "}
         — include your workspace name (<strong>{workspace.name}</strong>) for a
         faster answer.
       </p>
