@@ -17,6 +17,7 @@ const inputClass =
 
 export function FeedbackPortal() {
   const [kind, setKind] = useState<"feature" | "issue">("feature");
+  const [company, setCompany] = useState("");
   const [message, setMessage] = useState("");
   const [items, setItems] = useState<FeedbackItem[] | null>(null);
   const [state, setState] = useState<
@@ -45,7 +46,7 @@ export function FeedbackPortal() {
       const res = await fetch("/api/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kind, message }),
+        body: JSON.stringify({ kind, message, company }),
       });
       const json = await res.json().catch(() => null);
       if (!res.ok) throw new Error(json?.error ?? `HTTP ${res.status}`);
@@ -107,6 +108,15 @@ export function FeedbackPortal() {
             </p>
           </button>
         </div>
+
+        <input
+          type="text"
+          value={company}
+          onChange={(e) => setCompany(e.target.value)}
+          maxLength={120}
+          placeholder="Company name (optional)"
+          className={inputClass}
+        />
 
         <textarea
           value={message}

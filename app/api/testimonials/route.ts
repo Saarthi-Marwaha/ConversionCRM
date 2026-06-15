@@ -14,6 +14,7 @@ export const dynamic = "force-dynamic";
 
 const BodySchema = z.object({
   author_name: z.string().trim().max(80).optional(),
+  company: z.string().trim().max(120).optional(),
   rating: z.number().int().min(1).max(5),
   content: z.string().trim().min(3).max(1500),
 });
@@ -94,10 +95,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Fire-and-forget founder notification with the rating.
+  // Fire-and-forget team notification, subject-marked testimonial.
   void notifyOwner({
     type: "Testimonial",
     workspaceName: workspace.name,
+    companyName: parsed.data.company || workspace.name,
     fromEmail: userEmail || workspace.reply_to_email,
     content: `${parsed.data.content}\n\n— ${authorName}`,
     rating: parsed.data.rating,

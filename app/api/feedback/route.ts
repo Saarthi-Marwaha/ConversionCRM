@@ -15,6 +15,7 @@ export const dynamic = "force-dynamic";
 const BodySchema = z.object({
   kind: z.enum(["feature", "issue"]),
   message: z.string().trim().min(3).max(2000),
+  company: z.string().trim().max(120).optional(),
 });
 
 // Light per-instance limit: 10 submissions per workspace per hour.
@@ -83,10 +84,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Fire-and-forget founder notification, labeled with what it is.
+  // Fire-and-forget team notification, subject-marked bug/feature.
   void notifyOwner({
     type: parsed.data.kind === "feature" ? "Feature request" : "Bug report",
     workspaceName: workspace.name,
+    companyName: parsed.data.company || workspace.name,
     fromEmail: userEmail || workspace.reply_to_email,
     content: parsed.data.message,
   });

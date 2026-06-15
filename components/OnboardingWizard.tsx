@@ -188,11 +188,9 @@ export function OnboardingWizard({
           smtpPass.length > 0
         );
       case 2:
-        return (
-          featureName.trim().length > 0 &&
-          (featureUrl.trim().startsWith("/") ||
-            /^https?:\/\/\S+$/i.test(featureUrl.trim()))
-        );
+        // Accept the link however it's typed — bare domain (no https/www) or
+        // path. The server normalizes it on submit.
+        return featureName.trim().length > 0 && featureUrl.trim().length > 0;
       case 3:
         return websiteUrl.trim().length > 3;
       default:

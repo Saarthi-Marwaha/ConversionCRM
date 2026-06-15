@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import { normalizeFeatureUrl } from "@/lib/scoring";
 
 // ─────────────────────────────────────────────
 // Sign Up
@@ -140,8 +141,10 @@ export async function createWorkspace(formData: FormData) {
   if (!companyName || !productName) fail("Company and product name are required");
   if (!keyFeatureName) fail("Name your aha-moment feature");
   if (!keyFeatureUrl) fail("The feature button link is required");
-  if (!keyFeatureUrl.startsWith("/") && !/^https?:\/\/\S+$/i.test(keyFeatureUrl)) {
-    fail("Feature link must be a full URL or a path starting with /");
+  // Accept the link however it's typed — bare domain (no https/www) or path.
+  const normalizedFeatureUrl = normalizeFeatureUrl(keyFeatureUrl);
+  if (!normalizedFeatureUrl) {
+    fail("Enter a feature link, e.g. acme.com/feature or /feature");
   }
   if (!websiteUrl) fail("Your website URL is required");
   if (!websiteUrl.startsWith("http")) websiteUrl = `https://${websiteUrl}`;
@@ -222,7 +225,7 @@ export async function createWorkspace(formData: FormData) {
     api_key: apiKey,
     website_url: websiteUrl,
     key_feature_name: keyFeatureName,
-    key_feature_url: keyFeatureUrl,
+    key_feature_url: normalizedFeatureUrl,
     key_feature_event: event || null,
     reply_to_email: resolvedReplyTo,
     email_sender_name: emailSenderName,

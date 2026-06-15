@@ -44,16 +44,18 @@ export default async function PricingPage() {
   } = await supabase.auth.getUser();
 
   let currentPlan: PlanId | null = null;
+  let currentPlanActive = false;
   let hasWorkspace = false;
   if (user) {
     const admin = createSupabaseAdminClient();
     const { data: ws } = await admin
       .from("workspaces")
-      .select("plan")
+      .select("plan, plan_status")
       .eq("owner_id", user.id)
       .maybeSingle();
     hasWorkspace = !!ws;
     currentPlan = (ws?.plan as PlanId) ?? null;
+    currentPlanActive = ws?.plan_status === "active" && currentPlan !== "free";
   }
 
   const loggedIn = !!user;
@@ -118,6 +120,7 @@ export default async function PricingPage() {
         <PricingTable
           loggedIn={loggedIn}
           currentPlan={currentPlan}
+          currentPlanActive={currentPlanActive}
           mustChoose={mustChoose}
         />
       </section>

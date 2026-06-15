@@ -97,7 +97,7 @@ footer .brand .logo-img{height:22px}
 }
 .drop-panel::before{content:"";position:absolute;top:-12px;left:0;right:0;height:12px}
 .drop-item{
-  display:flex;gap:11px;align-items:flex-start;padding:11px 12px;border-radius:10px;
+  display:flex;gap:11px;align-items:center;padding:11px 12px;border-radius:10px;
   transition:background .15s;
 }
 .drop-item:hover{background:var(--blue-pale)}

@@ -19,7 +19,7 @@ import {
   razorpayPlanId,
   updateSubscriptionPlan,
 } from "@/lib/razorpay";
-import { PLANS, PURCHASABLE_PLANS, type PlanId } from "@/lib/plans";
+import { PLANS, PLAN_ORDER, PURCHASABLE_PLANS, type PlanId } from "@/lib/plans";
 
 const schema = z.object({
   plan: z.enum(["basic", "pro", "scale"]),
@@ -76,8 +76,30 @@ export async function POST(request: NextRequest) {
     !!workspace.plan &&
     workspace.plan !== "free";
 
-  // ── Already subscribed → schedule the change for the next cycle ──
+  // ── Already subscribed → only upgrades, scheduled for the next cycle ──
   if (hasActiveSub) {
+    const currentIdx = PLAN_ORDER.indexOf(workspace.plan as PlanId);
+    const targetIdx = PLAN_ORDER.indexOf(plan);
+
+    if (targetIdx === currentIdx) {
+      return NextResponse.json(
+        { error: "You're already on this plan." },
+        { status: 400 }
+      );
+    }
+    // No downgrades while a plan is active — the lower plan can't start until
+    // the current paid month ends. They must cancel (drops to Free at period
+    // end) or wait for renewal.
+    if (targetIdx < currentIdx) {
+      return NextResponse.json(
+        {
+          error:
+            "You can't downgrade while your plan is active. Cancel to drop to Free when your billing month ends, or upgrade instead.",
+        },
+        { status: 409 }
+      );
+    }
+
     const result = await updateSubscriptionPlan(
       workspace.razorpay_subscription_id!,
       planId,

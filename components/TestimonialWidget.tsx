@@ -59,6 +59,7 @@ export function TestimonialWidget() {
   const [rating, setRating] = useState(0);
   const [content, setContent] = useState("");
   const [name, setName] = useState("");
+  const [company, setCompany] = useState("");
   const [state, setState] = useState<
     { k: "idle" } | { k: "sending" } | { k: "done" } | { k: "error"; msg: string }
   >({ k: "idle" });
@@ -91,6 +92,7 @@ export function TestimonialWidget() {
           rating,
           content,
           author_name: name.trim() || undefined,
+          company: company.trim() || undefined,
         }),
       });
       const json = await res.json().catch(() => null);
@@ -168,6 +170,13 @@ export function TestimonialWidget() {
                   onChange={(e) => setName(e.target.value)}
                   maxLength={80}
                   placeholder="Your name (optional)"
+                  className="w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-300"
+                />
+                <input
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  maxLength={120}
+                  placeholder="Company name (optional)"
                   className="w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-300"
                 />
                 <div className="flex items-center gap-3">

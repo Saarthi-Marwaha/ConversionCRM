@@ -112,6 +112,28 @@ export function normalizeAhaPath(value: string | null | undefined): string | nul
   }
 }
 
+/**
+ * Normalises whatever the user typed into the feature-button field into a
+ * usable link. Accepts bare domains (no https, no www required), full URLs,
+ * and paths — e.g. "app.acme.com/export", "https://acme.com/x", "/export",
+ * or "export". Returns null only for empty input.
+ */
+export function normalizeFeatureUrl(
+  value: string | null | undefined
+): string | null {
+  const v = value?.trim().replace(/\s+/g, "");
+  if (!v) return null;
+  if (/^https?:\/\//i.test(v)) return v; // already absolute
+  if (v.startsWith("/")) return v; // path on the customer's own site
+  const host = v.split(/[/?#]/)[0];
+  // Domain-like first segment (has a dot, or localhost) → assume https.
+  if (host.includes(".") || /^localhost(:\d+)?$/i.test(host)) {
+    return `https://${v}`;
+  }
+  // Otherwise treat it as a path.
+  return `/${v}`;
+}
+
 /** True when this click/visit hits the configured aha link. */
 export function matchesAhaUrl(
   ev: Pick<ScoringEvent, "event_type" | "page" | "properties">,

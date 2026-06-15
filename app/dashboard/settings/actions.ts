@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { getActiveWorkspace } from "@/lib/active-workspace";
+import { normalizeFeatureUrl } from "@/lib/scoring";
 
 export async function saveWebsiteUrl(formData: FormData) {
   const { workspace } = await getActiveWorkspace();
@@ -35,17 +36,15 @@ export async function saveAhaMoment(formData: FormData) {
   const rawEvent = ((formData.get("key_feature_event") as string) ?? "").trim();
   const rawUrl = ((formData.get("key_feature_url") as string) ?? "").trim();
 
-  // The button link is the backbone of the aha catcher — required.
+  // The button link is the backbone of the aha catcher — required. Accept it
+  // however the user types it (bare domain, no https/www, or a path).
   if (!rawUrl) {
     return { error: "The feature button link is required" };
   }
   if (rawUrl.length > 500) return { error: "Link is too long" };
-  const isPath = rawUrl.startsWith("/");
-  const isHttp = /^https?:\/\/[^\s]+$/i.test(rawUrl);
-  if (!isPath && !isHttp) {
-    return {
-      error: "Enter a full URL (https://…) or a path starting with /",
-    };
+  const url = normalizeFeatureUrl(rawUrl);
+  if (!url) {
+    return { error: "Enter a link, e.g. acme.com/feature or /feature" };
   }
 
   // Event names are snake_case identifiers like the widget sends.
@@ -63,7 +62,7 @@ export async function saveAhaMoment(formData: FormData) {
     .update({
       key_feature_name: name || null,
       key_feature_event: event || null,
-      key_feature_url: rawUrl,
+      key_feature_url: url,
     })
     .eq("id", workspace.id);
 

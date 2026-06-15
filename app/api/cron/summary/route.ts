@@ -56,7 +56,8 @@ export async function GET(request: NextRequest) {
         .eq("workspace_id", ws.id)
         .gte("created_at", todayUTCStart());
 
-      // TODO: wire Lemon Squeezy revenue data once billing is live
+      // Revenue attribution (which emails drove paid conversions) is a
+      // roadmap feature; the daily summary reports 0 until it ships.
       const revenueThisWeek = 0;
 
       const summaryData: DailySummaryData = {

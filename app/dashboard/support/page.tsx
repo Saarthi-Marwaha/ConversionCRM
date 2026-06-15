@@ -9,7 +9,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-const SUPPORT_EMAIL = "ceo.conversioncrm@gmail.com";
+const SUPPORT_EMAIL = "team@heyvirtual.me";
 
 const FAQS: { q: string; a: string }[] = [
   {

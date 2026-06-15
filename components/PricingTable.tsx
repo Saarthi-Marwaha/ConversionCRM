@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check, X, Loader2, Zap } from "lucide-react";
 import {
   PLANS,
+  PLAN_ORDER,
   SALES_EMAIL,
   formatPrice,
   formatEmails,
@@ -16,6 +17,8 @@ const NAVY = "text-[#0b3a5e]";
 interface Props {
   loggedIn: boolean;
   currentPlan: PlanId | null;
+  /** True when the current plan is a paid, active (non-cancelled) subscription. */
+  currentPlanActive: boolean;
   /** Logged in but no plan yet — must choose before reaching the dashboard. */
   mustChoose: boolean;
 }
@@ -31,7 +34,12 @@ const CTA: Record<PlanId, string> = {
   enterprise: "Talk to sales",
 };
 
-export function PricingTable({ loggedIn, currentPlan, mustChoose }: Props) {
+export function PricingTable({
+  loggedIn,
+  currentPlan,
+  currentPlanActive,
+  mustChoose,
+}: Props) {
   const [busy, setBusy] = useState<PlanId | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -145,6 +153,15 @@ export function PricingTable({ loggedIn, currentPlan, mustChoose }: Props) {
   /** What the button for a plan should do + say. */
   function action(plan: PlanId): { label: string; disabled?: boolean; onClick: () => void } {
     if (currentPlan === plan) return { label: "Current plan", disabled: true, onClick: () => {} };
+    // No downgrades while a paid plan is active — only available after the
+    // current month ends (cancel first, or wait for renewal).
+    if (
+      currentPlanActive &&
+      currentPlan &&
+      PLAN_ORDER.indexOf(plan) < PLAN_ORDER.indexOf(currentPlan)
+    ) {
+      return { label: "Available at renewal", disabled: true, onClick: () => {} };
+    }
     if (!loggedIn) return { label: CTA[plan], onClick: () => window.location.assign("/signup") };
     if (plan === "free") return { label: "Choose Free", onClick: selectFree };
     if (plan === "enterprise")

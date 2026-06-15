@@ -546,6 +546,7 @@ function OverviewUsersTable({
                 <tr className="bg-sky-500 text-left text-xs font-semibold text-white">
                   <th className="px-4 py-3 font-semibold">Tracked User Id</th>
                   <th className="px-4 py-3 font-semibold">Email</th>
+                  <th className="px-4 py-3 font-semibold">Region</th>
                   <th className="px-4 py-3 font-semibold text-right">
                     Total Clicks
                   </th>
@@ -586,6 +587,9 @@ function OverviewUsersTable({
                       ) : (
                         <span className="text-gray-300">—</span>
                       )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <RegionCell user={u} />
                     </td>
                     <td className="px-4 py-3 text-right text-gray-700 tabular-nums">
                       {u.total_clicks > 0 ? u.total_clicks : "—"}
