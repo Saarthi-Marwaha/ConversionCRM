@@ -55,3 +55,18 @@ export function isWithinSendWindow(
   const hour = localHourFor(country, now);
   return hour >= WINDOW_START && hour < WINDOW_END;
 }
+
+/**
+ * Would the main daily "window" run (fired at `windowRunHourUTC` UTC) actually
+ * reach this country — i.e. is it inside its 10:00–12:59 local window at that
+ * UTC hour? On a once-a-day cron only a few UTC offsets line up; the rest are
+ * served by a flat fallback run instead.
+ */
+export function isCoveredByWindowRun(
+  country: string | null | undefined,
+  windowRunHourUTC = 10
+): boolean {
+  const at = new Date();
+  at.setUTCHours(windowRunHourUTC, 0, 0, 0);
+  return isWithinSendWindow(country, at);
+}

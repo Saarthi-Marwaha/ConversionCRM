@@ -12,6 +12,10 @@
       "schedule": "0 10 * * *"
     },
     {
+      "path": "/api/cron/emails?mode=fallback",
+      "schedule": "30 8 * * *"
+    },
+    {
       "path": "/api/cron/summary",
       "schedule": "0 8 * * *"
     }

@@ -10,7 +10,16 @@ import {
   wasEmailSentRecently,
   countEmailsSentToUser,
 } from "@/lib/emails/send";
-import { isWithinSendWindow } from "@/lib/emails/local-time";
+import { isWithinSendWindow, isCoveredByWindowRun } from "@/lib/emails/local-time";
+
+/**
+ * "window"   — the daily 10:00 UTC run: send only to users inside their
+ *              10:00–12:59 local window (a few UTC offsets line up).
+ * "fallback" — the daily 08:30 UTC run: send to everyone the window run can't
+ *              reach (US, India, Asia-Pacific, the Middle East, …), at a flat
+ *              08:30 UTC, so no region is ever skipped.
+ */
+export type EmailRunMode = "window" | "fallback";
 import { matchesAhaUrl, normalizeAhaPath } from "@/lib/scoring";
 import { WelcomeEmail } from "@/emails/templates/Welcome";
 import { FeatureNudgeEmail } from "@/emails/templates/FeatureNudge";
@@ -278,7 +287,8 @@ export function shouldRunEmailBatch(
 
 async function processWorkspaceEmails(
   ws: WorkspaceRow,
-  result: RunAutomatedEmailsResult
+  result: RunAutomatedEmailsResult,
+  mode: EmailRunMode = "window"
 ): Promise<void> {
   // The 8 behaviour-triggered lifecycle emails run on EVERY plan, including
   // Free — the monthly quota in sendEmail() is what bounds volume per tier.
@@ -346,12 +356,17 @@ async function processWorkspaceEmails(
     const plan = planStageEmail(user, ws);
     if (!plan) continue;
 
-    // Respect the recipient's morning: everything except the welcome email
-    // waits for ~11 am in the user's captured country (newest event wins).
+    // Region-aware timing (welcome is exempt — it fires instantly on signup).
+    //  • window run   → only users in their ~11 am local window.
+    //  • fallback run → only users the window run can't reach (sent flat at
+    //    the fallback hour, 08:30 UTC), so no timezone is ever skipped.
     if (plan.trigger !== "welcome") {
-      const country =
-        userEvents.find((e) => e.country)?.country ?? null;
-      if (!isWithinSendWindow(country)) continue;
+      const country = userEvents.find((e) => e.country)?.country ?? null;
+      if (mode === "fallback") {
+        if (isCoveredByWindowRun(country)) continue;
+      } else if (!isWithinSendWindow(country)) {
+        continue;
+      }
     }
 
     // ── Persistent follow-up cadence + guardrails ──────────────────────
@@ -451,7 +466,9 @@ export async function runAutomatedEmailsForWorkspace(
   return result;
 }
 
-export async function runAutomatedEmails(): Promise<RunAutomatedEmailsResult> {
+export async function runAutomatedEmails(
+  mode: EmailRunMode = "window"
+): Promise<RunAutomatedEmailsResult> {
   const supabase = createSupabaseAdminClient();
   const result: RunAutomatedEmailsResult = { sent: 0, errors: [] };
 
@@ -469,7 +486,7 @@ export async function runAutomatedEmails(): Promise<RunAutomatedEmailsResult> {
   for (const ws of (workspaces ?? []) as WorkspaceRow[]) {
     if (!ws.reply_to_email?.trim()) continue;
     try {
-      await processWorkspaceEmails(ws, result);
+      await processWorkspaceEmails(ws, result, mode);
     } catch (err) {
       result.errors.push(`workspace:${ws.id} – ${String(err)}`);
     }
