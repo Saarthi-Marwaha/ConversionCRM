@@ -10,7 +10,7 @@ interface Props {
 
 export function CheckInEmail({
   userName,
-  appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.conversioncrm.io",
+  appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.conversioncrm.co",
   productName,
 }: Props) {
   return (

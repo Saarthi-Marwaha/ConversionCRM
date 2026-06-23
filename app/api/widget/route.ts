@@ -3,7 +3,7 @@
  *
  * Returns a self-contained vanilla-JS tracking snippet with the api_key baked in.
  * The customer embeds:
- *   <script src="https://app.conversioncrm.io/widget.js?api_key=ccrm_xxx"></script>
+ *   <script src="https://www.conversioncrm.co/widget.js?api_key=ccrm_xxx"></script>
  */
 import { NextRequest, NextResponse } from "next/server";
 

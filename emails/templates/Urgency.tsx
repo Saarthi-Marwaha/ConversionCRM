@@ -14,7 +14,7 @@ export function UrgencyEmail({
   productName,
 }: Props) {
   const appUrl =
-    process.env.NEXT_PUBLIC_APP_URL ?? "https://app.conversioncrm.io";
+    process.env.NEXT_PUBLIC_APP_URL ?? "https://www.conversioncrm.co";
   const ctaUrl = pricingUrl ?? `${appUrl}/pricing`;
 
   return (

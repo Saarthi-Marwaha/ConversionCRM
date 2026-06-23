@@ -14,7 +14,7 @@ export function UpgradeOfferEmail({
   userName,
   score,
   checkoutUrl,
-  appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.conversioncrm.io",
+  appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.conversioncrm.co",
   productName,
 }: UpgradeOfferEmailProps) {
   const ctaUrl = checkoutUrl ?? `${appUrl}/pricing`;

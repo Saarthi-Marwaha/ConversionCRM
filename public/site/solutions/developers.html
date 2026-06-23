@@ -5,11 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Automated User Onboarding for Developers — ConversionCRM</title>
 <meta name="description" content="Automated user onboarding for developers: one script tag, an events API, engagement scoring, and lifecycle emails that convert signups to paid — without building a pipeline, scoring model, or email infra.">
-<link rel="canonical" href="https://conversioncrm.co/solutions/developers">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://www.conversioncrm.co/solutions/developers">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Automated User Onboarding for Developers — ConversionCRM">
 <meta property="og:description" content="Automated user onboarding for developers: one script tag, an events API, engagement scoring, and lifecycle emails that convert signups to paid — without building a pipeline, scoring model, or email infra.">
-<meta property="og:url" content="https://conversioncrm.co/solutions/developers">
+<meta property="og:url" content="https://www.conversioncrm.co/solutions/developers">
 <meta property="og:site_name" content="ConversionCRM">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Automated User Onboarding for Developers — ConversionCRM">
@@ -20,8 +21,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/site.css">
 
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://conversioncrm.co/"},{"@type":"ListItem","position":2,"name":"Solutions","item":"https://conversioncrm.co/solutions/"},{"@type":"ListItem","position":3,"name":"Developers"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.conversioncrm.co/"},{"@type":"ListItem","position":2,"name":"Solutions","item":"https://www.conversioncrm.co/solutions/"},{"@type":"ListItem","position":3,"name":"Developers"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How does the widget handle SPAs?","acceptedAnswer":{"@type":"Answer","text":"Route changes in single-page apps are tracked as page views automatically — history API navigation included — along with time on page per route and click tracking. You don't need router middleware or manual page() calls."}},{"@type":"Question","name":"What are the event API limits and validation rules?","acceptedAnswer":{"@type":"Answer","text":"Ingestion is keyed by api_key with roughly 240 events/min per key, a 32 KB body cap (8 KB for properties), email format validation, and a timestamp sanity window. In production, unknown API keys get a 401 — events can't be written to arbitrary workspaces."}},{"@type":"Question","name":"Can I send events server-side instead of from the browser?","acceptedAnswer":{"@type":"Answer","text":"The primary path is the widget plus client calls, which covers page/click/time signals you can't get server-side. For conversion-critical events (payment_success, usage_limit_hit) fire them wherever they're authoritative — they're just events with your user_id; the scoring engine doesn't care where they originated."}},{"@type":"Question","name":"What email infrastructure does it use — and can I bring mine?","acceptedAnswer":{"@type":"Answer","text":"Default is platform infrastructure (Resend) sending from a platform address with your sender name and your reply-to. Or configure SMTP — Gmail, Outlook, SES, anything — and sends go through your server with your From address. All sends are logged with provider and error metadata for debugging."}},{"@type":"Question","name":"Build vs buy honestly — when should we build?","acceptedAnswer":{"@type":"Answer","text":"Build if events legally can't leave your infrastructure, or your scoring needs domain logic no general model fits. Otherwise the in-house version is 4–8 engineering weeks to reach parity (pipeline, scoring, stages, templates, deliverability, dashboard) plus permanent maintenance — for a system that isn't your product. We wrote up the comparison on the build-vs-buy section of the compare page."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"ConversionCRM","applicationCategory":"BusinessApplication","operatingSystem":"Web","url":"https://www.conversioncrm.co/solutions/developers","description":"Free trial conversion software for SaaS: 6-layer engagement scoring, automatic lifecycle stages, and 8 behavior-triggered emails that turn sign-ups into paid users.","offers":{"@type":"AggregateOffer","priceCurrency":"USD","lowPrice":"0","highPrice":"699","offerCount":"5"}}</script>
 </head>
 <body>
 <nav id="nav">
@@ -87,6 +89,14 @@
   </div>
   <div class="container"><div class="tldr rise d4"><b>TL;DR — the short answer</b><p>ConversionCRM gives developers app activation software as an API surface: a widget that auto-tracks pages/clicks/time (SPA-aware), identify() and track() calls, a hardened ingestion endpoint, nightly scoring + staging crons, and 8 lifecycle emails via Resend or your own SMTP. Integration is genuinely ~3 minutes.</p></div></div>
 </header>
+<section class="answer-block" style="padding:28px 0 0">
+  <div class="container">
+    <div style="border:1px solid #e3e9f0;border-radius:14px;padding:20px 22px;background:#f7fafd">
+      <p style="margin:0 0 6px;font-weight:700;color:var(--blue-deep,#0b3a5e)">Q: What is ConversionCRM?</p>
+      <p style="margin:0;line-height:1.6"><b>A:</b> ConversionCRM is free-trial conversion software for SaaS. You add one script tag, and it tracks each user's behavior, scores their engagement 0–100 across six layers, assigns a lifecycle stage, and automatically sends behavior-triggered emails that move free users to paid — installed in about three minutes, free during beta.</p>
+    </div>
+  </div>
+</section>
 <section style="padding-top:72px">
   <div class="container">
     <div class="sec-head reveal"><span class="kicker">The build trap</span><h2>The “simple” in-house version</h2>

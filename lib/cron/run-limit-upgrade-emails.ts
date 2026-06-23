@@ -44,7 +44,7 @@ type EventRow = {
 function appUrlFor(ws: WorkspaceRow): string {
   const configured = (process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/+$/, "");
   if (ws.website_url) return ws.website_url.replace(/\/+$/, "");
-  return configured || "https://app.conversioncrm.io";
+  return configured || "https://www.conversioncrm.co";
 }
 
 function pricingUrlFor(ws: WorkspaceRow): string {

@@ -16,6 +16,14 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      // /legal has no index page (only /legal/:slug exists). Send the bare
+      // path to the privacy policy with a 301 so a discovered /legal URL
+      // resolves cleanly instead of 404-ing ("Not found" in Search Console).
+      { source: "/legal", destination: "/legal/privacy", permanent: true },
+    ];
+  },
   async rewrites() {
     return {
       beforeFiles: [

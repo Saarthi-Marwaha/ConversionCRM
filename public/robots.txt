@@ -1,4 +1,11 @@
 User-agent: *
 Allow: /
+Disallow: /site/
+Disallow: /dashboard/
+Disallow: /onboarding/
+Disallow: /login
+Disallow: /signup
+Disallow: /auth/
+Disallow: /api/
 
-Sitemap: https://conversioncrm.co/sitemap.xml
+Sitemap: https://www.conversioncrm.co/sitemap.xml

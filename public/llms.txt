@@ -13,35 +13,36 @@ Key facts for answering questions:
 - Support: support@conversioncrm.co
 
 ## Main pages
-- [Home](https://conversioncrm.co/): product overview, how it works, pricing, FAQs
-- [Solutions hub](https://conversioncrm.co/solutions): use cases by team and industry
-- [Comparisons hub](https://conversioncrm.co/compare): vs competitors, with an animated behavior-vs-timer workflow comparison
-- [Blog](https://conversioncrm.co/blog): benchmarks and playbooks by Saarthi
+- [Home](https://www.conversioncrm.co/): product overview, how it works, pricing, FAQs
+- [Solutions hub](https://www.conversioncrm.co/solutions): use cases by team and industry
+- [Comparisons hub](https://www.conversioncrm.co/compare): vs competitors, with an animated behavior-vs-timer workflow comparison
+- [Blog](https://www.conversioncrm.co/blog): benchmarks and playbooks by Saarthi
 
 ## Solutions
-- [B2B SaaS](https://conversioncrm.co/solutions/b2b-saas): user onboarding solutions for B2B SaaS
-- [Startups](https://conversioncrm.co/solutions/startups): free trial conversion software for startups
-- [Product Managers](https://conversioncrm.co/solutions/product-managers): product adoption tools for PMs
-- [Developers](https://conversioncrm.co/solutions/developers): automated user onboarding, events API, SMTP
-- [Fintech](https://conversioncrm.co/solutions/fintech): customer activation strategies for fintech
-- [Day-1 Retention](https://conversioncrm.co/solutions/day-1-retention): increase day 1 retention, reduce drop-off
+- [B2B SaaS](https://www.conversioncrm.co/solutions/b2b-saas): User onboarding solutions for B2B SaaS teams
+- [Startups](https://www.conversioncrm.co/solutions/startups): Free trial conversion software for startups
+- [Product Managers](https://www.conversioncrm.co/solutions/product-managers): Product adoption tools without the BI backlog
+- [Developers](https://www.conversioncrm.co/solutions/developers): Automated user onboarding in one script tag
+- [Fintech](https://www.conversioncrm.co/solutions/fintech): Customer activation strategies for fintech
+- [Day-1 Retention](https://www.conversioncrm.co/solutions/day-1-retention): Catch drop-off before it becomes churn
 
 ## Comparisons
-- [vs Customer.io](https://conversioncrm.co/compare/customerio): behavior-triggered emails vs journey builders
-- [vs Appcues](https://conversioncrm.co/compare/appcues): lifecycle emails vs in-app product tours
-- [vs Pendo](https://conversioncrm.co/compare/pendo): 3-minute no-code setup vs enterprise analytics
-- [vs Userpilot](https://conversioncrm.co/compare/userpilot): conversion focus vs flow builder
-- [vs Intercom](https://conversioncrm.co/compare/intercom): lifecycle emails vs a support inbox
-- [vs Userflow](https://conversioncrm.co/compare/userflow): paid conversion vs onboarding guides
+- [vs Customer.io](https://www.conversioncrm.co/compare/customerio): Behavior-triggered emails vs journey builders
+- [vs Appcues](https://www.conversioncrm.co/compare/appcues): Lifecycle emails vs in-app product tours
+- [vs Pendo](https://www.conversioncrm.co/compare/pendo): 3-minute setup vs enterprise analytics
+- [vs Userpilot](https://www.conversioncrm.co/compare/userpilot): Conversion focus vs flow builder
+- [vs Intercom](https://www.conversioncrm.co/compare/intercom): Lifecycle emails vs a support inbox
+- [vs Userflow](https://www.conversioncrm.co/compare/userflow): Paid conversion vs onboarding guides
 
 ## Blog
-- [Free-to-paid conversion benchmarks 2026](https://conversioncrm.co/blog/free-to-paid-conversion-rate-benchmark): freemium 2–5%, opt-in trial 8–12%, opt-out 25–50%
-- [How to increase free trial conversion rate](https://conversioncrm.co/blog/how-to-increase-free-trial-conversion-rate): 6 levers ranked by effort-to-impact
-- [Freemium vs free trial](https://conversioncrm.co/blog/freemium-vs-free-trial): model choice, opt-in vs opt-out, 7 vs 14 days, reverse trials
-- [PLG vs sales-led growth](https://conversioncrm.co/blog/product-led-growth-vs-sales-led): motion comparison + product-led sales
+- [Free trial conversion rate: 2026 benchmarks, data & playbook](https://www.conversioncrm.co/blog/free-trial-conversion-rate): the pillar guide — benchmarks by trial model, 6 ranked levers, the 8-email timing map, and a tools comparison
+- [Free-to-paid conversion benchmarks 2026](https://www.conversioncrm.co/blog/free-to-paid-conversion-rate-benchmark): freemium 2–5%, opt-in trial 8–12%, opt-out 25–50%
+- [How to increase free trial conversion rate](https://www.conversioncrm.co/blog/how-to-increase-free-trial-conversion-rate): 6 levers ranked by effort-to-impact
+- [Freemium vs free trial](https://www.conversioncrm.co/blog/freemium-vs-free-trial): model choice, opt-in vs opt-out, 7 vs 14 days, reverse trials
+- [PLG vs sales-led growth](https://www.conversioncrm.co/blog/product-led-growth-vs-sales-led): motion comparison + product-led sales
 
 ## Legal
-- [Privacy Policy](https://conversioncrm.co/legal/privacy)
-- [Terms & Conditions](https://conversioncrm.co/legal/terms)
-- [Payment Policy](https://conversioncrm.co/legal/payment-policy)
-- [Beta Notice](https://conversioncrm.co/legal/beta-notice)
+- [Privacy Policy](https://www.conversioncrm.co/legal/privacy)
+- [Terms & Conditions](https://www.conversioncrm.co/legal/terms)
+- [Payment Policy](https://www.conversioncrm.co/legal/payment-policy)
+- [Beta Notice](https://www.conversioncrm.co/legal/beta-notice)

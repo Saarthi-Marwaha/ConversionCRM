@@ -8,6 +8,17 @@ export const metadata = {
   title: "Pricing — ConversionCRM",
   description:
     "Simple, volume-based pricing for turning sign-ups into paid users. Start free, upgrade when it works.",
+  alternates: {
+    canonical: "https://www.conversioncrm.co/pricing",
+  },
+  openGraph: {
+    title: "Pricing — ConversionCRM",
+    description:
+      "Simple, volume-based pricing for turning sign-ups into paid users. Start free, upgrade when it works.",
+    url: "https://www.conversioncrm.co/pricing",
+    siteName: "ConversionCRM",
+    type: "website",
+  },
 };
 
 export const dynamic = "force-dynamic";
@@ -37,6 +48,37 @@ const FAQS: { q: string; a: string }[] = [
   },
 ];
 
+// Server-rendered structured data (this is an async server component, so the
+// JSON-LD ships in the initial HTML — no client render needed for Googlebot).
+const PRICING_JSONLD = [
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "ConversionCRM",
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    url: "https://www.conversioncrm.co/pricing",
+    description:
+      "Free trial conversion software for SaaS: 6-layer engagement scoring, automatic lifecycle stages, and 8 behavior-triggered emails that turn sign-ups into paid users.",
+    offers: {
+      "@type": "AggregateOffer",
+      priceCurrency: "USD",
+      lowPrice: "0",
+      highPrice: "699",
+      offerCount: "5",
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQS.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  },
+];
+
 export default async function PricingPage() {
   const supabase = await createSupabaseServerClient();
   const {
@@ -63,6 +105,13 @@ export default async function PricingPage() {
 
   return (
     <div className="min-h-screen bg-[#f4f8fc] text-gray-900">
+      {PRICING_JSONLD.map((schema, i) => (
+        <script
+          key={i}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+      ))}
       {/* ── Header ── */}
       <header className="bg-white shadow-soft">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
