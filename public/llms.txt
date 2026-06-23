@@ -45,6 +45,11 @@ Key facts for answering questions:
 - [Resource library](https://www.conversioncrm.co/resources): free guides, research, checklists, and templates for converting SaaS free trials to paid
 - [Guide: how to define your activation moment](https://www.conversioncrm.co/resources/guides/how-to-define-your-activation-moment): find the one action that predicts retention, with examples by product category
 - [Guide: behavior triggered email setup](https://www.conversioncrm.co/resources/guides/behavior-triggered-email-setup-guide): the event to trigger mapping for the eight lifecycle emails
+- [Whitepaper: the trial conversion operating system](https://www.conversioncrm.co/resources/whitepapers/the-trial-conversion-operating-system): the full PLG framework, funnel, six levers, scoring, and implementation
+- [Checklist: 30 point trial conversion checklist](https://www.conversioncrm.co/resources/checklists/trial-conversion-launch-checklist): activation, onboarding emails, intent triggers, win back
+- [Checklist: SaaS onboarding email checklist](https://www.conversioncrm.co/resources/checklists/saas-onboarding-email-checklist): the eight lifecycle emails, their triggers, and jobs
+- [Template: 8 lifecycle email templates](https://www.conversioncrm.co/resources/templates/lifecycle-email-templates): copy ready subject lines and bodies for all eight emails
+- [Template: activation tracking plan](https://www.conversioncrm.co/resources/templates/activation-tracking-plan): map your activation event, six scoring inputs, and email triggers
 - [Trial to paid teardowns](https://www.conversioncrm.co/resources/case-studies): how Notion, Calendly, and Slack approach activation, from public info, plus the early case study program
 - [Write for ConversionCRM](https://www.conversioncrm.co/contribute): guest post topics, byline policy, and how to pitch
 
