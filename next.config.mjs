@@ -41,6 +41,12 @@ const nextConfig = {
         { source: "/solutions", destination: "/site/solutions/list.html" },
         { source: "/solutions/:slug", destination: "/site/solutions/:slug.html" },
         { source: "/legal/:slug", destination: "/site/legal/:slug.html" },
+
+        // ── Resources section ──
+        { source: "/resources", destination: "/site/resources/list.html" },
+        { source: "/resources/case-studies", destination: "/site/resources/case-studies/list.html" },
+        { source: "/resources/:type/:slug", destination: "/site/resources/:type/:slug.html" },
+        { source: "/contribute", destination: "/site/contribute.html" },
       ],
     };
   },

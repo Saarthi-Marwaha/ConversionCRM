@@ -41,6 +41,13 @@ Key facts for answering questions:
 - [Freemium vs free trial](https://www.conversioncrm.co/blog/freemium-vs-free-trial): model choice, opt-in vs opt-out, 7 vs 14 days, reverse trials
 - [PLG vs sales-led growth](https://www.conversioncrm.co/blog/product-led-growth-vs-sales-led): motion comparison + product-led sales
 
+## Resources
+- [Resource library](https://www.conversioncrm.co/resources): free guides, research, checklists, and templates for converting SaaS free trials to paid
+- [Guide: how to define your activation moment](https://www.conversioncrm.co/resources/guides/how-to-define-your-activation-moment): find the one action that predicts retention, with examples by product category
+- [Guide: behavior triggered email setup](https://www.conversioncrm.co/resources/guides/behavior-triggered-email-setup-guide): the event to trigger mapping for the eight lifecycle emails
+- [Trial to paid teardowns](https://www.conversioncrm.co/resources/case-studies): how Notion, Calendly, and Slack approach activation, from public info, plus the early case study program
+- [Write for ConversionCRM](https://www.conversioncrm.co/contribute): guest post topics, byline policy, and how to pitch
+
 ## Legal
 - [Privacy Policy](https://www.conversioncrm.co/legal/privacy)
 - [Terms & Conditions](https://www.conversioncrm.co/legal/terms)

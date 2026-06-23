@@ -3,25 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Payment Policy | ConversionCRM</title>
-<meta name="description" content="ConversionCRM payment policy: free beta, founder pricing, future billing through Lemon Squeezy, refunds, and cancellation.">
-<link rel="canonical" href="https://www.conversioncrm.co/legal/payment-policy">
+<title>Behavior Triggered Email Setup Guide for SaaS Trials | ConversionCRM</title>
+<meta name="description" content="A practical guide to mapping product events to email triggers, so your lifecycle emails fire on real intent instead of a fixed calendar. Includes the event to trigger mapping.">
+<link rel="canonical" href="https://www.conversioncrm.co/resources/guides/behavior-triggered-email-setup-guide">
 <meta name="robots" content="index, follow, max-image-preview:large">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Payment Policy | ConversionCRM">
-<meta property="og:description" content="ConversionCRM payment policy: free beta, founder pricing, future billing through Lemon Squeezy, refunds, and cancellation.">
-<meta property="og:url" content="https://www.conversioncrm.co/legal/payment-policy">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Behavior Triggered Email Setup Guide for SaaS Trials | ConversionCRM">
+<meta property="og:description" content="A practical guide to mapping product events to email triggers, so your lifecycle emails fire on real intent instead of a fixed calendar. Includes the event to trigger mapping.">
+<meta property="og:url" content="https://www.conversioncrm.co/resources/guides/behavior-triggered-email-setup-guide">
 <meta property="og:site_name" content="ConversionCRM">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Payment Policy | ConversionCRM">
-<meta name="twitter:description" content="ConversionCRM payment policy: free beta, founder pricing, future billing through Lemon Squeezy, refunds, and cancellation.">
+<meta name="twitter:title" content="Behavior Triggered Email Setup Guide for SaaS Trials | ConversionCRM">
+<meta name="twitter:description" content="A practical guide to mapping product events to email triggers, so your lifecycle emails fire on real intent instead of a fixed calendar. Includes the event to trigger mapping.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='12' cy='16' r='9' fill='%230B0D12'/%3E%3Ccircle cx='21' cy='16' r='9' fill='%230B0D12' fill-opacity='.85'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/site.css">
 
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.conversioncrm.co/"},{"@type":"ListItem","position":2,"name":"Legal"},{"@type":"ListItem","position":3,"name":"Payment Policy"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.conversioncrm.co/"},{"@type":"ListItem","position":2,"name":"Resources","item":"https://www.conversioncrm.co/resources"},{"@type":"ListItem","position":3,"name":"Guides"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is a behavior triggered email?","acceptedAnswer":{"@type":"Answer","text":"It is an email that fires when a user takes or skips a specific action, like visiting pricing or going quiet for five days, rather than on a fixed day of the trial. Because it arrives at peak intent, it converts far better than a timer based drip."}},{"@type":"Question","name":"Which events should trigger which emails?","acceptedAnswer":{"@type":"Answer","text":"Signup triggers welcome. A missing key feature triggers a feature nudge. A pricing visit triggers an upgrade or urgency email. Five days of silence triggers a win back. The full mapping is in this guide, and ConversionCRM ships all eight prewired."}}]}</script>
 </head>
 <body>
 <nav id="nav">
@@ -86,32 +87,102 @@
     </div>
   </div>
 </nav>
+<header class="page-hero">
+  <div class="container">
+    <div class="crumbs"><a href="/">Home</a><span>/</span><a href="/resources">Resources</a><span>/</span>Guides</div>
+    <span class="kicker">Guide</span>
+    <h1 class="rise d1">Behavior triggered email <span class="hl">setup guide</span></h1>
+    <p class="hero-sub rise d2">Map the events that matter to the emails that convert, so every message lands when a user is actually ready for it.</p>
+    <div class="hero-cta rise d3">
+      <a class="btn btn-blue" href="/signup">Try Beta</a>
+      <a class="btn btn-gray" href="/#how">See how it works</a>
+    </div>
+  </div>
+  
+</header>
+<section style="padding-top:8px"><div class="container" style="max-width:760px">
+<div class="tldr" style="margin:6px 0 26px"><b>What is a behavior triggered email?</b><p>A behavior triggered email fires when a user takes or skips a specific in product action, like visiting the pricing page or going quiet for five days, instead of on a fixed calendar day. Arriving at the moment of intent is what makes it convert several times better than a timer based drip.</p></div>
 
-<div class="legal-wrap">
-  <div class="crumbs" style="margin-bottom:28px"><a href="/">Home</a><span>/</span>Legal<span>/</span>Payment Policy</div>
-  <h1>Payment Policy</h1>
-  <p class="legal-date">Last updated: June 12, 2026</p>
-  <h2>1. Current pricing: free beta</h2>
-<p>ConversionCRM is <strong>free during beta</strong>. No credit card is required to sign up, and nothing in the current product can charge you. All features — tracking, scoring, stages, all 8 automated emails, the composer, SMTP delivery, and the live dashboard — are included.</p>
+<article class="article prose">
+<p>Timer based email treats every user the same. It sends day 1, day 3, day 7 regardless of what the person did, which means the most engaged users get nagged and the ready to buy users get a pricing nudge two days too late. Behavior triggered email flips that. Each message waits for a signal, then fires when the signal appears. This guide shows the mapping and where the work actually lives.</p>
 
-<h2>2. Founder pricing commitment</h2>
-<p>Workspaces created during beta keep a <strong>locked-in founder discount</strong> when paid plans launch. We will announce plans by email before any billing begins; you will always opt in explicitly — no silent conversion from free to paid.</p>
+<div class="takeaways"><b>Key takeaways</b><ul>
+<li>Track a small set of events: identify, key feature used, pricing visit, and activity.</li>
+<li>Map each lifecycle email to a trigger condition, not a day number.</li>
+<li>Add guardrails so no user gets more than one message per batch and paying users get none.</li>
+</ul></div>
 
-<h2>3. Future billing</h2>
-<p>When paid plans launch, payments will be processed by <strong>Lemon Squeezy</strong> (our merchant of record), which handles cards, invoices, and applicable taxes (VAT/GST). We store subscription state, never card numbers. Plans are expected to bill monthly or annually, cancellable any time from the workspace.</p>
+<h2>The three signals you actually need</h2>
+<p>You do not need to instrument everything. You need identity, the activation event, and intent. Identity ties anonymous activity to a real email. The activation event tells you whether the user reached value. Intent signals, mostly pricing visits and usage limits, tell you when to ask for the upgrade. With those three, you can drive the whole lifecycle.</p>
 
-<h2>4. Refunds</h2>
-<p>Once paid plans exist: if something goes wrong — you were charged in error, or the Service materially failed to function during a billing period — email <a href="mailto:support@conversioncrm.co">support@conversioncrm.co</a> within 14 days of the charge and we'll make it right with a refund or credit. Pro-rated refunds for mid-cycle cancellation are not guaranteed but are considered case by case.</p>
+<h2>The event to trigger mapping</h2>
+<p>Here is the mapping ConversionCRM runs out of the box, from welcome to win back.</p>
+<div class="cmp reveal"><table>
+<thead><tr><th>Trigger condition</th><th>Email</th></tr></thead>
+<tbody>
+<tr><td>Signup event</td><td class="col-us" style="color:var(--blue-deep);font-weight:600">Welcome, sent instantly</td></tr>
+<tr><td>Key feature not used in 24h</td><td>Feature nudge</td></tr>
+<tr><td>Active but not converted</td><td>Value demo</td></tr>
+<tr><td>Engagement score drops</td><td>Check in</td></tr>
+<tr><td>Engagement score crosses 70</td><td class="col-us" style="color:var(--blue-deep);font-weight:600">Upgrade offer</td></tr>
+<tr><td>Pricing visit, no conversion</td><td>Urgency</td></tr>
+<tr><td>Five days inactive</td><td>Win back</td></tr>
+<tr><td>Usage limit reached</td><td>Limit upgrade</td></tr>
+</tbody>
+</table></div>
 
-<h2>5. Cancellation</h2>
-<p>Cancel any time; access continues to the end of the paid period. Your data remains exportable/deletable per the <a href="/legal/privacy">Privacy Policy</a> after cancellation.</p>
+<h2>What the tracking looks like</h2>
+<p>In practice this is two calls. You identify a user once you know who they are, and you track the events that matter. Everything else, the scoring and the stage and the send, happens server side.</p>
+<pre style="background:#0b0d12;color:#e9ebef;border-radius:10px;padding:18px;overflow:auto;font-family:var(--font-mono);font-size:13px;line-height:1.6"><code>ccrm.identify(userId, { email: "founder@acme.com" });
+ccrm.track("key_feature_used", { feature: "first_project" });</code></pre>
+<p>Page views, clicks, and time on page are captured by the script automatically, so the only event you usually add by hand is your activation event from the <a href="/resources/guides/how-to-define-your-activation-moment">activation moment guide</a>. From there the eight emails fire on the conditions above.</p>
 
-<h2>6. Questions</h2>
-<p>Anything unclear about current or future pricing: <a href="mailto:support@conversioncrm.co">support@conversioncrm.co</a>. The <a href="/legal/beta-notice">Beta Notice</a> covers what beta status means for reliability and support.</p>
+<h2>The guardrails that keep it from spamming</h2>
+<p>Behavior triggered does not mean high volume. Cap sends at one lifecycle email per user per batch. Put a cooldown on each trigger so the same email cannot repeat too soon. And never email a paying customer an upgrade message. These rules are the difference between a system people trust and one they unsubscribe from. ConversionCRM applies all three automatically, and the wider context is in <a href="/blog/how-to-increase-free-trial-conversion-rate">how to increase free trial conversion rate</a>. When you are ready, <a href="/signup">start free</a> and the mapping above is already wired.</p>
+</article>
+</div></section>
+<section id="faqs" style="padding-top:0">
+  <div class="container">
+    <div class="sec-head center reveal">
+      <span class="kicker">FAQs</span>
+      <h2>Questions, answered</h2>
+    </div>
+    <div class="faq reveal">
+      <div class="faq-item open">
+        <button type="button" aria-expanded="true">What is a behavior triggered email?</button>
+        <div class="faq-body"><div><p>It is an email that fires when a user takes or skips a specific action, like visiting pricing or going quiet for five days, rather than on a fixed day of the trial. Because it arrives at peak intent, it converts far better than a timer based drip.</p></div></div>
+      </div>
+      <div class="faq-item">
+        <button type="button" aria-expanded="false">Which events should trigger which emails?</button>
+        <div class="faq-body"><div><p>Signup triggers welcome. A missing key feature triggers a feature nudge. A pricing visit triggers an upgrade or urgency email. Five days of silence triggers a win back. The full mapping is in this guide, and ConversionCRM ships all eight prewired.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="related" style="padding:72px 0">
+  <div class="container">
+    <div class="sec-head reveal" style="margin-bottom:36px">
+      <span class="kicker">Keep reading</span>
+      <h2 style="font-size:clamp(22px,2.6vw,30px)">Related guides &amp; pages</h2>
+    </div>
+    <div class="rel-grid reveal">
+      <a class="rel-card" href="/resources/guides/how-to-define-your-activation-moment"><b>How to define your activation moment</b><span>Find the one action that predicts retention.</span><em>Read more →</em></a>
+      <a class="rel-card" href="/compare"><b>Compare ConversionCRM</b><span>vs Customer.io, Appcues, Pendo, and more.</span><em>Read more →</em></a>
+      <a class="rel-card" href="/pricing"><b>See pricing</b><span>Free plan with the full tracking API.</span><em>Read more →</em></a>
+    </div>
+  </div>
+</section>
+<div class="final" style="padding-top:72px">
+  <div class="final-card reveal">
+    <h2>Stop losing the users<br>you <span class="hl">already won</span>.</h2>
+    <p>Install in three minutes. Tonight, every user gets a score, a stage, and the right email.</p>
+    <div class="final-cta">
+      <a class="btn btn-blue btn-lg" href="/signup">Try Beta</a>
+      <a class="btn btn-white btn-lg" href="/#how">Get Walkthrough</a>
+    </div>
+    <p class="micro">Free during beta · no credit card · 3-minute install</p>
+  </div>
 </div>
-
-
-
 <footer>
   <div class="foot-grid">
     <div class="foot-brand">
