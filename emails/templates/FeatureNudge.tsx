@@ -1,6 +1,11 @@
-import { Text } from "@react-email/components";
+import { Text, Section } from "@react-email/components";
 import * as React from "react";
-import { EmailShell, emailText } from "./shared";
+import {
+  EmailShell,
+  emailText,
+  BulletItem,
+  Highlight,
+} from "./shared";
 
 interface Props {
   userName: string;
@@ -15,23 +20,63 @@ export function FeatureNudgeEmail({
   appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.conversioncrm.co",
   productName,
 }: Props) {
+  const product = productName ?? "the product";
+
   return (
     <EmailShell
-      preview={`Try ${keyFeatureName} — it's the fastest way to get value`}
-      heading={`Have you tried ${keyFeatureName}?`}
+      preview={`The one thing that makes ${product} click — have you tried it?`}
+      heading={`Most teams find their aha moment here`}
       userName={userName}
-      ctaLabel={`Open ${productName ?? "the app"} →`}
+      ctaLabel={`Try ${keyFeatureName} now →`}
       ctaUrl={appUrl}
       productName={productName}
+      ps={
+        <>
+          Users who use <strong>{keyFeatureName}</strong> in their first week
+          are significantly more likely to still be using {product} 30 days
+          later. It&apos;s the single highest-signal action in the whole
+          onboarding flow — that&apos;s why we&apos;re flagging it.
+        </>
+      }
     >
       <Text style={emailText}>
-        Most people who stick with {productName ?? "the product"} try{" "}
-        <strong>{keyFeatureName}</strong> in their first week. It&apos;s the
-        step that usually clicks everything into place.
+        You&apos;ve been exploring {product} — great. But there&apos;s one step
+        that most teams say &quot;that&apos;s when it clicked&quot; about, and
+        you haven&apos;t hit it yet:{" "}
+        <strong>{keyFeatureName}</strong>.
       </Text>
+
+      <Text style={{ ...emailText, fontWeight: "600", color: "#0b0d12" }}>
+        Here&apos;s why it matters:
+      </Text>
+
+      <Section>
+        <BulletItem>
+          <Highlight>It takes about 2 minutes</Highlight> — no complex setup,
+          no data import required. You can try it right now.
+        </BulletItem>
+        <BulletItem>
+          <Highlight>It makes everything else make sense</Highlight> — teams
+          that skip this step often feel like the product is &quot;kind of
+          useful.&quot; Teams that don&apos;t skip it feel like they can&apos;t
+          go back.
+        </BulletItem>
+        <BulletItem>
+          <Highlight>It&apos;s the step most teams wish they&apos;d done first</Highlight> — not last, after everything else.
+        </BulletItem>
+      </Section>
+
       <Text style={emailText}>
-        You haven&apos;t used it yet — no pressure, but it takes about a minute
-        and makes the rest of the product much easier to understand.
+        Open {product}, navigate to{" "}
+        <strong>{keyFeatureName}</strong>, and spend 2 minutes with it. If
+        something doesn&apos;t make sense or it doesn&apos;t work the way you
+        expected, reply to this email — we&apos;ll walk you through it in
+        minutes.
+      </Text>
+
+      <Text style={emailText}>
+        You don&apos;t need to finish your entire setup before trying this. In
+        fact, <em>starting</em> here is the faster path.
       </Text>
     </EmailShell>
   );

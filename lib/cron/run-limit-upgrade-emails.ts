@@ -158,7 +158,7 @@ export async function runLimitUpgradeEmails(): Promise<RunLimitUpgradeEmailsResu
 
       const ok = await sendEmail({
         to: email,
-        subject: `Your ${limitLabel} on ${productName} has ended`,
+        subject: `You've hit your ${limitLabel} — here's how to keep going`,
         react: React.createElement(LimitUpgradeEmail, {
           userName: displayName,
           limitLabel,

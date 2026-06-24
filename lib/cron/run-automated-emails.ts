@@ -117,7 +117,7 @@ function msAgo(days: number): number {
 function appUrlFor(ws: WorkspaceRow): string {
   const configured = (process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/+$/, "");
   if (ws.website_url) return ws.website_url.replace(/\/+$/, "");
-  return configured || "https://conversioncrm.co";
+  return configured || "https://www.conversioncrm.co";
 }
 
 function pricingUrlFor(ws: WorkspaceRow): string {
@@ -172,7 +172,7 @@ export function planStageEmail(
     case "signup":
       return {
         trigger: "welcome",
-        subject: `Welcome to ${productName}`,
+        subject: `You're in — here's what happens in the next 48 hours`,
         react: React.createElement(WelcomeEmail, {
           userName: displayName,
           appUrl,
@@ -193,7 +193,7 @@ export function planStageEmail(
       if (featureUsedIn5d) return null;
       return {
         trigger: "feature_nudge",
-        subject: `Try ${keyFeature} in ${productName}`,
+        subject: `The one thing that makes ${productName} click — have you tried it?`,
         react: React.createElement(FeatureNudgeEmail, {
           userName: displayName,
           keyFeatureName: keyFeature,
@@ -212,7 +212,7 @@ export function planStageEmail(
       if (pageViews7d < 3) return null;
       return {
         trigger: "value_demo",
-        subject: `You're exploring ${productName} — nice work`,
+        subject: `Here's what ${productName} already knows about your users`,
         react: React.createElement(ValueDemoEmail, {
           userName: displayName,
           appUrl,
@@ -224,7 +224,7 @@ export function planStageEmail(
     case "going_quiet":
       return {
         trigger: "check_in",
-        subject: `Checking in on your ${productName} account`,
+        subject: `Quick question — what got in the way?`,
         react: React.createElement(CheckInEmail, {
           userName: displayName,
           appUrl,
@@ -237,7 +237,7 @@ export function planStageEmail(
       if (visitedPricing) {
         return {
           trigger: "urgency",
-          subject: `Questions about ${productName} pricing?`,
+          subject: `You looked at pricing — let me answer any questions`,
           react: React.createElement(UrgencyEmail, {
             userName: displayName,
             pricingUrl,
@@ -247,7 +247,7 @@ export function planStageEmail(
       }
       return {
         trigger: "upgrade_offer",
-        subject: `You're ready to upgrade ${productName}`,
+        subject: `Your engagement score hit ${user.score}/100 — you're ready to upgrade`,
         react: React.createElement(UpgradeOfferEmail, {
           userName: displayName,
           score: user.score,
@@ -261,7 +261,7 @@ export function planStageEmail(
     case "churned":
       return {
         trigger: "churn_prevention",
-        subject: `We'd love to see you back on ${productName}`,
+        subject: `Before you go — 30 seconds?`,
         react: React.createElement(ChurnPreventionEmail, {
           userName: displayName,
           appUrl,

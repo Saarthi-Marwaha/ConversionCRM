@@ -49,7 +49,7 @@ export async function maybeSendWelcomeOnSignup(
 
   return sendEmail({
     to: trimmed,
-    subject: `Welcome to ${productName}`,
+    subject: `You're in — here's what happens in the next 48 hours`,
     react: React.createElement(WelcomeEmail, {
       userName: displayName,
       appUrl: appUrlFor(ws),
