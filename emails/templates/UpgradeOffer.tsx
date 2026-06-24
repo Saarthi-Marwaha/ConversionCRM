@@ -50,8 +50,8 @@ export function UpgradeOfferEmail({
     >
       {/* Score callout */}
       <Section style={statBox}>
-        <span style={statNumber}>{score}<span style={{ fontSize: "22px" }}>/100</span></span>
-        <Text style={statLabel}>Your engagement score — {tier} of all users</Text>
+        <Text style={{ ...statNumber, margin: "0 0 4px" }}>{score}/100</Text>
+        <Text style={{ ...statLabel, margin: 0 }}>Your engagement score — {tier} of all users</Text>
       </Section>
 
       <Text style={emailText}>

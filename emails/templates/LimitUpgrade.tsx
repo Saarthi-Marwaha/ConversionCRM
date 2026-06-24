@@ -46,8 +46,8 @@ export function LimitUpgradeEmail({
     >
       {/* Limit callout */}
       <Section style={statBox}>
-        <span style={{ ...statNumber, fontSize: "28px" }}>Limit reached</span>
-        <Text style={{ ...statLabel, textTransform: "none", fontSize: "14px", fontWeight: "normal", color: "#374151" }}>
+        <Text style={{ ...statNumber, fontSize: "26px", margin: "0 0 6px" }}>Limit reached</Text>
+        <Text style={{ ...statLabel, textTransform: "none" as const, fontSize: "14px", fontWeight: "normal", color: "#374151", margin: 0 }}>
           Your <strong style={{ color: "#0b0d12" }}>{limitLabel}</strong> on the Free plan has been exhausted
         </Text>
       </Section>

@@ -135,12 +135,12 @@ export const statLabel: React.CSSProperties = {
   margin: 0,
 };
 
-/** Bullet list item */
+/** Bullet list item — inline arrow safe for all email clients incl. Outlook */
 export function BulletItem({ children }: { children: React.ReactNode }) {
   return (
-    <Text style={{ ...emailText, paddingLeft: "0", margin: "0 0 10px", display: "flex" }}>
-      <span style={{ color: BRAND, fontWeight: "700", marginRight: "10px", flexShrink: 0 }}>→</span>
-      <span>{children}</span>
+    <Text style={{ ...emailText, margin: "0 0 12px", paddingLeft: "0" }}>
+      <span style={{ color: BRAND, fontWeight: "700", paddingRight: "8px" }}>{"→"}</span>
+      {children}
     </Text>
   );
 }
