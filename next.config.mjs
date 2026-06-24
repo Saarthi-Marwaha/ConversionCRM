@@ -29,6 +29,14 @@ const nextConfig = {
       { source: "/vs-mailchimp.html", destination: "/compare/mailchimp",permanent: true },
       { source: "/vs-mixpanel.html",  destination: "/compare",          permanent: true },
 
+      // Bare section index pages with a .html suffix (e.g. /compare.html).
+      // These have no :slug, so the per-slug rules below never match them.
+      { source: "/compare.html",   destination: "/compare",   permanent: true },
+      { source: "/solutions.html", destination: "/solutions", permanent: true },
+      { source: "/blog.html",      destination: "/blog",      permanent: true },
+      { source: "/resources.html", destination: "/resources", permanent: true },
+      { source: "/index.html",     destination: "/",          permanent: true },
+
       // .html-suffix variants of clean URLs (GSC "Crawled - not indexed")
       // Any stale link to /compare/customerio.html etc. 301s to the clean URL.
       { source: "/compare/:slug.html",         destination: "/compare/:slug",         permanent: true },

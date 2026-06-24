@@ -14,20 +14,17 @@ import { LimitUpgradeEmail } from "@/emails/templates/LimitUpgrade";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.conversioncrm.co";
 
 function buildDefaultElement(trigger: string, productName: string) {
-  const props = {
-    userName: "{{userName}}",
-    productName,
-    appUrl: APP_URL,
-  };
+  const userName = "{{userName}}";
+  const appUrl = APP_URL;
   switch (trigger) {
-    case "welcome":         return React.createElement(WelcomeEmail, props);
-    case "feature_nudge":   return React.createElement(FeatureNudgeEmail, { ...props, keyFeatureName: "your key feature" });
-    case "value_demo":      return React.createElement(ValueDemoEmail, props);
-    case "check_in":        return React.createElement(CheckInEmail, props);
-    case "upgrade_offer":   return React.createElement(UpgradeOfferEmail, { ...props, score: 78 });
-    case "urgency":         return React.createElement(UrgencyEmail, props);
-    case "churn_prevention":return React.createElement(ChurnPreventionEmail, props);
-    case "limit_upgrade":   return React.createElement(LimitUpgradeEmail, { ...props, limitLabel: "email quota" });
+    case "welcome":          return React.createElement(WelcomeEmail, { userName, productName, appUrl });
+    case "feature_nudge":    return React.createElement(FeatureNudgeEmail, { userName, productName, appUrl, keyFeatureName: "your key feature" });
+    case "value_demo":       return React.createElement(ValueDemoEmail, { userName, productName, appUrl });
+    case "check_in":         return React.createElement(CheckInEmail, { userName, productName, appUrl });
+    case "upgrade_offer":    return React.createElement(UpgradeOfferEmail, { userName, productName, appUrl, score: 78 });
+    case "urgency":          return React.createElement(UrgencyEmail, { userName, productName, pricingUrl: appUrl });
+    case "churn_prevention": return React.createElement(ChurnPreventionEmail, { userName, productName, appUrl });
+    case "limit_upgrade":    return React.createElement(LimitUpgradeEmail, { userName, productName, appUrl, limitLabel: "email quota" });
     default: return null;
   }
 }
