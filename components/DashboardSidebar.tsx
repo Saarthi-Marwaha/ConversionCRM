@@ -45,9 +45,16 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/dashboard/users", label: "Users", icon: Users },
   {
+    href: "/dashboard/emails",
+    label: "Email Templates",
+    icon: Mail,
+    requires: "custom_composer",
+    lockLabel: "Basic",
+  },
+  {
     href: "/dashboard/composer",
     label: "Email Composer",
-    icon: Mail,
+    icon: Send,
     requires: "custom_composer",
     lockLabel: "Basic",
   },

@@ -68,6 +68,8 @@ const nextConfig = {
         { source: "/security", destination: "/site/security.html" },
         { source: "/contact", destination: "/site/contact.html" },
         { source: "/changelog", destination: "/site/changelog.html" },
+        { source: "/about", destination: "/site/about.html" },
+        { source: "/glossary", destination: "/site/glossary.html" },
 
         // ── Free tools ──
         { source: "/tools/sitemap-builder", destination: "/site/tools/sitemap-builder.html" },

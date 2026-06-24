@@ -132,10 +132,42 @@ export async function sendEmail(options: SendEmailOptions): Promise<boolean> {
   }
 
   try {
-    const html = await render(react);
+    // Check for a workspace-level custom email template first
+    let html: string;
+    let finalSubject = subject;
+
+    const { data: customTpl } = await supabase
+      .from("email_templates")
+      .select("subject, html_body")
+      .eq("workspace_id", workspaceId)
+      .eq("trigger", trigger)
+      .maybeSingle();
+
+    if (customTpl) {
+      // Extract template variables from the React element props
+      const props = (react as { props?: Record<string, unknown> }).props ?? {};
+      const vars: Record<string, string> = {
+        userName: String(props.userName ?? "there"),
+        productName: String(
+          props.productName ?? delivery.product_name ?? delivery.name ?? ""
+        ),
+        ctaUrl: String(props.checkoutUrl ?? props.appUrl ?? ""),
+        appUrl: String(props.appUrl ?? ""),
+        score: String(props.score ?? ""),
+        limitLabel: String(props.limitLabel ?? ""),
+        keyFeatureName: String(props.keyFeatureName ?? ""),
+      };
+      const substitute = (s: string) =>
+        s.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k] ?? "");
+      html = substitute(customTpl.html_body);
+      finalSubject = substitute(customTpl.subject);
+    } else {
+      html = await render(react);
+    }
+
     const result = await deliverEmail(delivery, {
       to,
-      subject,
+      subject: finalSubject,
       html,
       replyTo: replyTo ?? delivery.reply_to_email,
     });
@@ -146,7 +178,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<boolean> {
       end_user_id: endUserId ?? null,
       trigger,
       resend_message_id: result.messageId,
-      subject,
+      subject: finalSubject,
       status: result.ok ? "sent" : "failed",
       sent_at: sentAt,
       metadata: {
