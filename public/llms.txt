@@ -58,3 +58,13 @@ Key facts for answering questions:
 - [Terms & Conditions](https://www.conversioncrm.co/legal/terms)
 - [Payment Policy](https://www.conversioncrm.co/legal/payment-policy)
 - [Beta Notice](https://www.conversioncrm.co/legal/beta-notice)
+
+## Product pages
+- [Features](https://www.conversioncrm.co/features): 6-layer scoring, 8 lifecycle emails, real-time dashboard, dual-path email delivery, and zero-config tracking
+- [Integrations](https://www.conversioncrm.co/integrations): works with any web framework (React, Next.js, Vue, SvelteKit) via script tag; REST API for backend events; any SMTP for email delivery
+- [Security](https://www.conversioncrm.co/security): TLS 1.2+, AES-256 at rest, GDPR data processor, no data selling, 90-day raw event retention, deletion on request
+- [Contact](https://www.conversioncrm.co/contact): support@conversioncrm.co, enterprise: ceo.conversioncrm@gmail.com, 24-hour response
+- [Changelog](https://www.conversioncrm.co/changelog): product updates — June 2026 resources section, May 2026 dual-path email, April 2026 scoring and dashboard launch
+
+## Free tools
+- [Free XML Sitemap Builder](https://www.conversioncrm.co/tools/sitemap-builder): paste URLs, generate valid sitemap.xml instantly, copy or download; no AI, no sign-up, runs entirely in the browser

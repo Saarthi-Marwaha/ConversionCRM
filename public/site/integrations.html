@@ -3,26 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Trial Conversion Operating System (Whitepaper) | ConversionCRM</title>
-<meta name="description" content="How product led teams turn free trial signups into revenue without a sales team. The full framework: funnel shape, the six levers, behavior triggered messaging, activation, and engagement scoring.">
-<link rel="canonical" href="https://www.conversioncrm.co/resources/whitepapers/the-trial-conversion-operating-system">
+<title>Integrations — ConversionCRM Works With Your Stack</title>
+<meta name="description" content="ConversionCRM works with any web app via one script tag and a REST API. No native connector needed for React, Next.js, Vue, Stripe, Segment, Zapier, or any other tool.">
+<link rel="canonical" href="https://www.conversioncrm.co/integrations">
 <meta name="robots" content="index, follow, max-image-preview:large">
-<meta property="og:type" content="article">
-<meta property="og:title" content="The Trial Conversion Operating System (Whitepaper) | ConversionCRM">
-<meta property="og:description" content="How product led teams turn free trial signups into revenue without a sales team. The full framework: funnel shape, the six levers, behavior triggered messaging, activation, and engagement scoring.">
-<meta property="og:url" content="https://www.conversioncrm.co/resources/whitepapers/the-trial-conversion-operating-system">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Integrations — ConversionCRM">
+<meta property="og:description" content="Works with any web stack, email provider, and analytics tool. One script tag is all the integration you need.">
+<meta property="og:url" content="https://www.conversioncrm.co/integrations">
 <meta property="og:site_name" content="ConversionCRM">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="The Trial Conversion Operating System (Whitepaper) | ConversionCRM">
-<meta name="twitter:description" content="How product led teams turn free trial signups into revenue without a sales team. The full framework: funnel shape, the six levers, behavior triggered messaging, activation, and engagement scoring.">
+<meta name="twitter:title" content="Integrations — ConversionCRM">
+<meta name="twitter:description" content="Works with any web stack, email provider, and analytics tool. One script tag is all the integration you need.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='12' cy='16' r='9' fill='%230B0D12'/%3E%3Ccircle cx='21' cy='16' r='9' fill='%230B0D12' fill-opacity='.85'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/site.css">
-
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.conversioncrm.co/"},{"@type":"ListItem","position":2,"name":"Resources","item":"https://www.conversioncrm.co/resources"},{"@type":"ListItem","position":3,"name":"Whitepapers"}]}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is a trial conversion operating system?","acceptedAnswer":{"@type":"Answer","text":"It is a repeatable system that moves a signup to paid without manual sales: instrument behavior, score engagement, assign a lifecycle stage, and send the right email at the right moment. It replaces ad hoc nudges with a loop that runs every night on its own."}},{"@type":"Question","name":"Do I need a sales team to run it?","acceptedAnswer":{"@type":"Answer","text":"No. The whole point is that the product and the email engine do the converting. A founder or a small team can run it because the decisions, who is ready and what to send, are made by the scoring and stage logic, not by a human reading dashboards."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.conversioncrm.co/"},{"@type":"ListItem","position":2,"name":"Integrations"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Does ConversionCRM integrate with Stripe?","acceptedAnswer":{"@type":"Answer","text":"Yes — send a server-side event when a payment succeeds and ConversionCRM moves that user to the Paid stage and excludes them from all future lifecycle email. One REST call from your webhook handler."}},{"@type":"Question","name":"Does ConversionCRM work with Next.js or React?","acceptedAnswer":{"@type":"Answer","text":"Yes. The script tag works on any web app including React, Next.js, Vue, and SvelteKit. SPA route changes are tracked automatically."}},{"@type":"Question","name":"Can I send events from my backend?","acceptedAnswer":{"@type":"Answer","text":"Yes. The REST API accepts server-side events using your workspace API key. Any server language works: Node.js, Python, Ruby, Go, or a serverless function."}},{"@type":"Question","name":"Does it work with Segment?","acceptedAnswer":{"@type":"Answer","text":"You can send Segment track() and identify() events to ConversionCRM via the REST API from your Segment function or a webhook destination. There is no native Segment connector yet."}},{"@type":"Question","name":"What email providers does ConversionCRM support?","acceptedAnswer":{"@type":"Answer","text":"By default, ConversionCRM sends through its own Resend-backed infrastructure. You can also provide any SMTP credentials — Gmail, Outlook, Amazon SES, Postmark, SendGrid — and emails will send from your own domain."}}]}</script>
 </head>
 <body>
 <nav id="nav">
@@ -86,115 +85,126 @@
     </div>
   </div>
 </nav>
+
 <header class="page-hero">
   <div class="container">
-    <div class="crumbs"><a href="/">Home</a><span>/</span><a href="/resources">Resources</a><span>/</span>Whitepapers</div>
-    <span class="kicker">Whitepaper</span>
-    <h1 class="rise d1">The trial conversion <span class="hl">operating system</span></h1>
-    <p class="hero-sub rise d2">How product led teams turn signups into revenue without a sales team. The whole framework, end to end.</p>
+    <div class="crumbs"><a href="/">Home</a><span>/</span>Integrations</div>
+    <span class="kicker">Integrations</span>
+    <h1 class="rise d1">Works with <span class="hl">your stack</span> — all of it</h1>
+    <p class="hero-sub rise d2">ConversionCRM is a script tag and a REST API. If your app runs in a browser or has a backend, it integrates in under 10 minutes. No native connector needed.</p>
     <div class="hero-cta rise d3">
       <a class="btn btn-blue" href="/signup">Start free</a>
-      <a class="btn btn-gray" href="/#how">See how it works</a>
+      <a class="btn btn-gray" href="/solutions/developers">Developer docs →</a>
     </div>
   </div>
-  
 </header>
-<section style="padding-top:8px"><div class="container" style="max-width:760px">
-<div class="tldr" style="margin:6px 0 26px"><b>What is a trial conversion operating system?</b><p>It is a repeatable loop that turns free trial signups into paying customers without a sales team. You instrument in product behavior, score engagement, assign each user a lifecycle stage, and fire the right email at the right moment. Instead of ad hoc nudges, the whole motion runs automatically every night.</p></div>
 
-<article class="article prose">
-<p>Most SaaS teams treat trial conversion as a pile of disconnected tactics: a welcome email here, a discount there, a pricing tweak when revenue dips. This whitepaper lays out the alternative, a single operating system where every part feeds the next, so that turning a signup into a paying customer becomes a process you can run rather than a thing you hope for.</p>
+<section style="padding:28px 0 0">
+  <div class="container">
+    <div class="tldr reveal">
+      <b>How integration works</b>
+      <p>ConversionCRM collects data two ways: a client-side script tag that auto-tracks page views, clicks, and time on page; and a REST API that accepts custom events from your backend with your workspace API key. Every user's behavior, scored and staged, regardless of where the event originated.</p>
+    </div>
+  </div>
+</section>
 
-<div class="takeaways"><b>The system in one paragraph</b><ul>
-<li>Instrument the few behaviors that matter with one script tag.</li>
-<li>Score every user 0 to 100 across six layers of engagement.</li>
-<li>Assign a lifecycle stage from that score and the user's actions.</li>
-<li>Fire one behavior triggered email per user per night based on the stage.</li>
-<li>Stop the moment a user converts. Never email a paying customer an upgrade.</li>
-</ul></div>
+<section style="padding-top:72px">
+  <div class="container">
+    <div class="sec-head reveal">
+      <span class="kicker">Frontend</span>
+      <h2>Any web framework</h2>
+      <p class="sec-sub">The script tag works with static HTML, React, Next.js, Vue, SvelteKit, Angular, or anything else that runs in a browser. SPA route changes are auto-detected.</p>
+    </div>
+    <div class="bento">
+      <div class="cell c-3 reveal">
+        <h3>React &amp; Next.js</h3>
+        <p>Add the script tag to your root layout or <code class="code-inline">_document.tsx</code>. Call <code class="code-inline">ccrm.identify()</code> inside a <code class="code-inline">useEffect</code> after auth resolves. Route changes tracked automatically.</p>
+      </div>
+      <div class="cell c-3 reveal" style="transition-delay:.08s">
+        <h3>Vue &amp; Nuxt</h3>
+        <p>Load the widget in your <code class="code-inline">app.vue</code> or a plugin. Call <code class="code-inline">identify()</code> in the <code class="code-inline">onMounted</code> lifecycle hook after session is confirmed.</p>
+      </div>
+      <div class="cell c-3 reveal">
+        <h3>Static HTML &amp; PHP</h3>
+        <p>Paste the script tag before <code class="code-inline">&lt;/body&gt;</code>. Echo the user ID and email from your session into the <code class="code-inline">identify()</code> call. Done.</p>
+      </div>
+      <div class="cell c-3 reveal" style="transition-delay:.08s">
+        <h3>SvelteKit &amp; Astro</h3>
+        <p>Add the snippet to your base layout. Use the <code class="code-inline">page</code> store or route lifecycle to call <code class="code-inline">identify()</code> after session hydrates.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-<h2>Part 1: the real shape of a trial funnel</h2>
-<p>Every free to paid number decomposes into the same three steps. One hundred signups become a smaller group that activates, a smaller group still that shows buying intent, and a final group that pays. The biggest leak is almost always at activation, days before anyone sees a paywall, which is why discounting the price rarely moves the number. Fix the funnel where it actually leaks. For the benchmark math behind each step, see the <a href="/blog/free-to-paid-conversion-rate-benchmark">benchmark guide</a>.</p>
+<section style="padding-top:0">
+  <div class="container">
+    <div class="sec-head reveal">
+      <span class="kicker">Backend events</span>
+      <h2>REST API for server-side events</h2>
+      <p class="sec-sub">Payment processed, export completed, team member invited — these happen on your server. The REST API brings them into the same user timeline as the front-end behavior.</p>
+    </div>
+    <div class="bento">
+      <div class="cell c-3 reveal">
+        <h3>Stripe webhooks</h3>
+        <p>Call <code class="code-inline">POST /api/track</code> from your <code class="code-inline">payment_intent.succeeded</code> handler. ConversionCRM moves that user to Paid and removes them from all future lifecycle email immediately.</p>
+      </div>
+      <div class="cell c-3 reveal" style="transition-delay:.08s">
+        <h3>Node.js / Python / Ruby / Go</h3>
+        <p>The API accepts JSON over HTTPS with your <code class="code-inline">api_key</code> as a bearer token. Works from any server language — no SDK required, though community wrappers exist.</p>
+      </div>
+      <div class="cell c-3 reveal">
+        <h3>Serverless functions</h3>
+        <p>Works from AWS Lambda, Vercel Edge Functions, Cloudflare Workers, or any other serverless runtime — a single fetch call is all you need.</p>
+      </div>
+      <div class="cell c-3 reveal" style="transition-delay:.08s">
+        <h3>Zapier / Make</h3>
+        <p>Use the Webhook action in Zapier or Make to send events from CRMs, form tools, or payment processors into ConversionCRM without writing code.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-<h2>Part 2: the six levers</h2>
-<p>There are six levers that move trial conversion, and they are not equal. Ranked by impact to effort, they are behavior triggered email, engagement scoring, trial length, activation milestones, the pricing page, and win back. The first two carry most of the result. The full ranked breakdown with actions is in <a href="/blog/how-to-increase-free-trial-conversion-rate">how to increase free trial conversion rate</a>.</p>
+<section style="padding-top:0">
+  <div class="container">
+    <div class="sec-head reveal">
+      <span class="kicker">Email delivery</span>
+      <h2>Your email provider or ours</h2>
+      <p class="sec-sub">ConversionCRM ships its own sending infrastructure via Resend. Or bring your own SMTP — switch takes 30 seconds in Settings.</p>
+    </div>
+    <div class="bento">
+      <div class="cell c-3 reveal"><h3>Gmail (G Suite)</h3><p>Paste your app-specific password and sending address. Emails land from your real Gmail address; replies come back to you directly.</p></div>
+      <div class="cell c-3 reveal" style="transition-delay:.08s"><h3>Amazon SES</h3><p>SMTP credentials from your SES verified domain. Full control over sending reputation, bounce handling, and compliance headers.</p></div>
+      <div class="cell c-3 reveal"><h3>Postmark &amp; SendGrid</h3><p>Both support SMTP relay. Use your Postmark stream or SendGrid API key as SMTP credentials and sending is immediate.</p></div>
+      <div class="cell c-3 reveal" style="transition-delay:.08s"><h3>Outlook / Microsoft 365</h3><p>Microsoft 365 SMTP works with OAuth app passwords. Emails come from your company address and live alongside your other Outlook mail.</p></div>
+    </div>
+  </div>
+</section>
 
-<h2>Part 3: behavior triggered beats the timer</h2>
-<p>A timer based sequence sends on a calendar regardless of what the user did. A behavior triggered system waits for a signal, then fires. When someone visits pricing, the upgrade email lands within minutes at peak intent, not in two days when the moment has passed. This single shift is the highest leverage change most teams can make. The mapping of events to emails is in the <a href="/resources/guides/behavior-triggered-email-setup-guide">setup guide</a>.</p>
-
-<h2>Part 4: define the activation moment</h2>
-<p>Activation is the first action that proves the product's promise. Find it by comparing what converters did early that non converters skipped, turn it into one tracked event, then build onboarding to drive every new user there in the first session. The step by step method is in the <a href="/resources/guides/how-to-define-your-activation-moment">activation moment guide</a>.</p>
-
-<h2>Part 5: the scoring approach</h2>
-<p>A single score is what makes the system run on its own. ConversionCRM scores six layers: recency, frequency, depth, key feature usage, time spent, and buying intent. When the score crosses 70 the upgrade offer goes out. When it drops despite an active trial, the win back fires. Without a score you are sending the same message to a power user and someone who has not logged in for a week.</p>
-
-<div class="cmp reveal"><table>
-<thead><tr><th>Layer</th><th>What it measures</th></tr></thead>
-<tbody>
-<tr><td>Recency</td><td>How recently the user was active</td></tr>
-<tr><td>Frequency</td><td>How often they return</td></tr>
-<tr><td>Depth</td><td>How many features they have explored</td></tr>
-<tr><td>Key feature</td><td>Whether they reached the activation moment</td></tr>
-<tr><td>Time spent</td><td>Total real usage</td></tr>
-<tr><td>Buying intent</td><td>Pricing visits, upgrade clicks, limit hits</td></tr>
-</tbody>
-</table></div>
-
-<h2>Part 6: the one page implementation checklist</h2>
-<p>The system is only useful if you ship it. Here is the short version, and the printable long version lives in the <a href="/resources/checklists/trial-conversion-launch-checklist">30 point checklist</a>.</p>
-<ol>
-<li>Install the tracking script and call identify on login.</li>
-<li>Mark your activation event.</li>
-<li>Turn on the eight lifecycle emails.</li>
-<li>Set your sender name and reply to address.</li>
-<li>Watch the live scores for a week, then adjust the activation event if the gap is not sharp.</li>
-</ol>
-
-<p>That is the operating system. Instrument, score, stage, send, stop on convert. When you are ready to run it, <a href="/signup">start free</a> and most of this is wired the moment you install.</p>
-</article>
-</div></section>
 <section id="faqs" style="padding-top:0">
   <div class="container">
-    <div class="sec-head center reveal">
-      <span class="kicker">FAQs</span>
-      <h2>Questions, answered</h2>
-    </div>
+    <div class="sec-head center reveal"><span class="kicker">FAQs</span><h2>Integration questions</h2></div>
     <div class="faq reveal">
-      <div class="faq-item open">
-        <button type="button" aria-expanded="true">What is a trial conversion operating system?</button>
-        <div class="faq-body"><div><p>It is a repeatable system that moves a signup to paid without manual sales: instrument behavior, score engagement, assign a lifecycle stage, and send the right email at the right moment. It replaces ad hoc nudges with a loop that runs every night on its own.</p></div></div>
-      </div>
-      <div class="faq-item">
-        <button type="button" aria-expanded="false">Do I need a sales team to run it?</button>
-        <div class="faq-body"><div><p>No. The whole point is that the product and the email engine do the converting. A founder or a small team can run it because the decisions, who is ready and what to send, are made by the scoring and stage logic, not by a human reading dashboards.</p></div></div>
-      </div>
+      <div class="faq-item open"><button type="button" aria-expanded="true">Does ConversionCRM integrate with Stripe?</button><div class="faq-body"><div><p>Yes — send a server-side event when a payment succeeds and ConversionCRM moves that user to the Paid stage and excludes them from all future lifecycle email. One REST call from your webhook handler is all it takes.</p></div></div></div>
+      <div class="faq-item"><button type="button" aria-expanded="false">Does it work with Next.js or React?</button><div class="faq-body"><div><p>Yes. The script tag works on any web app including React, Next.js, Vue, and SvelteKit. SPA route changes are tracked automatically — no extra code for navigation events.</p></div></div></div>
+      <div class="faq-item"><button type="button" aria-expanded="false">Can I send events from my backend?</button><div class="faq-body"><div><p>Yes. The REST API accepts server-side events using your workspace API key. Any server language works: Node.js, Python, Ruby, Go, or a serverless function.</p></div></div></div>
+      <div class="faq-item"><button type="button" aria-expanded="false">Does it work with Segment?</button><div class="faq-body"><div><p>You can send Segment track() and identify() events to ConversionCRM via the REST API from a Segment function or webhook destination. There is no native Segment connector yet — it is on the roadmap.</p></div></div></div>
+      <div class="faq-item"><button type="button" aria-expanded="false">What email providers are supported?</button><div class="faq-body"><div><p>By default ConversionCRM sends via its own Resend-backed infrastructure. You can also provide any SMTP credentials — Gmail, Outlook, Amazon SES, Postmark, SendGrid — and emails send from your domain.</p></div></div></div>
     </div>
   </div>
 </section>
-<section class="related" style="padding:72px 0">
-  <div class="container">
-    <div class="sec-head reveal" style="margin-bottom:36px">
-      <span class="kicker">Keep reading</span>
-      <h2 style="font-size:clamp(22px,2.6vw,30px)">Related guides &amp; pages</h2>
-    </div>
-    <div class="rel-grid reveal">
-      <a class="rel-card" href="/resources/checklists/trial-conversion-launch-checklist"><b>30 point trial conversion checklist</b><span>Ship the system step by step.</span><em>Read more →</em></a>
-      <a class="rel-card" href="/resources/guides/behavior-triggered-email-setup-guide"><b>Behavior triggered email setup</b><span>The event to trigger mapping.</span><em>Read more →</em></a>
-      <a class="rel-card" href="/pricing"><b>See pricing</b><span>Free plan with the full tracking API.</span><em>Read more →</em></a>
-    </div>
-  </div>
-</section>
+
 <div class="final" style="padding-top:72px">
   <div class="final-card reveal">
-    <h2>Stop losing the users<br>you <span class="hl">already won</span>.</h2>
-    <p>Install in three minutes. Tonight, every user gets a score, a stage, and the right email.</p>
+    <h2>Your stack is <span class="hl">already compatible</span>.</h2>
+    <p>If it runs in a browser or has a backend, it integrates. Install in 3 minutes.</p>
     <div class="final-cta">
       <a class="btn btn-blue btn-lg" href="/signup">Start free</a>
-      <a class="btn btn-white btn-lg" href="/#how">Get Walkthrough</a>
+      <a class="btn btn-white btn-lg" href="/solutions/developers">Developer docs</a>
     </div>
-    <p class="micro">Free plan · no credit card · 3-minute install</p>
+    <p class="micro">Free plan · no card · 3-minute install</p>
   </div>
 </div>
+
 <footer>
   <div class="foot-grid">
     <div class="foot-brand">
@@ -203,10 +213,10 @@
     </div>
     <div class="foot-col">
       <b>Product</b>
-      <a href="/#how">How It Works</a>
+      <a href="/features">Features</a>
+      <a href="/integrations">Integrations</a>
       <a href="/#pricing">Pricing</a>
-      <a href="/#faqs">FAQs</a>
-      <a href="/blog">Blog</a>
+      <a href="/changelog">Changelog</a>
       <a href="/signup">Start free</a>
     </div>
     <div class="foot-col">
@@ -238,10 +248,10 @@
     </div>
     <div class="foot-col">
       <b>Company</b>
+      <a href="/security">Security</a>
+      <a href="/contact">Contact</a>
       <a href="/legal/privacy">Privacy Policy</a>
       <a href="/legal/terms">Terms &amp; Conditions</a>
-      <a href="/legal/payment-policy">Payment Policy</a>
-      <a href="/legal/beta-notice">Beta Notice</a>
       <a href="mailto:support@conversioncrm.co">Support</a>
     </div>
   </div>

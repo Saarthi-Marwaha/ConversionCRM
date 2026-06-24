@@ -47,6 +47,16 @@ const nextConfig = {
         { source: "/resources/case-studies", destination: "/site/resources/case-studies/list.html" },
         { source: "/resources/:type/:slug", destination: "/site/resources/:type/:slug.html" },
         { source: "/contribute", destination: "/site/contribute.html" },
+
+        // ── Product / company pages ──
+        { source: "/features", destination: "/site/features.html" },
+        { source: "/integrations", destination: "/site/integrations.html" },
+        { source: "/security", destination: "/site/security.html" },
+        { source: "/contact", destination: "/site/contact.html" },
+        { source: "/changelog", destination: "/site/changelog.html" },
+
+        // ── Free tools ──
+        { source: "/tools/sitemap-builder", destination: "/site/tools/sitemap-builder.html" },
       ],
     };
   },
