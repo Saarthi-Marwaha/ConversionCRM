@@ -22,6 +22,20 @@ const nextConfig = {
       // path to the privacy policy with a 301 so a discovered /legal URL
       // resolves cleanly instead of 404-ing ("Not found" in Search Console).
       { source: "/legal", destination: "/legal/privacy", permanent: true },
+
+      // Old /vs-*.html URLs (GSC 404s) — 301 to current compare pages
+      { source: "/vs-hubspot.html",   destination: "/compare/hubspot",  permanent: true },
+      { source: "/vs-intercom.html",  destination: "/compare/intercom", permanent: true },
+      { source: "/vs-mailchimp.html", destination: "/compare/mailchimp",permanent: true },
+      { source: "/vs-mixpanel.html",  destination: "/compare",          permanent: true },
+
+      // .html-suffix variants of clean URLs (GSC "Crawled - not indexed")
+      // Any stale link to /compare/customerio.html etc. 301s to the clean URL.
+      { source: "/compare/:slug.html",         destination: "/compare/:slug",         permanent: true },
+      { source: "/solutions/:slug.html",       destination: "/solutions/:slug",       permanent: true },
+      { source: "/blog/:slug.html",            destination: "/blog/:slug",            permanent: true },
+      { source: "/legal/:slug.html",           destination: "/legal/:slug",           permanent: true },
+      { source: "/resources/:type/:slug.html", destination: "/resources/:type/:slug", permanent: true },
     ];
   },
   async rewrites() {
