@@ -3,51 +3,100 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Free XML Sitemap Builder — Generate &amp; Copy Your Sitemap Instantly</title>
-<meta name="description" content="Free XML sitemap builder. Paste your URLs, generate a valid sitemap.xml instantly, and copy or download it. No AI, no sign-up, no limits. Works for any website.">
+<title>Free XML Sitemap Builder — Crawl Any Website Instantly</title>
+<meta name="description" content="Free sitemap builder that actually crawls your website. Enter a URL, it discovers every page, extracts titles and headings, and generates a perfect sitemap.xml instantly. No sign-up.">
 <link rel="canonical" href="https://www.conversioncrm.co/tools/sitemap-builder">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Free XML Sitemap Builder — Generate &amp; Copy Instantly">
-<meta property="og:description" content="Paste URLs, generate a valid sitemap.xml instantly. Copy or download in one click. No sign-up, no AI, no limits.">
+<meta property="og:title" content="Free XML Sitemap Builder — Crawl Any Website Instantly">
+<meta property="og:description" content="Crawls your entire site, extracts titles and headings, generates a valid sitemap.xml. Free, no sign-up.">
 <meta property="og:url" content="https://www.conversioncrm.co/tools/sitemap-builder">
 <meta property="og:site_name" content="ConversionCRM">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Free XML Sitemap Builder">
-<meta name="twitter:description" content="Paste URLs, generate a valid sitemap.xml instantly. Copy or download in one click.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='12' cy='16' r='9' fill='%230B0D12'/%3E%3Ccircle cx='21' cy='16' r='9' fill='%230B0D12' fill-opacity='.85'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/site.css">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.conversioncrm.co/"},{"@type":"ListItem","position":2,"name":"Tools","item":"https://www.conversioncrm.co/tools"},{"@type":"ListItem","position":3,"name":"Sitemap Builder"}]}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is this sitemap builder free?","acceptedAnswer":{"@type":"Answer","text":"Yes. No sign-up, no credit card, no limits on URLs. Generate and download as many sitemaps as you need."}},{"@type":"Question","name":"Does this tool use AI?","acceptedAnswer":{"@type":"Answer","text":"No. The sitemap is generated using deterministic rules: URL parsing, deduplication, priority assignment by depth, and standard XML formatting. There is no AI or language model involved."}},{"@type":"Question","name":"What is the difference between an XML sitemap and an HTML sitemap?","acceptedAnswer":{"@type":"Answer","text":"An XML sitemap is for search engines — it tells Google and Bing which URLs exist and when they were last updated. An HTML sitemap is for human visitors — a navigable list of all pages on your site."}},{"@type":"Question","name":"How do I submit my sitemap to Google?","acceptedAnswer":{"@type":"Answer","text":"Upload sitemap.xml to your website root, then go to Google Search Console, select your property, click Sitemaps, and submit the full URL (e.g. https://example.com/sitemap.xml)."}},{"@type":"Question","name":"How many URLs can this tool handle?","acceptedAnswer":{"@type":"Answer","text":"The tool handles up to 500 URLs in the browser without performance issues. For larger sites, use the sitemap index splitting option."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.conversioncrm.co/"},{"@type":"ListItem","position":2,"name":"Tools"},{"@type":"ListItem","position":3,"name":"Sitemap Builder"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Does this sitemap builder actually crawl my website?","acceptedAnswer":{"@type":"Answer","text":"Yes. Enter your URL and our server-side crawler visits every internal page, follows links, extracts titles and headings, and generates a complete sitemap.xml — no AI, no guessing."}},{"@type":"Question","name":"How many pages can it crawl?","acceptedAnswer":{"@type":"Answer","text":"Up to 300 pages per crawl. For large sites you can run multiple crawls on sub-sections or use the manual paste mode for complete control."}},{"@type":"Question","name":"Is this tool free?","acceptedAnswer":{"@type":"Answer","text":"Yes, completely free with no sign-up required."}},{"@type":"Question","name":"What data does the crawler extract?","acceptedAnswer":{"@type":"Answer","text":"For each page: URL, title tag, meta description, H1 heading, H2 headings, word count, image count, and last-modified date from HTTP headers or meta tags."}},{"@type":"Question","name":"Does it respect noindex?","acceptedAnswer":{"@type":"Answer","text":"Yes. Pages with a noindex robots meta tag are discovered but excluded from the sitemap output."}}]}</script>
 <style>
-/* Tool-specific styles */
-.tool-wrap { background: var(--bg-soft); border-radius: 16px; border: 1px solid #e3e9f0; padding: 32px; margin: 0 0 28px; }
-.tool-label { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; display: block; }
-.tool-input { width: 100%; font-family: var(--font-mono); font-size: 13px; padding: 14px 16px; border: 1.5px solid #d1dbe8; border-radius: 10px; background: #fff; color: var(--ink); resize: vertical; min-height: 120px; box-sizing: border-box; line-height: 1.6; }
-.tool-input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-pale); }
-.tool-row { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
-.tool-select { font-family: var(--font-body); font-size: 13.5px; padding: 9px 14px; border: 1.5px solid #d1dbe8; border-radius: 8px; background: #fff; color: var(--ink); cursor: pointer; }
-.tool-check { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-2); cursor: pointer; user-select: none; }
-.tool-check input { width: 16px; height: 16px; accent-color: var(--blue); cursor: pointer; }
-.output-box { position: relative; }
-.output-code { width: 100%; font-family: var(--font-mono); font-size: 12.5px; padding: 16px; border: 1.5px solid #d1dbe8; border-radius: 10px; background: #fff; color: var(--ink-2); resize: vertical; min-height: 200px; box-sizing: border-box; line-height: 1.65; }
-.copy-btn { position: absolute; top: 10px; right: 10px; font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 6px; background: var(--blue-pale); color: var(--blue-deep); border: none; cursor: pointer; font-family: var(--font-body); transition: background .15s; }
-.copy-btn:hover { background: var(--blue-wash); }
-.copy-btn.copied { background: #dcfce7; color: #15803d; }
-.stat-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: var(--blue-pale); color: var(--blue-deep); }
-.err-msg { font-size: 13px; color: #dc2626; background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 10px 14px; margin-top: 10px; display: none; }
-.section-divider { border: none; border-top: 1px solid #e6eef6; margin: 56px 0; }
-.prose h3 { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--ink); margin: 28px 0 8px; }
-.prose p, .prose li { font-size: 15px; line-height: 1.75; color: var(--ink-2); }
-.prose ul { margin: 8px 0 0 18px; }
-.prose li { margin-bottom: 5px; }
-.use-case-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
-.use-case-card { background: var(--bg-soft); border: 1px solid #e3e9f0; border-radius: 12px; padding: 20px; }
-.use-case-card h4 { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--ink); margin: 0 0 6px; }
-.use-case-card p { font-size: 13.5px; color: var(--ink-2); line-height: 1.6; margin: 0; }
+:root { --tool-radius: 12px; }
+
+/* Tabs */
+.tool-tabs { display:flex; gap:4px; background:#f0f4f8; border-radius:10px; padding:4px; margin-bottom:24px; width:fit-content; }
+.tool-tab { font-family:var(--font-body); font-size:14px; font-weight:600; padding:8px 20px; border-radius:8px; border:none; cursor:pointer; transition:background .15s,color .15s; color:var(--ink-3); background:transparent; }
+.tool-tab.active { background:#fff; color:var(--ink); box-shadow:0 1px 4px rgba(0,0,0,.08); }
+
+/* Inputs */
+.t-wrap { background:var(--bg-soft); border:1px solid #e3e9f0; border-radius:14px; padding:28px 28px 24px; margin-bottom:22px; }
+.t-label { font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); margin-bottom:8px; display:block; }
+.t-url { width:100%; font-family:var(--font-body); font-size:15px; padding:13px 16px; border:1.5px solid #d1dbe8; border-radius:10px; background:#fff; color:var(--ink); box-sizing:border-box; }
+.t-url:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-pale); }
+.t-row { display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-top:14px; }
+.t-select { font-family:var(--font-body); font-size:13.5px; padding:9px 14px; border:1.5px solid #d1dbe8; border-radius:8px; background:#fff; color:var(--ink); cursor:pointer; }
+.t-textarea { width:100%; font-family:var(--font-mono); font-size:13px; padding:14px 16px; border:1.5px solid #d1dbe8; border-radius:10px; background:#fff; color:var(--ink); resize:vertical; min-height:140px; box-sizing:border-box; line-height:1.6; }
+.t-textarea:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-pale); }
+.t-check { display:flex; align-items:center; gap:8px; font-size:14px; color:var(--ink-2); cursor:pointer; }
+.t-check input { width:16px; height:16px; accent-color:var(--blue); cursor:pointer; }
+
+/* Progress */
+.progress-wrap { background:#fff; border:1px solid #e3e9f0; border-radius:14px; padding:28px; text-align:center; display:none; }
+.spin { width:40px; height:40px; border:3px solid var(--blue-pale); border-top-color:var(--blue); border-radius:50%; animation:spin .7s linear infinite; margin:0 auto 16px; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.progress-msg { font-size:15px; font-weight:600; color:var(--ink); }
+.progress-sub { font-size:13px; color:var(--ink-3); margin-top:6px; }
+
+/* Stats row */
+.stats-row { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
+.stat-chip { display:inline-flex; align-items:center; gap:5px; font-size:13px; font-weight:600; padding:5px 12px; border-radius:999px; }
+.stat-chip.blue { background:var(--blue-pale); color:var(--blue-deep); }
+.stat-chip.green { background:#dcfce7; color:#15803d; }
+.stat-chip.red { background:#fee2e2; color:#dc2626; }
+
+/* Pages table */
+.pages-table-wrap { border:1px solid #e3e9f0; border-radius:12px; overflow:hidden; margin-bottom:24px; }
+.pt-header { display:grid; grid-template-columns:2fr 1.2fr 0.5fr 0.5fr; gap:0; background:#f7fafd; border-bottom:1px solid #e3e9f0; padding:10px 16px; }
+.pt-header span { font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-3); }
+.pt-body { max-height:400px; overflow-y:auto; }
+.pt-row { display:grid; grid-template-columns:2fr 1.2fr 0.5fr 0.5fr; gap:0; padding:11px 16px; border-bottom:1px solid #f0f4f8; cursor:pointer; transition:background .1s; }
+.pt-row:hover { background:#f7fafd; }
+.pt-row:last-child { border-bottom:none; }
+.pt-url { font-size:12.5px; font-family:var(--font-mono); color:var(--blue-deep); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pt-title { font-size:13px; color:var(--ink-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pt-badge { font-size:11px; font-weight:600; padding:2px 7px; border-radius:999px; background:var(--blue-pale); color:var(--blue-deep); white-space:nowrap; }
+.pt-words { font-size:12px; color:var(--ink-3); white-space:nowrap; }
+
+/* Expandable row detail */
+.pt-detail { display:none; padding:12px 16px 14px; background:#f7fafd; border-bottom:1px solid #e3e9f0; font-size:13px; line-height:1.7; color:var(--ink-2); }
+.pt-detail.open { display:block; }
+.pt-detail b { color:var(--ink); font-weight:600; }
+.pt-detail .h2-list { margin:4px 0 0 14px; }
+.pt-detail .h2-list li { margin-bottom:2px; }
+
+/* XML output */
+.output-box { position:relative; }
+.output-code { width:100%; font-family:var(--font-mono); font-size:12.5px; padding:16px; border:1.5px solid #d1dbe8; border-radius:10px; background:#fff; color:var(--ink-2); resize:vertical; min-height:220px; box-sizing:border-box; line-height:1.65; }
+.copy-btn { position:absolute; top:10px; right:10px; font-size:12px; font-weight:600; padding:5px 12px; border-radius:6px; background:var(--blue-pale); color:var(--blue-deep); border:none; cursor:pointer; font-family:var(--font-body); transition:background .15s; }
+.copy-btn:hover { background:var(--blue-wash); }
+.copy-btn.copied { background:#dcfce7; color:#15803d; }
+
+/* Errors */
+.err-box { background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; padding:12px 16px; font-size:13px; color:#dc2626; margin-top:10px; display:none; }
+.err-list { margin:6px 0 0 16px; }
+.err-list li { margin-bottom:2px; }
+
+/* SEO prose */
+.prose h3 { font-family:var(--font-display); font-size:18px; font-weight:700; color:var(--ink); margin:28px 0 8px; }
+.prose p, .prose li { font-size:15px; line-height:1.75; color:var(--ink-2); }
+.prose ul { margin:8px 0 0 18px; }
+.prose li { margin-bottom:5px; }
+.use-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; }
+.use-card { background:var(--bg-soft); border:1px solid #e3e9f0; border-radius:12px; padding:20px; }
+.use-card h4 { font-family:var(--font-display); font-size:15px; font-weight:700; color:var(--ink); margin:0 0 6px; }
+.use-card p { font-size:13.5px; color:var(--ink-2); line-height:1.6; margin:0; }
+
+hr.sdiv { border:none; border-top:1px solid #e6eef6; margin:56px 0; }
 </style>
 </head>
 <body>
@@ -94,150 +143,226 @@
 <header class="page-hero">
   <div class="container">
     <div class="crumbs"><a href="/">Home</a><span>/</span><a href="/tools">Tools</a><span>/</span>Sitemap Builder</div>
-    <span class="kicker">Free tool · no AI · no sign-up</span>
+    <span class="kicker">Free tool · no sign-up · server-side crawler</span>
     <h1 class="rise d1">Free XML <span class="hl">Sitemap Builder</span></h1>
-    <p class="hero-sub rise d2">Paste your URLs, generate a valid <code class="code-inline">sitemap.xml</code> instantly, then copy or download it. Deterministic rules only — no AI, no hallucinated pages.</p>
+    <p class="hero-sub rise d2">Enter your website URL and our crawler visits every page, extracts titles, headings, and meta data, then generates a complete <code class="code-inline">sitemap.xml</code> — ready to copy or download in seconds.</p>
   </div>
 </header>
 
 <!-- TOOL -->
-<section style="padding-top:36px">
-  <div class="container" style="max-width:860px">
+<section style="padding-top:32px">
+  <div class="container" style="max-width:900px">
 
-    <!-- Input -->
-    <div class="tool-wrap">
-      <label class="tool-label" for="urlInput">Your URLs — one per line. First URL is treated as the homepage.</label>
-      <textarea class="tool-input" id="urlInput" rows="8" placeholder="https://example.com/
+    <!-- Mode tabs -->
+    <div class="tool-tabs">
+      <button class="tool-tab active" id="tabCrawl" type="button">Crawl website</button>
+      <button class="tool-tab" id="tabManual" type="button">Paste URLs</button>
+    </div>
+
+    <!-- ── CRAWL MODE ── -->
+    <div id="paneCrawl">
+      <div class="t-wrap">
+        <label class="t-label" for="crawlUrl">Website URL to crawl</label>
+        <input class="t-url" id="crawlUrl" type="url" placeholder="https://example.com" autocomplete="off" spellcheck="false">
+        <div class="t-row">
+          <select class="t-select" id="maxPagesSel">
+            <option value="50">Up to 50 pages</option>
+            <option value="100">Up to 100 pages</option>
+            <option value="200" selected>Up to 200 pages</option>
+            <option value="300">Up to 300 pages (max)</option>
+          </select>
+          <label class="t-check"><input type="checkbox" id="htmlToggleCrawl"> Also generate HTML sitemap</label>
+        </div>
+        <div class="t-row" style="margin-top:18px">
+          <button class="btn btn-blue btn-lg" id="crawlBtn" type="button">Crawl &amp; Generate sitemap</button>
+          <button class="btn btn-gray" id="crawlClearBtn" type="button" style="display:none">Clear</button>
+        </div>
+        <div id="crawlErr" class="err-box"></div>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-wrap" id="progressWrap">
+        <div class="spin"></div>
+        <div class="progress-msg" id="progressMsg">Crawling your website…</div>
+        <div class="progress-sub" id="progressSub">This takes 10–60 seconds depending on site size</div>
+      </div>
+
+      <!-- Results -->
+      <div id="crawlResults" style="display:none">
+
+        <!-- Stats -->
+        <div class="stats-row" id="statsRow"></div>
+
+        <!-- Pages table -->
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+          <span style="font-family:var(--font-display);font-size:17px;font-weight:700">Pages discovered</span>
+          <span style="font-size:13px;color:var(--ink-3)">Click any row to expand details</span>
+        </div>
+        <div class="pages-table-wrap">
+          <div class="pt-header">
+            <span>URL</span>
+            <span>Title</span>
+            <span>Depth</span>
+            <span>Words</span>
+          </div>
+          <div class="pt-body" id="pagesBody"></div>
+        </div>
+
+        <!-- Errors (if any) -->
+        <div class="err-box" id="errorsBox">
+          <b>Skipped URLs</b>
+          <ul class="err-list" id="errorsList"></ul>
+        </div>
+
+        <!-- XML Output -->
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin:24px 0 12px">
+          <span style="font-family:var(--font-display);font-size:17px;font-weight:700">sitemap.xml</span>
+          <button class="btn btn-gray" id="downloadBtnCrawl" type="button">Download sitemap.xml</button>
+        </div>
+        <div class="output-box">
+          <textarea class="output-code" id="xmlOutputCrawl" readonly rows="14"></textarea>
+          <button class="copy-btn" id="copyXmlCrawl" data-label="Copy XML" type="button">Copy XML</button>
+        </div>
+
+        <!-- HTML Sitemap -->
+        <div id="htmlSectionCrawl" style="display:none;margin-top:24px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <span style="font-family:var(--font-display);font-size:17px;font-weight:700">HTML sitemap</span>
+            <span style="font-size:12.5px;color:var(--ink-3)">For human visitors</span>
+          </div>
+          <div class="output-box">
+            <textarea class="output-code" id="htmlOutputCrawl" readonly rows="10"></textarea>
+            <button class="copy-btn" id="copyHtmlCrawl" data-label="Copy HTML" type="button">Copy HTML</button>
+          </div>
+        </div>
+
+      </div><!-- /crawlResults -->
+    </div><!-- /paneCrawl -->
+
+    <!-- ── MANUAL MODE ── -->
+    <div id="paneManual" style="display:none">
+      <div class="t-wrap">
+        <label class="t-label" for="urlInput">Your URLs — one per line. First URL is treated as the homepage.</label>
+        <textarea class="t-textarea" id="urlInput" rows="8" placeholder="https://example.com/
 https://example.com/features
 https://example.com/pricing
 https://example.com/blog
 https://example.com/contact"></textarea>
-      <div id="urlError" class="err-msg"></div>
-      <div class="tool-row">
-        <select class="tool-select" id="changefreqSel">
-          <option value="auto">Changefreq: auto (by depth)</option>
-          <option value="weekly">weekly — all pages</option>
-          <option value="monthly">monthly — all pages</option>
-          <option value="daily">daily — all pages</option>
-        </select>
-        <label class="tool-check"><input type="checkbox" id="htmlToggle"> Also generate HTML sitemap</label>
-        <label class="tool-check"><input type="checkbox" id="lastmodToggle" checked> Include lastmod (today)</label>
-      </div>
-      <div class="tool-row" style="margin-top:18px">
-        <button class="btn btn-blue btn-lg" id="generateBtn" type="button">Generate sitemap</button>
-        <button class="btn btn-gray" id="clearBtn" type="button">Clear</button>
-      </div>
-    </div>
-
-    <!-- Output: XML -->
-    <div id="outputSection" style="display:none">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px">
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-family:var(--font-display);font-size:17px;font-weight:700">sitemap.xml</span>
-          <span class="stat-pill" id="urlCount">0 URLs</span>
+        <div id="manualErr" class="err-box"></div>
+        <div class="t-row">
+          <select class="t-select" id="changefreqSel">
+            <option value="auto">Changefreq: auto (by depth)</option>
+            <option value="weekly">weekly — all pages</option>
+            <option value="monthly">monthly — all pages</option>
+          </select>
+          <label class="t-check"><input type="checkbox" id="htmlToggleManual"> Also generate HTML sitemap</label>
+          <label class="t-check"><input type="checkbox" id="lastmodToggle" checked> Include lastmod (today)</label>
         </div>
-        <button class="btn btn-gray" id="downloadBtn" type="button">Download sitemap.xml</button>
-      </div>
-      <div class="output-box">
-        <textarea class="output-code" id="xmlOutput" readonly rows="12"></textarea>
-        <button class="copy-btn" id="copyXml" type="button">Copy XML</button>
+        <div class="t-row" style="margin-top:18px">
+          <button class="btn btn-blue btn-lg" id="generateBtn" type="button">Generate sitemap</button>
+          <button class="btn btn-gray" id="clearBtn" type="button">Clear</button>
+        </div>
       </div>
 
-      <!-- HTML sitemap output -->
-      <div id="htmlSection" style="display:none;margin-top:24px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-          <span style="font-family:var(--font-display);font-size:17px;font-weight:700">HTML sitemap</span>
-          <span style="font-size:12.5px;color:var(--ink-3)">For human visitors</span>
+      <div id="manualOutput" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-family:var(--font-display);font-size:17px;font-weight:700">sitemap.xml</span>
+            <span class="stat-chip blue" id="urlCountManual">0 URLs</span>
+          </div>
+          <button class="btn btn-gray" id="downloadBtnManual" type="button">Download sitemap.xml</button>
         </div>
         <div class="output-box">
-          <textarea class="output-code" id="htmlOutput" readonly rows="12"></textarea>
-          <button class="copy-btn" id="copyHtml" type="button">Copy HTML</button>
+          <textarea class="output-code" id="xmlOutputManual" readonly rows="12"></textarea>
+          <button class="copy-btn" id="copyXmlManual" data-label="Copy XML" type="button">Copy XML</button>
+        </div>
+        <div id="htmlSectionManual" style="display:none;margin-top:24px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <span style="font-family:var(--font-display);font-size:17px;font-weight:700">HTML sitemap</span>
+          </div>
+          <div class="output-box">
+            <textarea class="output-code" id="htmlOutputManual" readonly rows="10"></textarea>
+            <button class="copy-btn" id="copyHtmlManual" data-label="Copy HTML" type="button">Copy HTML</button>
+          </div>
         </div>
       </div>
-    </div>
+    </div><!-- /paneManual -->
 
-  </div>
+  </div><!-- /container -->
 </section>
 
-<hr class="section-divider">
+<hr class="sdiv">
 
 <!-- HOW IT WORKS -->
 <section style="padding-top:0">
   <div class="container" style="max-width:860px">
-    <div class="sec-head reveal">
-      <span class="kicker">How it works</span>
-      <h2>Deterministic rules, not AI</h2>
-      <p class="sec-sub">Every URL in the output came from your input. No pages are invented, guessed, or hallucinated. The tool applies a fixed set of rules to produce a clean, valid sitemap.xml.</p>
-    </div>
+    <div class="sec-head reveal"><span class="kicker">How it works</span><h2>A real crawler, not a guesser</h2><p class="sec-sub">The crawler runs on our server — not in your browser. It follows links the same way Googlebot does, page by page, extracting real data from real HTML.</p></div>
     <div class="prose reveal">
-      <h3>Step 1 — Parse and validate</h3>
-      <p>Each line is trimmed and tested against a URL pattern. Lines that are not valid absolute URLs (missing scheme or domain) are flagged and skipped. Relative paths like <code class="code-inline">/blog</code> are left out unless a base domain is detected from the first URL.</p>
-      <h3>Step 2 — Deduplicate</h3>
-      <p>Duplicate URLs (including trailing-slash variants) are removed. The first occurrence is kept. Canonicalization removes fragments (#section) since search engines ignore them.</p>
-      <h3>Step 3 — Assign priority and changefreq</h3>
-      <p>Priority is assigned by URL depth: homepage = 1.0, one level deep = 0.8, two levels = 0.7, three or more = 0.6. Changefreq follows the same logic unless you override it in the options: homepage = weekly, everything else = monthly.</p>
-      <h3>Step 4 — Build the XML</h3>
-      <p>The tool wraps each URL in a standard <code class="code-inline">&lt;url&gt;</code> element with <code class="code-inline">&lt;loc&gt;</code>, <code class="code-inline">&lt;lastmod&gt;</code>, <code class="code-inline">&lt;changefreq&gt;</code>, and <code class="code-inline">&lt;priority&gt;</code>. The output is indented for readability and validates against the sitemaps.org schema.</p>
+      <h3>Step 1 — Fetch the start URL</h3>
+      <p>The crawler sends an HTTP request to your URL using a standard browser User-Agent. It follows redirects automatically and records the final URL as the canonical starting point.</p>
+      <h3>Step 2 — Extract links and queue them</h3>
+      <p>Every <code class="code-inline">&lt;a href&gt;</code> on the page is parsed. Relative paths are resolved to absolute URLs. External links, file downloads (.pdf, .jpg, etc.), and API routes are excluded. Internal links go into the crawl queue.</p>
+      <h3>Step 3 — Crawl in parallel batches</h3>
+      <p>Pages are fetched 6 at a time with a short delay between batches to avoid overwhelming your server. Each page is checked for <code class="code-inline">noindex</code> — those pages are skipped from the sitemap but their links are still followed.</p>
+      <h3>Step 4 — Extract structured data</h3>
+      <p>For each indexable page the crawler extracts: title tag, meta description, H1, H2 headings (up to 6), word count, image count, and last-modified date from the HTTP <code class="code-inline">Last-Modified</code> header or <code class="code-inline">article:modified_time</code> meta tag.</p>
+      <h3>Step 5 — Generate a clean sitemap.xml</h3>
+      <p>URLs are sorted by depth then alphabetically. Priority is assigned by depth (homepage 1.0, top-level 0.8, deeper 0.7–0.6). Duplicate canonical URLs are deduplicated. The output is valid sitemap.org XML ready to submit to Google Search Console.</p>
     </div>
   </div>
 </section>
 
-<hr class="section-divider">
+<hr class="sdiv">
 
 <!-- SEO BEST PRACTICES -->
 <section style="padding-top:0">
   <div class="container" style="max-width:860px">
-    <div class="sec-head reveal">
-      <span class="kicker">SEO best practices</span>
-      <h2>What makes a good sitemap</h2>
-    </div>
+    <div class="sec-head reveal"><span class="kicker">SEO best practices</span><h2>What makes a good sitemap</h2></div>
     <div class="prose reveal">
       <h3>Only include indexable URLs</h3>
-      <p>Exclude pages with <code class="code-inline">noindex</code> meta tags, canonical redirects, 4xx errors, and URL parameters that create duplicate content. A smaller, clean sitemap performs better than a large one with junk URLs.</p>
+      <p>This tool automatically excludes pages with <code class="code-inline">noindex</code> meta tags, non-HTML resources, and pages that return 4xx or 5xx status codes. Review your output for any URLs that should not appear in Google.</p>
       <h3>Keep lastmod accurate</h3>
-      <p>Google uses lastmod as a signal for recrawl priority. Only update it when the page content actually changes — setting it to today for every page on every deploy teaches Google to ignore it.</p>
-      <h3>XML is for search engines, HTML is for users</h3>
-      <p>The XML sitemap tells crawlers which URLs exist. The HTML sitemap helps human visitors navigate a large site. Both are useful, but they serve different audiences.</p>
-      <h3>Reference the sitemap in robots.txt</h3>
-      <p>Add <code class="code-inline">Sitemap: https://example.com/sitemap.xml</code> as the last line of your robots.txt file. This tells all compliant crawlers where to find it without waiting for them to discover it via Search Console.</p>
-      <h3>Use sitemap index files for large sites</h3>
-      <p>A single sitemap supports up to 50,000 URLs and 50 MB. For larger sites, create multiple sitemaps and reference them in a sitemap index file.</p>
+      <p>Google uses lastmod to prioritize recrawls. The crawler reads the <code class="code-inline">Last-Modified</code> HTTP header or <code class="code-inline">article:modified_time</code> meta tag when available. If neither is present, today's date is used as a safe fallback.</p>
+      <h3>Reference it in robots.txt</h3>
+      <p>Add <code class="code-inline">Sitemap: https://yourdomain.com/sitemap.xml</code> as the last line of your robots.txt. All compliant crawlers (Google, Bing, Yandex) will discover it automatically.</p>
       <h3>Submit to Google Search Console</h3>
-      <p>Upload your sitemap.xml to your website root, then go to Google Search Console, select your property, click Sitemaps in the sidebar, and submit the full URL. Re-submit any time the sitemap changes significantly.</p>
+      <p>Upload the file to your domain root, then go to Google Search Console → Sitemaps → Submit the full URL. Re-submit whenever you add significant new content.</p>
+      <h3>For large sites: use a sitemap index</h3>
+      <p>Google's limit is 50,000 URLs and 50 MB per sitemap file. Sites with more content should split into multiple sitemaps and reference them from a sitemap index file.</p>
     </div>
   </div>
 </section>
 
-<hr class="section-divider">
+<hr class="sdiv">
 
 <!-- USE CASES -->
 <section style="padding-top:0">
   <div class="container" style="max-width:860px">
     <div class="sec-head reveal"><span class="kicker">Use cases</span><h2>Who uses this tool</h2></div>
-    <div class="use-case-grid reveal">
-      <div class="use-case-card"><h4>Small websites</h4><p>Under 50 pages. Paste your URLs, download in 10 seconds, upload to the root, done.</p></div>
-      <div class="use-case-card"><h4>SaaS marketing sites</h4><p>Features, comparisons, solutions, legal pages. Clean sitemap with correct priority tiers.</p></div>
-      <div class="use-case-card"><h4>Blogs and content sites</h4><p>Export your post list from your CMS, paste it here, generate a sitemap that actually matches your content.</p></div>
-      <div class="use-case-card"><h4>Agencies</h4><p>Generate a baseline sitemap for every new client site. Takes 30 seconds per project.</p></div>
-      <div class="use-case-card"><h4>Developers</h4><p>Quick sanity check: paste your known URLs and verify the sitemap looks correct before deploying the dynamic version.</p></div>
-      <div class="use-case-card"><h4>Ecommerce</h4><p>Paste category and key product URLs. Generate the structural skeleton before adding product-level entries.</p></div>
+    <div class="use-grid reveal">
+      <div class="use-card"><h4>SaaS websites</h4><p>Crawl your marketing site, get every features/pricing/comparison page, generate a structured sitemap in one click.</p></div>
+      <div class="use-card"><h4>Blogs and content sites</h4><p>Discover all published posts, check titles and word counts, spot missing meta descriptions in the results table.</p></div>
+      <div class="use-card"><h4>Agencies</h4><p>Generate a baseline sitemap for every new client site. The pages table doubles as a quick content audit.</p></div>
+      <div class="use-card"><h4>Developers</h4><p>Validate routes are reachable, check canonical URLs, and verify redirects are being followed correctly.</p></div>
+      <div class="use-card"><h4>SEO audits</h4><p>The page detail view (title, H1, description, H2s, word count) surfaces thin-content and missing meta data at a glance.</p></div>
+      <div class="use-card"><h4>Ecommerce</h4><p>Crawl category pages and key product URLs. Check that lastmod dates are being served correctly from your platform.</p></div>
     </div>
   </div>
 </section>
 
-<hr class="section-divider">
+<hr class="sdiv">
 
 <!-- FAQ -->
 <section id="faqs" style="padding-top:0">
   <div class="container" style="max-width:860px">
     <div class="sec-head reveal"><span class="kicker">FAQs</span><h2>Questions about the tool</h2></div>
     <div class="faq reveal">
-      <div class="faq-item open"><button type="button" aria-expanded="true">Is this sitemap builder free?</button><div class="faq-body"><div><p>Yes. No sign-up, no credit card, no limits on URLs. Generate and download as many sitemaps as you need.</p></div></div></div>
-      <div class="faq-item"><button type="button" aria-expanded="false">Does this tool use AI?</button><div class="faq-body"><div><p>No. The sitemap is generated using deterministic rules: URL parsing, deduplication, priority assignment by depth, and standard XML formatting. There is no AI or language model involved.</p></div></div></div>
-      <div class="faq-item"><button type="button" aria-expanded="false">What is the difference between an XML sitemap and an HTML sitemap?</button><div class="faq-body"><div><p>An XML sitemap is for search engines — it tells Google and Bing which URLs exist and when they were last updated. An HTML sitemap is for human visitors — a navigable list of all pages on your site. Both can help SEO, but the XML version is what you submit to Search Console.</p></div></div></div>
-      <div class="faq-item"><button type="button" aria-expanded="false">How do I submit my sitemap to Google?</button><div class="faq-body"><div><p>Upload sitemap.xml to your website root so it lives at <code class="code-inline">https://yoursite.com/sitemap.xml</code>. Then go to Google Search Console, select your property, click Sitemaps in the left sidebar, and enter the full sitemap URL. Also add <code class="code-inline">Sitemap: https://yoursite.com/sitemap.xml</code> to your robots.txt.</p></div></div></div>
-      <div class="faq-item"><button type="button" aria-expanded="false">How many URLs can this tool handle?</button><div class="faq-body"><div><p>The browser tool handles up to 500 URLs comfortably. For large sites (50,000+ URLs), use a server-side generator or split your sitemap into a sitemap index file with multiple child sitemaps.</p></div></div></div>
-      <div class="faq-item"><button type="button" aria-expanded="false">Does the tool crawl my website?</button><div class="faq-body"><div><p>No. You paste your URLs manually. The tool does not make any requests to your website — everything runs in your browser with no data sent to any server.</p></div></div></div>
+      <div class="faq-item open"><button type="button" aria-expanded="true">Does this sitemap builder actually crawl my website?</button><div class="faq-body"><div><p>Yes. Enter your URL and our server-side crawler visits every internal page, follows links, extracts titles and headings, and generates a complete sitemap.xml — no AI, no guessing. The Paste URLs tab still works for manual control.</p></div></div></div>
+      <div class="faq-item"><button type="button" aria-expanded="false">How many pages can it crawl?</button><div class="faq-body"><div><p>Up to 300 pages per crawl. For large sites you can run multiple crawls on sub-sections (e.g. /blog, /products), then merge the outputs — or use the manual paste mode for complete control.</p></div></div></div>
+      <div class="faq-item"><button type="button" aria-expanded="false">Is this tool free?</button><div class="faq-body"><div><p>Yes, completely free with no sign-up required. You can crawl and download as many sitemaps as you need.</p></div></div></div>
+      <div class="faq-item"><button type="button" aria-expanded="false">What data does it extract per page?</button><div class="faq-body"><div><p>For each page: the canonical URL, title tag, meta description, H1, up to 6 H2 headings, word count, image count, crawl depth, and last-modified date from HTTP headers or meta tags.</p></div></div></div>
+      <div class="faq-item"><button type="button" aria-expanded="false">Does it respect noindex?</button><div class="faq-body"><div><p>Yes. Pages with a <code class="code-inline">noindex</code> robots meta tag are discovered and their links followed, but they are excluded from the sitemap output.</p></div></div></div>
+      <div class="faq-item"><button type="button" aria-expanded="false">Will it crawl password-protected pages?</button><div class="faq-body"><div><p>No. The crawler sends unauthenticated requests. Pages behind a login, HTTP basic auth, or Cloudflare Access will return a 401/403 and be skipped — same as Googlebot would see them.</p></div></div></div>
     </div>
   </div>
 </section>
@@ -291,85 +416,24 @@ https://example.com/contact"></textarea>
     <span><a href="/sitemap.xml">Sitemap</a> · <a href="/llms.txt">llms.txt</a></span>
   </div>
 </footer>
+
 <script src="/assets/site.js"></script>
 <script>
-(function(){
-  const today = new Date().toISOString().slice(0,10);
+(function () {
+  'use strict';
 
-  function getDepth(url) {
-    try {
-      const u = new URL(url);
-      const parts = u.pathname.replace(/^\/|\/$/g,'').split('/').filter(Boolean);
-      return parts.length;
-    } catch { return 0; }
+  // ── Tab switching ──────────────────────────────────────────────────────────
+  document.getElementById('tabCrawl').addEventListener('click', () => switchTab('crawl'));
+  document.getElementById('tabManual').addEventListener('click', () => switchTab('manual'));
+
+  function switchTab(t) {
+    document.getElementById('tabCrawl').classList.toggle('active', t === 'crawl');
+    document.getElementById('tabManual').classList.toggle('active', t === 'manual');
+    document.getElementById('paneCrawl').style.display = t === 'crawl' ? '' : 'none';
+    document.getElementById('paneManual').style.display = t === 'manual' ? '' : 'none';
   }
 
-  function getPriority(url, depth) {
-    if (depth === 0) return '1.0';
-    if (depth === 1) return '0.8';
-    if (depth === 2) return '0.7';
-    return '0.6';
-  }
-
-  function getChangefreq(url, depth, override) {
-    if (override !== 'auto') return override;
-    if (depth === 0) return 'weekly';
-    return 'monthly';
-  }
-
-  function normalizeUrl(raw) {
-    raw = raw.trim().replace(/#.*$/, '');
-    if (!raw) return null;
-    try {
-      const u = new URL(raw);
-      if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
-      return u.href;
-    } catch { return null; }
-  }
-
-  function parseUrls(text) {
-    const lines = text.split('\n');
-    const seen = new Set();
-    const valid = [], invalid = [];
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (!trimmed) continue;
-      const norm = normalizeUrl(trimmed);
-      if (!norm) { invalid.push(trimmed); continue; }
-      if (!seen.has(norm)) { seen.add(norm); valid.push(norm); }
-    }
-    return { valid, invalid };
-  }
-
-  function buildXml(urls, changefreqOverride, includeLastmod) {
-    const rows = urls.map(url => {
-      const depth = getDepth(url);
-      const cf = getChangefreq(url, depth, changefreqOverride);
-      const pr = getPriority(url, depth);
-      const lm = includeLastmod ? `\n    <lastmod>${today}</lastmod>` : '';
-      return `  <url>\n    <loc>${url}</loc>${lm}\n    <changefreq>${cf}</changefreq>\n    <priority>${pr}</priority>\n  </url>`;
-    });
-    return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${rows.join('\n')}\n</urlset>`;
-  }
-
-  function buildHtml(urls) {
-    const grouped = {};
-    for (const url of urls) {
-      try {
-        const u = new URL(url);
-        const parts = u.pathname.replace(/^\/|\/$/g,'').split('/').filter(Boolean);
-        const group = parts.length === 0 ? 'Home' : (parts[0].charAt(0).toUpperCase() + parts[0].slice(1));
-        if (!grouped[group]) grouped[group] = [];
-        grouped[group].push(url);
-      } catch {}
-    }
-    const sections = Object.entries(grouped).map(([g, ulist]) => {
-      const items = ulist.map(u => `    <li><a href="${u}">${u}</a></li>`).join('\n');
-      return `  <section>\n    <h2>${g}</h2>\n    <ul>\n${items}\n    </ul>\n  </section>`;
-    });
-    return `<!-- HTML Sitemap -->\n<nav aria-label="Site map">\n${sections.join('\n')}\n</nav>`;
-  }
-
+  // ── Copy helper ────────────────────────────────────────────────────────────
   function copyText(text, btn) {
     navigator.clipboard.writeText(text).then(() => {
       btn.textContent = 'Copied!';
@@ -378,69 +442,270 @@ https://example.com/contact"></textarea>
     });
   }
 
-  document.getElementById('generateBtn').addEventListener('click', function() {
-    const raw = document.getElementById('urlInput').value;
-    const errEl = document.getElementById('urlError');
-    errEl.style.display = 'none';
-
-    const { valid, invalid } = parseUrls(raw);
-    if (valid.length === 0) {
-      errEl.textContent = 'No valid absolute URLs found. Make sure each URL starts with https:// or http://.';
-      errEl.style.display = 'block';
-      return;
-    }
-    if (invalid.length > 0) {
-      errEl.textContent = `Skipped ${invalid.length} invalid line(s): ${invalid.slice(0,3).join(', ')}${invalid.length > 3 ? '...' : ''}`;
-      errEl.style.display = 'block';
-    }
-
-    const changefreqOverride = document.getElementById('changefreqSel').value;
-    const includeLastmod = document.getElementById('lastmodToggle').checked;
-    const showHtml = document.getElementById('htmlToggle').checked;
-
-    const xml = buildXml(valid, changefreqOverride, includeLastmod);
-    document.getElementById('xmlOutput').value = xml;
-    document.getElementById('urlCount').textContent = valid.length + ' URL' + (valid.length !== 1 ? 's' : '');
-    document.getElementById('outputSection').style.display = 'block';
-
-    if (showHtml) {
-      document.getElementById('htmlOutput').value = buildHtml(valid);
-      document.getElementById('htmlSection').style.display = 'block';
-    } else {
-      document.getElementById('htmlSection').style.display = 'none';
-    }
-
-    document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
-
-  document.getElementById('clearBtn').addEventListener('click', function() {
-    document.getElementById('urlInput').value = '';
-    document.getElementById('outputSection').style.display = 'none';
-    document.getElementById('urlError').style.display = 'none';
-  });
-
-  document.getElementById('downloadBtn').addEventListener('click', function() {
-    const xml = document.getElementById('xmlOutput').value;
-    if (!xml) return;
+  // ── Download helper ────────────────────────────────────────────────────────
+  function downloadXml(xml, filename) {
     const blob = new Blob([xml], { type: 'application/xml' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'sitemap.xml';
+    a.download = filename || 'sitemap.xml';
     a.click();
     URL.revokeObjectURL(a.href);
+  }
+
+  // ── HTML sitemap builder ───────────────────────────────────────────────────
+  function buildHtmlSitemap(pages) {
+    const grouped = {};
+    pages.forEach(p => {
+      try {
+        const u = new URL(p.url || p);
+        const parts = u.pathname.replace(/^\/|\/$/g, '').split('/').filter(Boolean);
+        const group = parts.length === 0 ? 'Home' : (parts[0].charAt(0).toUpperCase() + parts[0].slice(1));
+        if (!grouped[group]) grouped[group] = [];
+        grouped[group].push({ url: p.url || p, title: p.title || p.url || p });
+      } catch {}
+    });
+    const sections = Object.entries(grouped).map(([g, items]) => {
+      const lis = items.map(i => `    <li><a href="${i.url}">${i.title || i.url}</a></li>`).join('\n');
+      return `  <section>\n    <h2>${g}</h2>\n    <ul>\n${lis}\n    </ul>\n  </section>`;
+    });
+    return `<!-- HTML Sitemap -->\n<nav aria-label="Site map">\n${sections.join('\n')}\n</nav>`;
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // CRAWL MODE
+  // ══════════════════════════════════════════════════════════════════════════
+
+  let lastCrawlPages = [];
+  let lastCrawlXml = '';
+
+  document.getElementById('crawlBtn').addEventListener('click', startCrawl);
+  document.getElementById('crawlUrl').addEventListener('keydown', e => { if (e.key === 'Enter') startCrawl(); });
+  document.getElementById('crawlClearBtn').addEventListener('click', clearCrawl);
+  document.getElementById('copyXmlCrawl').addEventListener('click', () => copyText(lastCrawlXml, document.getElementById('copyXmlCrawl')));
+  document.getElementById('copyHtmlCrawl').addEventListener('click', () => copyText(document.getElementById('htmlOutputCrawl').value, document.getElementById('copyHtmlCrawl')));
+  document.getElementById('downloadBtnCrawl').addEventListener('click', () => downloadXml(lastCrawlXml, 'sitemap.xml'));
+
+  async function startCrawl() {
+    const rawUrl = document.getElementById('crawlUrl').value.trim();
+    if (!rawUrl) { showCrawlErr('Please enter a website URL.'); return; }
+
+    let url = rawUrl;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+
+    try { new URL(url); } catch { showCrawlErr('Invalid URL — please include the full address, e.g. https://example.com'); return; }
+
+    const maxPages = parseInt(document.getElementById('maxPagesSel').value, 10);
+
+    // UI: show progress
+    hideCrawlErr();
+    document.getElementById('crawlResults').style.display = 'none';
+    document.getElementById('progressWrap').style.display = 'block';
+    document.getElementById('crawlBtn').disabled = true;
+    document.getElementById('crawlClearBtn').style.display = 'none';
+
+    const msgs = [
+      'Fetching homepage…',
+      'Discovering internal links…',
+      'Crawling pages in parallel…',
+      'Extracting titles and headings…',
+      'Almost done — building your sitemap…',
+    ];
+    let msgIdx = 0;
+    const msgTimer = setInterval(() => {
+      msgIdx = Math.min(msgIdx + 1, msgs.length - 1);
+      document.getElementById('progressMsg').textContent = msgs[msgIdx];
+    }, 4000);
+
+    try {
+      const res = await fetch('/api/scrape-sitemap', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, maxPages }),
+      });
+      clearInterval(msgTimer);
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Server error' }));
+        throw new Error(err.error || `Server returned ${res.status}`);
+      }
+
+      const data = await res.json();
+      lastCrawlPages = data.pages || [];
+      lastCrawlXml = data.xml || '';
+
+      renderCrawlResults(data);
+    } catch (e) {
+      clearInterval(msgTimer);
+      showCrawlErr('Crawl failed: ' + (e.message || 'Unknown error. The site may be blocking crawlers or unreachable.'));
+    } finally {
+      document.getElementById('progressWrap').style.display = 'none';
+      document.getElementById('crawlBtn').disabled = false;
+      document.getElementById('crawlClearBtn').style.display = '';
+    }
+  }
+
+  function renderCrawlResults(data) {
+    const { pages, xml, stats, errors } = data;
+
+    // Stats row
+    const sr = document.getElementById('statsRow');
+    sr.innerHTML = `
+      <span class="stat-chip green">${stats.total} pages in sitemap</span>
+      <span class="stat-chip blue">${stats.crawled} URLs crawled</span>
+      ${stats.errors > 0 ? `<span class="stat-chip red">${stats.errors} skipped</span>` : ''}
+    `;
+
+    // Pages table
+    const body = document.getElementById('pagesBody');
+    body.innerHTML = pages.map((p, i) => {
+      const depthLabel = p.depth === 0 ? 'Home' : `Depth ${p.depth}`;
+      const safeTitle = (p.title || '').replace(/</g, '&lt;');
+      const safeUrl = (p.url || '').replace(/</g, '&lt;');
+      const safeDesc = (p.description || '').replace(/</g, '&lt;');
+      const safeH1 = (p.h1 || '').replace(/</g, '&lt;');
+      const h2Html = (p.h2s || []).length
+        ? `<ul class="h2-list">${p.h2s.map(h => `<li>${h.replace(/</g,'&lt;')}</li>`).join('')}</ul>`
+        : '<span style="color:var(--ink-3)">None detected</span>';
+      return `
+        <div class="pt-row" onclick="toggleDetail(${i})">
+          <span class="pt-url">${safeUrl}</span>
+          <span class="pt-title">${safeTitle}</span>
+          <span><span class="pt-badge">${depthLabel}</span></span>
+          <span class="pt-words">${p.wordCount > 0 ? p.wordCount + ' w' : '—'}</span>
+        </div>
+        <div class="pt-detail" id="detail-${i}">
+          ${safeDesc ? `<div><b>Description:</b> ${safeDesc}</div>` : ''}
+          ${safeH1 ? `<div><b>H1:</b> ${safeH1}</div>` : ''}
+          <div><b>H2 headings:</b> ${h2Html}</div>
+          <div><b>Images:</b> ${p.imageCount || 0} &nbsp;·&nbsp; <b>Last modified:</b> ${p.lastmod || 'unknown'}</div>
+        </div>
+      `;
+    }).join('');
+
+    // Errors
+    if (errors && errors.length) {
+      const eb = document.getElementById('errorsBox');
+      const el = document.getElementById('errorsList');
+      el.innerHTML = errors.map(e => `<li>${e.replace(/</g,'&lt;')}</li>`).join('');
+      eb.style.display = 'block';
+    }
+
+    // XML output
+    document.getElementById('xmlOutputCrawl').value = xml;
+
+    // HTML sitemap
+    if (document.getElementById('htmlToggleCrawl').checked) {
+      document.getElementById('htmlOutputCrawl').value = buildHtmlSitemap(pages);
+      document.getElementById('htmlSectionCrawl').style.display = 'block';
+    } else {
+      document.getElementById('htmlSectionCrawl').style.display = 'none';
+    }
+
+    document.getElementById('crawlResults').style.display = 'block';
+    document.getElementById('crawlResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  window.toggleDetail = function (i) {
+    const el = document.getElementById('detail-' + i);
+    if (el) el.classList.toggle('open');
+  };
+
+  function showCrawlErr(msg) {
+    const el = document.getElementById('crawlErr');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+  function hideCrawlErr() { document.getElementById('crawlErr').style.display = 'none'; }
+
+  function clearCrawl() {
+    document.getElementById('crawlUrl').value = '';
+    document.getElementById('crawlResults').style.display = 'none';
+    document.getElementById('crawlClearBtn').style.display = 'none';
+    hideCrawlErr();
+    lastCrawlPages = [];
+    lastCrawlXml = '';
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // MANUAL MODE (original paste-URL logic)
+  // ══════════════════════════════════════════════════════════════════════════
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  function getDepth(url) {
+    try {
+      const parts = new URL(url).pathname.replace(/^\/|\/$/g, '').split('/').filter(Boolean);
+      return parts.length;
+    } catch { return 0; }
+  }
+
+  function buildManualXml(urls, changefreqOvr, inclLastmod) {
+    const rows = urls.map(url => {
+      const d = getDepth(url);
+      const cf = changefreqOvr !== 'auto' ? changefreqOvr : d === 0 ? 'weekly' : 'monthly';
+      const pr = d === 0 ? '1.0' : d === 1 ? '0.8' : d === 2 ? '0.7' : '0.6';
+      const lm = inclLastmod ? `\n    <lastmod>${today}</lastmod>` : '';
+      return `  <url>\n    <loc>${url}</loc>${lm}\n    <changefreq>${cf}</changefreq>\n    <priority>${pr}</priority>\n  </url>`;
+    });
+    return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${rows.join('\n')}\n</urlset>`;
+  }
+
+  function parseManualUrls(text) {
+    const seen = new Set(), valid = [], invalid = [];
+    text.split('\n').forEach(line => {
+      const t = line.trim().replace(/#.*$/, '');
+      if (!t) return;
+      try {
+        const u = new URL(t);
+        if (u.protocol !== 'http:' && u.protocol !== 'https:') throw new Error();
+        if (!seen.has(u.href)) { seen.add(u.href); valid.push(u.href); }
+      } catch { invalid.push(t); }
+    });
+    return { valid, invalid };
+  }
+
+  document.getElementById('generateBtn').addEventListener('click', () => {
+    const raw = document.getElementById('urlInput').value;
+    const errEl = document.getElementById('manualErr');
+    errEl.style.display = 'none';
+
+    const { valid, invalid } = parseManualUrls(raw);
+    if (!valid.length) { errEl.textContent = 'No valid absolute URLs found. Make sure each starts with https://'; errEl.style.display = 'block'; return; }
+    if (invalid.length) { errEl.textContent = `Skipped ${invalid.length} invalid line(s): ${invalid.slice(0,3).join(', ')}${invalid.length>3?'…':''}`; errEl.style.display = 'block'; }
+
+    const cf = document.getElementById('changefreqSel').value;
+    const lm = document.getElementById('lastmodToggle').checked;
+    const xml = buildManualXml(valid, cf, lm);
+
+    document.getElementById('xmlOutputManual').value = xml;
+    document.getElementById('urlCountManual').textContent = valid.length + ' URL' + (valid.length !== 1 ? 's' : '');
+    document.getElementById('manualOutput').style.display = 'block';
+
+    if (document.getElementById('htmlToggleManual').checked) {
+      document.getElementById('htmlOutputManual').value = buildHtmlSitemap(valid.map(u => ({ url: u, title: u })));
+      document.getElementById('htmlSectionManual').style.display = 'block';
+    } else {
+      document.getElementById('htmlSectionManual').style.display = 'none';
+    }
+
+    document.getElementById('manualOutput').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
-  const copyXmlBtn = document.getElementById('copyXml');
-  copyXmlBtn.dataset.label = 'Copy XML';
-  copyXmlBtn.addEventListener('click', function() {
-    copyText(document.getElementById('xmlOutput').value, copyXmlBtn);
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    document.getElementById('urlInput').value = '';
+    document.getElementById('manualOutput').style.display = 'none';
+    document.getElementById('manualErr').style.display = 'none';
   });
 
-  const copyHtmlBtn = document.getElementById('copyHtml');
-  copyHtmlBtn.dataset.label = 'Copy HTML';
-  copyHtmlBtn.addEventListener('click', function() {
-    copyText(document.getElementById('htmlOutput').value, copyHtmlBtn);
-  });
+  document.getElementById('downloadBtnManual').addEventListener('click', () =>
+    downloadXml(document.getElementById('xmlOutputManual').value, 'sitemap.xml'));
+
+  document.getElementById('copyXmlManual').addEventListener('click', () =>
+    copyText(document.getElementById('xmlOutputManual').value, document.getElementById('copyXmlManual')));
+
+  document.getElementById('copyHtmlManual').addEventListener('click', () =>
+    copyText(document.getElementById('htmlOutputManual').value, document.getElementById('copyHtmlManual')));
+
 })();
 </script>
 </body>
