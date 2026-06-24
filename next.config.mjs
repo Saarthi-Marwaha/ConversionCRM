@@ -16,6 +16,41 @@ const nextConfig = {
       },
     ],
   },
+  async headers() {
+    // Content-Security-Policy is intentionally permissive on inline scripts:
+    // Next.js hydration, the JSON-LD blocks, and Razorpay checkout all need
+    // inline execution. The directives still close the common XSS/clickjacking
+    // holes (frame-ancestors, base-uri, object-src none) the audit flagged.
+    const csp = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.razorpay.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' data: https://fonts.gstatic.com",
+      "img-src 'self' data: https:",
+      "connect-src 'self' https://*.supabase.co https://*.razorpay.com",
+      "frame-src 'self' https://*.razorpay.com",
+      "frame-ancestors 'self'",
+      "base-uri 'self'",
+      "form-action 'self' https://*.razorpay.com",
+      "object-src 'none'",
+    ].join("; ");
+
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "Content-Security-Policy", value: csp },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
+        ],
+      },
+    ];
+  },
   async redirects() {
     return [
       // /legal has no index page (only /legal/:slug exists). Send the bare
@@ -80,6 +115,7 @@ const nextConfig = {
         { source: "/glossary", destination: "/site/glossary.html" },
 
         // ── Free tools ──
+        { source: "/tools", destination: "/site/tools/list.html" },
         { source: "/tools/sitemap-builder", destination: "/site/tools/sitemap-builder.html" },
       ],
     };

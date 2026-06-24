@@ -132,16 +132,20 @@ export async function sendEmail(options: SendEmailOptions): Promise<boolean> {
   }
 
   try {
-    // Check for a workspace-level custom email template first
+    // Check for a workspace-level custom email template first. Custom templates
+    // are a paid feature — Free plans always send the built-in template even if
+    // a row lingers from a previous paid period.
     let html: string;
     let finalSubject = subject;
 
-    const { data: customTpl } = await supabase
-      .from("email_templates")
-      .select("subject, html_body")
-      .eq("workspace_id", workspaceId)
-      .eq("trigger", trigger)
-      .maybeSingle();
+    const { data: customTpl } = planAllows(quota.plan, "custom_composer")
+      ? await supabase
+          .from("email_templates")
+          .select("subject, html_body")
+          .eq("workspace_id", workspaceId)
+          .eq("trigger", trigger)
+          .maybeSingle()
+      : { data: null };
 
     if (customTpl) {
       // Extract template variables from the React element props
