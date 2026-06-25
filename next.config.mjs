@@ -23,11 +23,11 @@ const nextConfig = {
     // holes (frame-ancestors, base-uri, object-src none) the audit flagged.
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.razorpay.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.razorpay.com https://www.googletagmanager.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' data: https://fonts.gstatic.com",
       "img-src 'self' data: https:",
-      "connect-src 'self' https://*.supabase.co https://*.razorpay.com",
+      "connect-src 'self' https://*.supabase.co https://*.razorpay.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com",
       "frame-src 'self' https://*.razorpay.com",
       "frame-ancestors 'self'",
       "base-uri 'self'",
