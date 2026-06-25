@@ -361,6 +361,237 @@ function Metric({
   );
 }
 
+/* ── Activation funnel ───────────────────────────────────────
+ * Splits conversion into its two honest halves so the customer can see which
+ * one is leaking: signups → activated (their onboarding's job) and
+ * activated → paid (the moment-timing job ConversionCRM owns). Computed from
+ * the live user stages — no extra request.
+ */
+function ActivationFunnel({ users }: { users: LiveUser[] | null }) {
+  if (!users) {
+    return (
+      <div className="card p-5 sm:p-6">
+        <h2 className="text-sm font-semibold text-gray-900">Activation funnel</h2>
+        <p className="py-8 text-center text-sm text-gray-400">Loading…</p>
+      </div>
+    );
+  }
+
+  // Only identified signups belong in a signup→paid funnel; anonymous
+  // visitors haven't signed up, so counting them would unfairly tank the
+  // activation rate and wrongly blame onboarding.
+  const signups = users.filter((u) => !u.is_anonymous);
+  const n = signups.length;
+
+  if (n === 0) {
+    return (
+      <div className="card p-5 sm:p-6 space-y-2">
+        <h2 className="text-sm font-semibold text-gray-900">Activation funnel</h2>
+        <p className="text-sm text-gray-500">
+          No identified signups yet. Call{" "}
+          <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">identify()</code>{" "}
+          after login so ConversionCRM can map your{" "}
+          <strong>signup → activated → paid</strong> funnel and show exactly
+          where users drop off.
+        </p>
+      </div>
+    );
+  }
+
+  const isActivated = (s: LifecycleStage) =>
+    s === "active" || s === "conversion_ready" || s === "paid";
+
+  const activated = signups.filter((u) => isActivated(u.stage)).length;
+  const ready = signups.filter(
+    (u) => u.stage === "conversion_ready" || u.stage === "paid"
+  ).length;
+  const paid = signups.filter((u) => u.stage === "paid").length;
+  const stillOnboarding = signups.filter(
+    (u) => u.stage === "signup" || u.stage === "onboarding"
+  ).length;
+  const slipped = signups.filter(
+    (u) => u.stage === "going_quiet" || u.stage === "churned"
+  ).length;
+
+  const pct = (x: number) => Math.round((x / n) * 100);
+  const activationRate = pct(activated);
+  const activatedToPaid = activated > 0 ? Math.round((paid / activated) * 100) : 0;
+
+  const steps = [
+    { label: "Signups", count: n, bar: "bg-sky-200 text-sky-900", desc: "Identified users" },
+    { label: "Activated", count: activated, bar: "bg-sky-400 text-white", desc: "Reached the aha moment" },
+    { label: "Conversion-ready", count: ready, bar: "bg-sky-600 text-white", desc: "Score 70+ with intent" },
+    { label: "Paid", count: paid, bar: "bg-[#0b3a5e] text-white", desc: "Upgraded to paid" },
+  ];
+
+  const dropToActivation = n - activated; // onboarding's responsibility
+  const dropAfterActivation = activated - paid; // timing's responsibility
+
+  let verdict: { tone: "warn" | "ok"; text: React.ReactNode };
+  if (activated === 0) {
+    verdict = {
+      tone: "warn",
+      text: (
+        <>
+          No signups have hit their aha moment yet. The bottleneck is{" "}
+          <strong>activation (your onboarding flow)</strong>, not email timing —
+          outreach can&apos;t convert users who never saw value.
+        </>
+      ),
+    };
+  } else if (dropToActivation === 0 && dropAfterActivation === 0) {
+    verdict = {
+      tone: "ok",
+      text: (
+        <>
+          Every identified signup has activated <em>and</em> converted to paid.
+          Nothing is leaking right now — keep doing what you&apos;re doing.
+        </>
+      ),
+    };
+  } else if (dropToActivation >= dropAfterActivation) {
+    verdict = {
+      tone: "warn",
+      text: (
+        <>
+          Your biggest leak is <strong>before activation</strong>:{" "}
+          {pct(dropToActivation)}% of signups haven&apos;t reached their aha
+          moment. That points to <strong>onboarding</strong>, not outreach — fix
+          activation first.
+        </>
+      ),
+    };
+  } else {
+    verdict = {
+      tone: "ok",
+      text: (
+        <>
+          Activation looks healthy. Your biggest leak is{" "}
+          <strong>after activation</strong>: {dropAfterActivation} activated
+          user{dropAfterActivation === 1 ? "" : "s"} haven&apos;t converted yet —
+          exactly where behavior-triggered <strong>timing</strong> moves the
+          needle.
+        </>
+      ),
+    };
+  }
+
+  const benchmark =
+    activationRate >= 30
+      ? { label: "Healthy", class: "bg-emerald-50 text-emerald-700" }
+      : activationRate >= 20
+        ? { label: "Average", class: "bg-amber-50 text-amber-700" }
+        : { label: "Needs work", class: "bg-red-50 text-red-700" };
+
+  return (
+    <div className="card p-5 sm:p-6 space-y-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-sm font-semibold text-gray-900">Activation funnel</h2>
+          <p className="text-xs text-gray-400 mt-0.5">
+            Where your signups are right now — is the leak onboarding or timing?
+          </p>
+        </div>
+        <div className="text-right">
+          <div className="flex items-center justify-end gap-2">
+            <span className="text-2xl font-bold text-[#0b3a5e] tabular-nums">
+              {activationRate}%
+            </span>
+            <span
+              className={cn(
+                "text-[11px] font-semibold px-2 py-0.5 rounded-full",
+                benchmark.class
+              )}
+            >
+              {benchmark.label}
+            </span>
+          </div>
+          <p className="text-[11px] text-gray-400">activation rate · aim for 30%+</p>
+        </div>
+      </div>
+
+      {/* Funnel bars */}
+      <div className="space-y-2.5">
+        {steps.map((s, i) => {
+          const widthPct = Math.max(pct(s.count), 6);
+          const prev = i === 0 ? null : steps[i - 1].count;
+          const drop = prev !== null && prev > 0 ? prev - s.count : 0;
+          const dropPct =
+            prev !== null && prev > 0 ? Math.round((drop / prev) * 100) : 0;
+          return (
+            <div key={s.label}>
+              {i > 0 && (
+                <div className="flex items-center gap-1 text-[11px] text-gray-400 pl-1 mb-1">
+                  <span className="text-gray-300">&#8627;</span>
+                  {drop > 0 ? (
+                    <span>
+                      &minus;{drop} dropped ({dropPct}%)
+                    </span>
+                  ) : (
+                    <span>no drop-off</span>
+                  )}
+                </div>
+              )}
+              <div className="flex items-center gap-3">
+                <div className="w-28 flex-shrink-0">
+                  <p className="text-xs font-semibold text-gray-800">{s.label}</p>
+                  <p className="text-[10px] text-gray-400 leading-tight">
+                    {s.desc}
+                  </p>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div
+                    className={cn(
+                      "h-8 rounded-md flex items-center px-2.5 transition-all duration-500",
+                      s.bar
+                    )}
+                    style={{ width: `${widthPct}%` }}
+                  >
+                    <span className="text-xs font-bold tabular-nums">
+                      {s.count}
+                    </span>
+                  </div>
+                </div>
+                <span className="w-10 text-right text-xs font-semibold text-gray-500 tabular-nums flex-shrink-0">
+                  {pct(s.count)}%
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Diagnostic verdict — the whole point: assign the leak honestly */}
+      <div
+        className={cn(
+          "rounded-lg px-4 py-3 text-xs leading-relaxed",
+          verdict.tone === "warn"
+            ? "bg-amber-50 text-amber-900"
+            : "bg-emerald-50 text-emerald-900"
+        )}
+      >
+        {verdict.text}
+      </div>
+
+      {/* Composition footnote */}
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-gray-400">
+        <span>
+          Still onboarding:{" "}
+          <strong className="text-gray-600">{stillOnboarding}</strong>
+        </span>
+        <span>
+          Slipped (quiet/churned):{" "}
+          <strong className="text-gray-600">{slipped}</strong>
+        </span>
+        <span>
+          Activated &rarr; paid:{" "}
+          <strong className="text-gray-600">{activatedToPaid}%</strong>
+        </span>
+      </div>
+    </div>
+  );
+}
+
 function Banners({ data }: { data: LiveData | null }) {
   if (!data) return null;
   return (
@@ -491,6 +722,8 @@ export function LiveDashboard() {
           icon={Clock}
         />
       </div>
+
+      <ActivationFunnel users={data?.users ?? null} />
 
       <OverviewUsersTable
         users={data?.users ?? null}
