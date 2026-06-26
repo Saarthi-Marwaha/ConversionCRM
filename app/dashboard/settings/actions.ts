@@ -4,6 +4,90 @@ import { revalidatePath } from "next/cache";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { getActiveWorkspace } from "@/lib/active-workspace";
 import { normalizeFeatureUrl } from "@/lib/scoring";
+import { normalizeMilestoneConfig } from "@/lib/value-milestone";
+
+/** snake_case event identifier like the widget sends. */
+function slugEvent(raw: string): string {
+  return raw
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "_")
+    .replace(/[^a-z0-9_-]/g, "")
+    .slice(0, 64);
+}
+
+/** Parse a comma/newline separated list of event names into slugs. */
+function eventList(raw: string): string[] {
+  return raw
+    .split(/[,\n]/)
+    .map((s) => slugEvent(s))
+    .filter(Boolean);
+}
+
+/**
+ * Save the workspace's Value Milestone. Common case is a single event
+ * ("first project created" → event "project_created"); an advanced JSON matcher
+ * field lets power users define computed (all/any/count/property) conditions.
+ * The full object (including `enabled`) is stored so the form round-trips;
+ * the scorer ignores it when enabled is false (normalizeMilestoneConfig → null).
+ */
+export async function saveValueMilestone(formData: FormData) {
+  const { workspace } = await getActiveWorkspace();
+  if (!workspace) return { error: "No workspace" };
+
+  const enabled = formData.get("vm_enabled") === "on";
+  const label = ((formData.get("vm_label") as string) ?? "").trim().slice(0, 120);
+  const event = slugEvent((formData.get("vm_event") as string) ?? "");
+  const advancedRaw = ((formData.get("vm_matcher_json") as string) ?? "").trim();
+  const vanity = eventList((formData.get("vm_vanity") as string) ?? "");
+  const prereq = eventList((formData.get("vm_prereq") as string) ?? "");
+  const atRiskRaw = Number((formData.get("vm_at_risk_days") as string) ?? "14");
+  const atRiskDays =
+    Number.isFinite(atRiskRaw) && atRiskRaw >= 1 && atRiskRaw <= 90 ? atRiskRaw : 14;
+
+  // Build the matcher: advanced JSON wins; otherwise the single-event case.
+  let matcher: unknown;
+  if (advancedRaw) {
+    try {
+      matcher = JSON.parse(advancedRaw);
+    } catch {
+      return { error: "Advanced matcher is not valid JSON" };
+    }
+  } else {
+    if (enabled && !event) {
+      return { error: "Enter the event that means value was achieved" };
+    }
+    matcher = { kind: "event", event: event || "value_achieved" };
+  }
+
+  const raw = {
+    enabled,
+    label: label || "Value milestone",
+    matcher,
+    vanityEvents: vanity,
+    nearValue: prereq.length
+      ? [{ kind: "prerequisites", events: prereq, fraction: 0.8 }]
+      : [],
+    atRiskDays,
+  };
+
+  // Validate the matcher when enabled (a bad advanced JSON would silently
+  // disable scoring otherwise).
+  if (enabled && !normalizeMilestoneConfig(raw)) {
+    return { error: "Milestone definition is invalid — check the matcher." };
+  }
+
+  const admin = createSupabaseAdminClient();
+  const { error } = await admin
+    .from("workspaces")
+    .update({ value_milestone: raw })
+    .eq("id", workspace.id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/settings");
+  return { ok: true };
+}
 
 export async function saveWebsiteUrl(formData: FormData) {
   const { workspace } = await getActiveWorkspace();

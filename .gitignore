@@ -37,3 +37,4 @@ next-env.d.ts
 
 # email dev
 .react-email/
+.tmp-vm/

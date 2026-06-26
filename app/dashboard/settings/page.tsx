@@ -9,6 +9,7 @@ import { WebsiteUrlForm } from "@/components/WebsiteUrlForm";
 import { ReplyToEmailForm } from "@/components/ReplyToEmailForm";
 import { EmailDeliveryForm } from "@/components/EmailDeliveryForm";
 import { AhaMomentForm } from "@/components/AhaMomentForm";
+import { ValueMilestoneForm } from "@/components/ValueMilestoneForm";
 import { FollowupForm } from "@/components/FollowupForm";
 import { BillingSection } from "@/components/BillingSection";
 import type { PlanId } from "@/lib/plans";
@@ -278,6 +279,25 @@ user and event should appear within 3 seconds.`;
           currentName={workspace.key_feature_name}
           currentEvent={workspace.key_feature_event}
           currentUrl={workspace.key_feature_url}
+        />
+      </section>
+
+      {/* ── Value milestone (outcome-based readiness) ──── */}
+      <section id="value-milestone" className="card p-5 sm:p-6 space-y-4 scroll-mt-24">
+        <div>
+          <h2 className="text-base font-semibold text-gray-900">
+            Value milestone
+          </h2>
+          <p className="text-sm text-gray-500 mt-0.5">
+            Define the one outcome that means a user got real value (e.g. first
+            project created, first integration connected). Readiness, lifecycle
+            stages, and upgrade emails key off this — not clicks and pageviews.
+          </p>
+        </div>
+        <ValueMilestoneForm
+          current={
+            (workspace.value_milestone as Record<string, unknown> | null) ?? null
+          }
         />
       </section>
 

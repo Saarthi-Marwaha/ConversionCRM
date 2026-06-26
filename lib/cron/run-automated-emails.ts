@@ -21,6 +21,11 @@ import { isWithinSendWindow, isCoveredByWindowRun } from "@/lib/emails/local-tim
  */
 export type EmailRunMode = "window" | "fallback";
 import { matchesAhaUrl, normalizeAhaPath } from "@/lib/scoring";
+import {
+  normalizeMilestoneConfig,
+  valueAllowsTrigger,
+  type ValueState,
+} from "@/lib/value-milestone";
 import { WelcomeEmail } from "@/emails/templates/Welcome";
 import { FeatureNudgeEmail } from "@/emails/templates/FeatureNudge";
 import { ValueDemoEmail } from "@/emails/templates/ValueDemo";
@@ -49,6 +54,7 @@ type WorkspaceRow = {
   followup_enabled: boolean | null;
   followup_interval_days: number | null;
   followup_max_sends: number | null;
+  value_milestone: unknown;
 };
 
 /**
@@ -314,9 +320,14 @@ async function processWorkspaceEmails(
           .limit(5000),
         supabase
           .from("engagement_scores")
-          .select("user_id, score")
+          .select("user_id, score, value_state")
           .eq("workspace_id", ws.id),
   ]);
+
+  // Value milestone gate: when configured, lifecycle triggers fire on value
+  // STATE, not just the engagement score. Unconfigured → null → no gating.
+  const milestone = normalizeMilestoneConfig(ws.value_milestone);
+  const valueStateByUser = new Map<string, ValueState>();
 
   if (stageError) {
     result.errors.push(`workspace:${ws.id} stages – ${stageError.message}`);
@@ -328,8 +339,14 @@ async function processWorkspaceEmails(
   }
 
   const scoreByUser = new Map<string, number>();
-  for (const row of scores ?? []) {
-    if (row.user_id) scoreByUser.set(row.user_id, row.score ?? 0);
+  for (const row of (scores ?? []) as {
+    user_id: string | null;
+    score: number | null;
+    value_state: ValueState | null;
+  }[]) {
+    if (!row.user_id) continue;
+    scoreByUser.set(row.user_id, row.score ?? 0);
+    if (row.value_state) valueStateByUser.set(row.user_id, row.value_state);
   }
 
   const eventsByUser = new Map<string, EventRow[]>();
@@ -355,6 +372,21 @@ async function processWorkspaceEmails(
 
     const plan = planStageEmail(user, ws);
     if (!plan) continue;
+
+    // ── Value milestone gate ───────────────────────────────────────────
+    // When a milestone is configured, journey triggers depend on the value
+    // STATE: upgrade/urgency wait until value is achieved, nudges target
+    // near-value/engaged users. No milestone → always allowed (unchanged).
+    if (
+      milestone &&
+      !valueAllowsTrigger(
+        plan.trigger,
+        valueStateByUser.get(user.user_id) ?? "not_started",
+        true
+      )
+    ) {
+      continue;
+    }
 
     // Region-aware timing (welcome is exempt — it fires instantly on signup).
     //  • window run   → only users in their ~11 am local window.
@@ -431,7 +463,7 @@ export async function runAutomatedEmailsForWorkspace(
   const { data: ws, error } = await supabase
     .from("workspaces")
     .select(
-      "id, name, product_name, website_url, key_feature_name, key_feature_event, key_feature_url, reply_to_email, email_sender_name, plan, followup_enabled, followup_interval_days, followup_max_sends, emails_last_run_at"
+      "id, name, product_name, website_url, key_feature_name, key_feature_event, key_feature_url, reply_to_email, email_sender_name, plan, followup_enabled, followup_interval_days, followup_max_sends, value_milestone, emails_last_run_at"
     )
     .eq("id", workspaceId)
     .single();
@@ -475,7 +507,7 @@ export async function runAutomatedEmails(
   const { data: workspaces, error: wsError } = await supabase
     .from("workspaces")
     .select(
-      "id, name, product_name, website_url, key_feature_name, key_feature_event, key_feature_url, reply_to_email, email_sender_name, plan, followup_enabled, followup_interval_days, followup_max_sends"
+      "id, name, product_name, website_url, key_feature_name, key_feature_event, key_feature_url, reply_to_email, email_sender_name, plan, followup_enabled, followup_interval_days, followup_max_sends, value_milestone"
     )
     .not("reply_to_email", "is", null);
 

@@ -4,6 +4,12 @@
  */
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { computeWeeklyEngagementScore, type ScoringEvent } from "@/lib/scoring";
+import {
+  normalizeMilestoneConfig,
+  evaluateValue,
+  computeReadiness,
+  type ValueState,
+} from "@/lib/value-milestone";
 import { daysAgo } from "@/lib/utils";
 
 export type ScoredUser = {
@@ -24,6 +30,7 @@ type WorkspaceRow = {
   key_feature_name: string | null;
   key_feature_event: string | null;
   key_feature_url: string | null;
+  value_milestone: unknown;
 };
 
 type EventRow = {
@@ -40,7 +47,9 @@ export async function runScoring(): Promise<RunScoringResult> {
 
   const { data: workspaces, error: wsError } = await supabase
     .from("workspaces")
-    .select("id, key_feature_name, key_feature_event, key_feature_url");
+    .select(
+      "id, key_feature_name, key_feature_event, key_feature_url, value_milestone"
+    );
 
   if (wsError) {
     throw new Error(`Failed to fetch workspaces: ${wsError.message}`);
@@ -52,6 +61,26 @@ export async function runScoring(): Promise<RunScoringResult> {
 
   for (const workspace of (workspaces ?? []) as WorkspaceRow[]) {
     const workspaceScored: ScoredUser[] = [];
+    const milestone = normalizeMilestoneConfig(workspace.value_milestone);
+
+    // Sticky value achievement: carry forward the earliest time each user
+    // crossed the value line so a 7-day scoring window never "forgets" it.
+    const priorAchievedAt = new Map<string, string>();
+    if (milestone) {
+      const { data: priorRows } = await supabase
+        .from("engagement_scores")
+        .select("user_id, value_achieved_at")
+        .eq("workspace_id", workspace.id)
+        .not("value_achieved_at", "is", null);
+      for (const r of (priorRows ?? []) as {
+        user_id: string | null;
+        value_achieved_at: string | null;
+      }[]) {
+        if (r.user_id && r.value_achieved_at) {
+          priorAchievedAt.set(r.user_id, r.value_achieved_at);
+        }
+      }
+    }
 
     const { data: events, error: evError } = await supabase
       .from("events")
@@ -82,11 +111,48 @@ export async function runScoring(): Promise<RunScoringResult> {
 
     for (const [userId, userEvents] of Array.from(byUser.entries())) {
       try {
-        const { score, breakdown } = computeWeeklyEngagementScore(userEvents, {
-          name: workspace.key_feature_name,
-          event: workspace.key_feature_event,
-          url: workspace.key_feature_url,
-        });
+        // Layer 1 — generic engagement (activity) from the existing scorer.
+        const { score: engagement, breakdown } = computeWeeklyEngagementScore(
+          userEvents,
+          {
+            name: workspace.key_feature_name,
+            event: workspace.key_feature_event,
+            url: workspace.key_feature_url,
+          }
+        );
+
+        // Layer 2 — value milestone (outcome). When configured, the stored
+        // `score` becomes the OUTCOME-WEIGHTED readiness so stages + emails key
+        // off value, not activity. Unconfigured → readiness == engagement.
+        let storedScore = engagement;
+        let valueState: ValueState | null = null;
+        let valueAchievedAt: string | null = null;
+        let valueBreakdown: Record<string, unknown> | null = null;
+
+        if (milestone) {
+          const evaluation = evaluateValue(
+            milestone,
+            userEvents,
+            new Date(),
+            priorAchievedAt.get(userId) ?? null
+          );
+          const { readiness, breakdown: readinessBreakdown } = computeReadiness(
+            engagement,
+            evaluation,
+            milestone
+          );
+          storedScore = readiness;
+          valueState = evaluation.state;
+          valueAchievedAt = evaluation.achievedAt;
+          valueBreakdown = {
+            engagementScore: engagement,
+            readiness: readinessBreakdown,
+            evidence: evaluation.evidence,
+            nearValueProgress: evaluation.nearValueProgress,
+            meaningfulEvents: evaluation.meaningfulEvents,
+            vanityFiltered: evaluation.vanityFiltered,
+          };
+        }
 
         const { error: upsertError } = await supabase
           .from("engagement_scores")
@@ -95,8 +161,11 @@ export async function runScoring(): Promise<RunScoringResult> {
               workspace_id: workspace.id,
               user_id: userId,
               end_user_id: null,
-              score,
+              score: storedScore,
               score_breakdown: breakdown,
+              value_state: valueState,
+              value_achieved_at: valueAchievedAt,
+              value_breakdown: valueBreakdown,
               computed_at: computedAt,
             },
             { onConflict: "workspace_id,user_id" }
@@ -107,10 +176,11 @@ export async function runScoring(): Promise<RunScoringResult> {
           continue;
         }
 
+        // Readiness drives lifecycle stage assignment downstream.
         workspaceScored.push({
           workspace_id: workspace.id,
           user_id: userId,
-          score,
+          score: storedScore,
         });
         scored++;
       } catch (err) {

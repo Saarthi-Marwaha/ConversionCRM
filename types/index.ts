@@ -2,6 +2,10 @@
 // Core domain types for ConversionCRM
 // ─────────────────────────────────────────────
 
+import type { ValueMilestoneConfig, ValueState } from "@/lib/value-milestone";
+
+export type { ValueMilestoneConfig, ValueState } from "@/lib/value-milestone";
+
 export type LifecycleStage =
   | "signup"
   | "onboarding"
@@ -61,6 +65,8 @@ export interface Workspace {
   key_feature_name: string | null;
   key_feature_event: string | null;
   key_feature_url: string | null;
+  /** Value Milestone config (see lib/value-milestone.ts). null = not configured. */
+  value_milestone: ValueMilestoneConfig | null;
   trial_length_days: number;
   email_provider: EmailProvider | null;
   smtp_host: string | null;
@@ -127,8 +133,13 @@ export interface EngagementScore {
   workspace_id: string;
   end_user_id: string | null;
   user_id: string | null;
+  /** Outcome-weighted readiness when a milestone is configured; else engagement. */
   score: number;
   score_breakdown: Record<string, number>;
+  /** Value-axis lifecycle (null when no milestone configured). */
+  value_state: ValueState | null;
+  value_achieved_at: string | null;
+  value_breakdown: Record<string, unknown> | null;
   computed_at: string;
 }
 
