@@ -10,6 +10,7 @@ import {
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
+import { FirstWinCard } from "@/components/FirstWinCard";
 import type { EmailTrigger, LifecycleStage } from "@/types";
 import type { WeeklyScoreBreakdown } from "@/lib/scoring";
 import type { UserEmailsSent } from "@/lib/emails/stage-email-columns";
@@ -693,6 +694,8 @@ export function LiveDashboard() {
       )}
 
       <Banners data={data} />
+
+      <FirstWinCard data={data} />
 
       {/* Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">

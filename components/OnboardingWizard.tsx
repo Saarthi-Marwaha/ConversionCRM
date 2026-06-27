@@ -204,6 +204,11 @@ export function OnboardingWizard({
       return;
     }
     setClientError(null);
+    // Pre-fill the sender name from the product name so there's one less field
+    // standing between signup and the first win.
+    if (step === 0 && !senderName.trim() && productName.trim()) {
+      setSenderName(`${productName.trim()} Team`);
+    }
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
   }
 
@@ -373,14 +378,23 @@ export function OnboardingWizard({
 
             {provider === "smtp" && (
               <div className="space-y-4 rounded-md bg-gray-50/70 p-4">
-                <button
-                  type="button"
-                  onClick={() => setShowSmtpHelp(true)}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-sky-700 hover:text-sky-900"
-                >
-                  <HelpCircle className="h-3.5 w-3.5" />
-                  How do I get these details?
-                </button>
+                {/* Inline cue teaches in-place — no need to leave the flow for
+                    docs. The modal stays as an optional deeper reference. */}
+                <p className="rounded-md bg-sky-50 px-3 py-2 text-xs leading-relaxed text-sky-900">
+                  Paste these from your email provider.{" "}
+                  <strong>Gmail:</strong> host{" "}
+                  <span className="font-mono">smtp.gmail.com</span>, port 465,
+                  username your address, password an app password (not your
+                  login).{" "}
+                  <button
+                    type="button"
+                    onClick={() => setShowSmtpHelp(true)}
+                    className="inline-flex items-center gap-1 font-semibold text-sky-700 underline hover:text-sky-900"
+                  >
+                    <HelpCircle className="h-3 w-3" />
+                    Outlook, SES or other? Exact steps
+                  </button>
+                </p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="sm:col-span-2">
                     <Field label="SMTP host">
@@ -456,18 +470,20 @@ export function OnboardingWizard({
           <div className="space-y-5">
             <div>
               <h1 className="text-xl font-bold text-gray-900">
-                Your aha moment
+                What does &ldquo;it clicked&rdquo; look like for a user?
               </h1>
               <p className="text-gray-500 text-sm mt-1">
-                The one feature that proves your product&apos;s value. When a
-                user clicks the button that opens this link, we count it as
-                <strong> your main feature being used</strong> — it powers 20
-                points of the engagement score.
+                Think of the one thing a user does that means your product
+                actually <strong>worked</strong> for them — created their first
+                report, connected a tool, sent their first invoice. Paste the
+                link that action opens and we&apos;ll know the moment someone
+                reaches it. <strong>No code</strong> — the widget already tracks
+                every click.
               </p>
             </div>
             <Field
-              label="Feature button link (required)"
-              hint="Paste the link your main-feature button opens — a full URL or a path like /reports/new. No extra code needed; the widget already tracks every click."
+              label="Where does that win happen? (link)"
+              hint="Paste the link the button opens — a full URL or a path like /reports/new. When a user clicks through to it, that counts as them reaching the win."
             >
               <input
                 value={featureUrl}

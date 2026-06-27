@@ -16,18 +16,19 @@ export function SetupStatusBanner() {
           <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-amber-500" />
         </span>
         <span className="text-sm font-semibold text-amber-800">
-          Setup incomplete
+          One step from spotting your ready-to-buy users
         </span>
         <span className="text-sm text-amber-700">
-          Add your key-feature (aha-moment) link so onboarding nudges, scoring
-          and lifecycle emails know what to point users at.
+          Tell us the one action that means a user &ldquo;got it&rdquo; — then
+          we can show you who&apos;s activating and email them the moment
+          they&apos;re ready to pay.
         </span>
       </div>
       <Link
         href="/dashboard/settings#aha"
         className="shrink-0 rounded-md bg-amber-500 px-3.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-amber-600"
       >
-        Complete setup →
+        Set your win →
       </Link>
     </div>
   );
