@@ -5,22 +5,22 @@ import { createWorkspace } from "@/app/auth/actions";
 import { cn } from "@/lib/utils";
 import {
   Building2,
-  Mail,
-  Server,
   Target,
   Globe,
   ArrowRight,
   ArrowLeft,
-  Lock,
+  ChevronDown,
   Check,
 } from "lucide-react";
 
 const inputClass =
   "w-full px-4 py-2.5 bg-gray-50 rounded-md text-sm text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:bg-white transition-colors";
 
+// Pre-win path only — anything that doesn't help the user reach their first
+// tracked event (email delivery, SMTP, sender name…) is defaulted and deferred
+// to Settings after activation.
 const STEPS = [
   { id: "company", label: "Company", icon: Building2 },
-  { id: "email", label: "Email delivery", icon: Mail },
   { id: "win", label: "Your win", icon: Target },
   { id: "website", label: "Website", icon: Globe },
 ] as const;
@@ -63,39 +63,43 @@ export function OnboardingWizard({
 }) {
   const [step, setStep] = useState(0);
   const [clientError, setClientError] = useState<string | null>(null);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   // ── Wizard state ──────────────────────────────────
   const [companyName, setCompanyName] = useState("");
   const [productName, setProductName] = useState("");
-  const [senderName, setSenderName] = useState("");
-  const [replyTo, setReplyTo] = useState(userEmail);
-  const [smtpInterest, setSmtpInterest] = useState(false); // wants SMTP (Basic+)
   const [featureName, setFeatureName] = useState("");
   const [featureUrl, setFeatureUrl] = useState("");
   const [featureEvent, setFeatureEvent] = useState("");
-  const [valueEvent, setValueEvent] = useState("");
+  const [valueEvent, setValueEvent] = useState("report_created"); // sensible default
   const [valuePrereq, setValuePrereq] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
 
-  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // ── Defaulted + deferred email delivery (editable later in Settings) ──
+  // Zero-setup default: ConversionCRM sends for the user (provider "resend"),
+  // sender name auto-derives from the product/company, replies go to the
+  // account email. None of this is asked before the first win.
+  const senderName = `${(productName.trim() || companyName.trim()) || "Your"} Team`;
+  const replyTo = userEmail;
 
-  // Returns a specific message for the first missing/invalid field, or null.
+  // Win name is defaulted, not required: fall back to a humanized value event
+  // ("report_created" → "Report created") so the only required win input is the
+  // link.
+  const featureNameOut =
+    featureName.trim() ||
+    valueEvent.trim().replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase()) ||
+    "Your key feature";
+
+  // Returns a specific message for the first missing field, or null.
   function validateStep(s: number): string | null {
     switch (s) {
       case 0:
         if (!companyName.trim()) return "Enter your company name to continue.";
-        if (!productName.trim()) return "Enter your product name to continue.";
-        return null;
+        return null; // product name is optional (falls back to company name)
       case 1:
-        if (!senderName.trim()) return "Enter the sender name your users will see.";
-        if (!EMAIL_RE.test(replyTo.trim()))
-          return "Enter a valid reply-to email (where user replies should land).";
-        return null;
-      case 2:
         if (!featureUrl.trim()) return "Paste the link where the win happens.";
-        if (!featureName.trim()) return "Give the win a short name.";
-        return null;
-      case 3:
+        return null; // win name + value event are defaulted — no typing required
+      case 2:
         if (websiteUrl.trim().length < 4)
           return "Enter the website URL where you'll install the widget.";
         return null;
@@ -107,7 +111,7 @@ export function OnboardingWizard({
   const stepValid = useMemo(
     () => validateStep(step) === null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [step, companyName, productName, senderName, replyTo, featureName, featureUrl, websiteUrl]
+    [step, companyName, featureName, featureUrl, websiteUrl]
   );
 
   function next() {
@@ -117,17 +121,6 @@ export function OnboardingWizard({
       return;
     }
     setClientError(null);
-    // Pre-fill downstream fields so there's less to type.
-    if (step === 0 && !senderName.trim() && productName.trim()) {
-      setSenderName(`${productName.trim()} Team`);
-    }
-    if (step === 2 && !valueEvent.trim()) {
-      // Default the value event to the aha event, then a slug of the name.
-      const derived =
-        featureEvent.trim() ||
-        featureName.trim().toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
-      if (derived) setValueEvent(derived);
-    }
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
   }
 
@@ -169,8 +162,9 @@ export function OnboardingWizard({
           />
         </div>
         <p className="text-[11px] text-gray-400 mt-1.5">
-          Step {step + 1} of {STEPS.length} — everything here can be changed later
-          in Settings. You start on the free plan, no card required.
+          Step {step + 1} of {STEPS.length} — then you&apos;re at your install
+          snippet. Free plan, no card required; everything is editable later in
+          Settings.
         </p>
       </div>
 
@@ -189,7 +183,7 @@ export function OnboardingWizard({
                 Tell us about your product
               </h1>
               <p className="text-gray-500 text-sm mt-1">
-                Shown to your users in emails and reports.
+                Used in your dashboard and (later) on the emails we send for you.
               </p>
             </div>
             <Field label="Company name">
@@ -201,123 +195,36 @@ export function OnboardingWizard({
                 autoFocus
               />
             </Field>
-            <Field label="Product name">
+            <Field
+              label="Product name"
+              optional
+              hint="Defaults to your company name if left blank."
+            >
               <input
                 value={productName}
                 onChange={(e) => setProductName(e.target.value)}
-                placeholder="Acme Dashboard"
+                placeholder={companyName ? companyName : "Acme Dashboard"}
                 className={inputClass}
               />
             </Field>
           </div>
         )}
 
-        {/* ── Step 2: Email delivery ────────────── */}
+        {/* ── Step 2: Your win (aha link + name + value event) ─── */}
         {step === 1 && (
-          <div className="space-y-5">
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">
-                How should emails be sent?
-              </h1>
-              <p className="text-gray-500 text-sm mt-1">
-                We&apos;ll send your lifecycle emails for free. Replies land in
-                your inbox — change anytime in Settings.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setSmtpInterest(false)}
-                className={cn(
-                  "rounded-md p-3.5 text-left transition-all",
-                  !smtpInterest ? "bg-sky-50 ring-2 ring-sky-400" : "bg-gray-50 hover:bg-gray-100"
-                )}
-              >
-                <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-                  <Mail className="h-4 w-4 text-sky-500" />
-                  Gmail / any inbox
-                </div>
-                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                  Zero setup. We send for you; replies land in your inbox.
-                </p>
-              </button>
-              {/* SMTP is a Basic+ feature — show it, but never collect
-                  credentials a Free plan can't use (audit Fix 5). */}
-              <button
-                type="button"
-                onClick={() => setSmtpInterest(true)}
-                className={cn(
-                  "relative rounded-md p-3.5 text-left transition-all",
-                  smtpInterest ? "bg-amber-50 ring-2 ring-amber-300" : "bg-gray-50 hover:bg-gray-100"
-                )}
-              >
-                <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-gray-200 px-1.5 py-0.5 text-[10px] font-semibold text-gray-500">
-                  <Lock className="h-2.5 w-2.5" /> Basic
-                </span>
-                <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-                  <Server className="h-4 w-4 text-gray-400" />
-                  My own SMTP
-                </div>
-                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                  Send from your domain. Unlocks on Basic.
-                </p>
-              </button>
-            </div>
-
-            {smtpInterest && (
-              <div className="rounded-md bg-amber-50 px-4 py-3 text-xs text-amber-800 leading-relaxed">
-                Sending from your own domain is a <strong>Basic</strong> feature.
-                For now you&apos;ll send through ConversionCRM for free — finish
-                setup, then add your SMTP details in{" "}
-                <strong>Settings → Email delivery</strong> after upgrading. Nothing
-                here is wasted.
-              </div>
-            )}
-
-            <Field
-              label="Sender name"
-              hint="What your users see in their inbox, e.g. “Acme Team”."
-            >
-              <input
-                value={senderName}
-                onChange={(e) => setSenderName(e.target.value)}
-                placeholder={productName ? `${productName} Team` : "Acme Team"}
-                className={inputClass}
-              />
-            </Field>
-
-            <Field
-              label="Reply-to inbox (Gmail or any email)"
-              hint="When users reply to automated emails, the reply lands here."
-            >
-              <input
-                type="email"
-                value={replyTo}
-                onChange={(e) => setReplyTo(e.target.value)}
-                placeholder="you@gmail.com"
-                className={inputClass}
-              />
-            </Field>
-          </div>
-        )}
-
-        {/* ── Step 3: Your win (aha moment + value milestone) ─── */}
-        {step === 2 && (
           <div className="space-y-5">
             <div>
               <h1 className="text-xl font-bold text-gray-900">
                 What does &ldquo;it clicked&rdquo; look like for a user?
               </h1>
               <p className="text-gray-500 text-sm mt-1">
-                Two quick things that make scoring sharp: the link a user clicks
-                when your product works, and the <strong>event</strong> that
-                proves they actually reached the outcome.
+                The one moment a user reaches real value. We&apos;ve pre-filled a
+                sensible default — confirm or tweak it.
               </p>
             </div>
             <Field
               label="Where does the win happen? (link)"
-              hint="Paste the link the button opens — a full URL or a path like /reports/new. Clicking through to it counts as reaching the win. No code needed."
+              hint="Paste the link the button opens — a full URL or a path like /reports/new. No code needed; the widget tracks every click."
             >
               <input
                 value={featureUrl}
@@ -337,40 +244,59 @@ export function OnboardingWizard({
             </Field>
             <Field
               label="Value event"
-              hint="The event you fire when a user reaches the core outcome (e.g. report_created, project_created). This — not clicks — drives readiness and upgrade emails. We pre-fill a sensible default; confirm or change it."
+              hint="The event you fire when a user reaches the outcome — this drives readiness and upgrade emails. Pre-filled; change only if yours differs."
             >
               <input
                 value={valueEvent}
                 onChange={(e) => setValueEvent(e.target.value)}
-                placeholder="e.g. report_created"
+                placeholder="report_created"
                 className={inputClass}
               />
             </Field>
-            <Field
-              label="Near-value steps"
-              optional
-              hint="Prerequisite events a user does on the way to the win (comma-separated). Lets us spot users who are close but stalled."
-            >
-              <input
-                value={valuePrereq}
-                onChange={(e) => setValuePrereq(e.target.value)}
-                placeholder="e.g. project_created, data_imported"
-                className={inputClass}
-              />
-            </Field>
-            <Field label="Custom aha event name" optional>
-              <input
-                value={featureEvent}
-                onChange={(e) => setFeatureEvent(e.target.value)}
-                placeholder="e.g. report_opened"
-                className={inputClass}
-              />
-            </Field>
+
+            {/* Optional details hidden by default so the win step stays to 3
+                fields (audit Q7 — default, don't ask). */}
+            <div>
+              <button
+                type="button"
+                onClick={() => setShowAdvanced((v) => !v)}
+                className="flex items-center gap-1 text-xs font-medium text-sky-600 hover:text-sky-800"
+              >
+                <ChevronDown
+                  className={cn("h-3.5 w-3.5 transition-transform", showAdvanced && "rotate-180")}
+                />
+                Advanced (optional)
+              </button>
+              {showAdvanced && (
+                <div className="mt-3 space-y-4">
+                  <Field
+                    label="Near-value steps"
+                    optional
+                    hint="Prerequisite events on the way to the win (comma-separated). Lets us spot users who are close but stalled."
+                  >
+                    <input
+                      value={valuePrereq}
+                      onChange={(e) => setValuePrereq(e.target.value)}
+                      placeholder="e.g. project_created, data_imported"
+                      className={inputClass}
+                    />
+                  </Field>
+                  <Field label="Custom aha event name" optional>
+                    <input
+                      value={featureEvent}
+                      onChange={(e) => setFeatureEvent(e.target.value)}
+                      placeholder="e.g. report_opened"
+                      className={inputClass}
+                    />
+                  </Field>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
-        {/* ── Step 4: Website ───────────────────── */}
-        {step === 3 && (
+        {/* ── Step 3: Website ───────────────────── */}
+        {step === 2 && (
           <div className="space-y-5">
             <div>
               <h1 className="text-xl font-bold text-gray-900">
@@ -392,10 +318,11 @@ export function OnboardingWizard({
               />
             </Field>
             <div className="rounded-md bg-sky-50 px-4 py-3 text-xs text-[#0b3a5e] leading-relaxed">
-              Finishing creates your workspace on the{" "}
-              <strong>free plan</strong> with a{" "}
-              <strong>production API key</strong> and takes you straight to your
-              install snippet — no pricing step, no card.
+              Finishing creates your workspace on the <strong>free plan</strong>{" "}
+              with a <strong>production API key</strong> and takes you straight to
+              your install snippet — no pricing step, no card. We&apos;ll send
+              lifecycle emails for you by default; tweak the sender, reply-to or
+              your own SMTP anytime in Settings.
             </div>
           </div>
         )}
@@ -419,7 +346,7 @@ export function OnboardingWizard({
 
           {step < STEPS.length - 1 ? (
             // Always enabled — validate on click and name the missing field
-            // (audit Fix 7a) instead of silently greying the button out.
+            // instead of silently greying the button out.
             <button
               type="button"
               onClick={next}
@@ -432,7 +359,7 @@ export function OnboardingWizard({
             <form
               action={createWorkspace}
               onSubmit={(e) => {
-                const err = validateStep(3);
+                const err = validateStep(2);
                 if (err) {
                   e.preventDefault();
                   setClientError(err);
@@ -441,10 +368,12 @@ export function OnboardingWizard({
             >
               <input type="hidden" name="company_name" value={companyName} />
               <input type="hidden" name="product_name" value={productName} />
+              {/* Defaulted + deferred email delivery */}
               <input type="hidden" name="email_sender_name" value={senderName} />
               <input type="hidden" name="email_provider" value="resend" />
               <input type="hidden" name="reply_to_email" value={replyTo} />
-              <input type="hidden" name="key_feature_name" value={featureName} />
+              {/* The win */}
+              <input type="hidden" name="key_feature_name" value={featureNameOut} />
               <input type="hidden" name="key_feature_url" value={featureUrl} />
               <input type="hidden" name="key_feature_event" value={featureEvent} />
               <input type="hidden" name="value_event" value={valueEvent} />

@@ -123,13 +123,13 @@ export function FirstWinCard({ data }: { data: FirstWinData }) {
         </span>
         <div className="min-w-0 flex-1">
           <h2 className="text-base font-bold">
-            ConversionCRM just scored your first real user 🎉
+            Tracking is live — your first real user just landed 🎉
           </h2>
           <p className="mt-1 text-sm text-sky-50 leading-relaxed">
-            <strong className="text-white">{firstUser}</strong> showed up and is
-            already scored and staged — no work from you. From here you know
-            exactly who&apos;s about to convert and who&apos;s slipping away,
-            automatically.
+            <strong className="text-white">{firstUser}</strong> came in and
+            ConversionCRM already scored and staged them — no work from you. Your
+            install works. Here&apos;s your next step: open their profile to see
+            the score, every action they took, and which email they&apos;ll get.
           </p>
           {/* Named outcome: their actual score + stage */}
           <div className="mt-3 inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs">

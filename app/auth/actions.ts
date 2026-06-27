@@ -131,17 +131,18 @@ export async function createWorkspace(formData: FormData) {
   const get = (k: string) => ((formData.get(k) as string) ?? "").trim();
 
   const companyName = get("company_name");
-  const productName = get("product_name");
-  const emailSenderName = get("email_sender_name") || productName;
+  // Product name is optional — fall back to the company name.
+  const productName = get("product_name") || companyName;
+  const emailSenderName = get("email_sender_name") || `${productName} Team`;
   const provider = get("email_provider") === "smtp" ? "smtp" : "resend";
   const replyToEmail = get("reply_to_email");
-  const keyFeatureName = get("key_feature_name");
+  // Win name is optional/defaulted — the link is what matters for tracking.
+  const keyFeatureName = get("key_feature_name") || "Your key feature";
   const keyFeatureUrl = get("key_feature_url");
   const rawEvent = get("key_feature_event");
   let websiteUrl = get("website_url").replace(/\/+$/, "");
 
-  if (!companyName || !productName) fail("Company and product name are required");
-  if (!keyFeatureName) fail("Name your aha-moment feature");
+  if (!companyName) fail("Company name is required");
   if (!keyFeatureUrl) fail("The feature button link is required");
   // Accept the link however it's typed — bare domain (no https/www) or path.
   const normalizedFeatureUrl = normalizeFeatureUrl(keyFeatureUrl);
