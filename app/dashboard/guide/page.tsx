@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { getActiveWorkspace } from "@/lib/active-workspace";
 import { CopyButton } from "@/components/CopyButton";
+import { InstallVerifier } from "@/components/InstallVerifier";
 import {
   Code2,
   Activity,
@@ -260,18 +261,27 @@ ConversionCRM.track("sign_up");  // "login" for returning users`;
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-3 text-sm">
-            <Link
-              href="/dashboard/settings"
-              className="rounded-md bg-emerald-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-emerald-700"
-            >
-              Full install + AI-agent prompt
-            </Link>
+          {/* 3 · Verify the install in-product (audit Fix 6) */}
+          <div className="mt-4">
+            <p className="text-sm font-semibold text-gray-900 mb-2">
+              3 · Verify it&apos;s working
+            </p>
+            <InstallVerifier />
+          </div>
+
+          {/* One obvious next step; everything else demoted (audit Fix 7b). */}
+          <div className="mt-5 flex flex-wrap items-center gap-4 text-sm">
             <Link
               href="/dashboard"
-              className="rounded-md bg-white px-4 py-2 font-semibold text-emerald-700 shadow-soft transition-colors hover:bg-emerald-50"
+              className="rounded-md bg-emerald-600 px-5 py-2.5 font-semibold text-white transition-colors hover:bg-emerald-700"
             >
-              Go to dashboard
+              Go to your dashboard →
+            </Link>
+            <Link
+              href="/dashboard/settings"
+              className="font-medium text-emerald-700 underline-offset-2 hover:underline"
+            >
+              Full install guide + AI-agent prompt
             </Link>
           </div>
         </section>

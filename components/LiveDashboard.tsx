@@ -11,8 +11,11 @@ import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { FirstWinCard } from "@/components/FirstWinCard";
+import { ShareResultsButton } from "@/components/ShareResultsButton";
 import type { EmailTrigger, LifecycleStage } from "@/types";
+import { emptyScoreBreakdown } from "@/lib/scoring";
 import type { WeeklyScoreBreakdown } from "@/lib/scoring";
+import { emptyEmailsSent } from "@/lib/emails/stage-email-columns";
 import type { UserEmailsSent } from "@/lib/emails/stage-email-columns";
 import {
   Users,
@@ -22,6 +25,8 @@ import {
   Clock,
   Check,
   Search,
+  FlaskConical,
+  ArrowRight,
 } from "lucide-react";
 
 type ClickTarget = { label: string; count: number };
@@ -665,10 +670,116 @@ function UserCardList({ users }: { users: LiveUser[] }) {
   );
 }
 
+/* ── Sample data (audit Fix 2) ───────────────────────────────
+ * Shown only when a brand-new workspace has zero real users, so the founder
+ * sees ConversionCRM working in ~10s — before installing any code. Clearly
+ * labelled and one click away from their real (empty) dashboard. Purely
+ * client-side: no fake rows are written to the database (which would trigger
+ * real scoring/emails).
+ */
+function demoUser(
+  p: Partial<LiveUser> &
+    Pick<LiveUser, "user_id" | "email" | "stage" | "engagement_score">
+): LiveUser {
+  const now = Date.now();
+  return {
+    country: null,
+    region: null,
+    emails_sent: emptyEmailsSent(),
+    score_breakdown: emptyScoreBreakdown(),
+    events: 14,
+    first_seen: new Date(now - 6 * 86_400_000).toISOString(),
+    last_seen: new Date(now - 3 * 3_600_000).toISOString(),
+    last_event: "page_view",
+    last_page: "/app",
+    signed_up: true,
+    logged_in: true,
+    is_anonymous: false,
+    total_time_seconds: 420,
+    total_clicks: 24,
+    pages: [],
+    page_count: 4,
+    activity: [],
+    ...p,
+  };
+}
+
+function buildDemoData(): LiveData {
+  const now = Date.now();
+  const ago = (h: number) => new Date(now - h * 3_600_000).toISOString();
+  const users: LiveUser[] = [
+    demoUser({ user_id: "demo_maya", email: "maya@northwind.io", stage: "conversion_ready", engagement_score: 86, country: "US", region: "CA", total_clicks: 41, total_time_seconds: 900, last_seen: ago(2) }),
+    demoUser({ user_id: "demo_arjun", email: "arjun@flowbase.app", stage: "active", engagement_score: 58, country: "IN", region: "KA", total_clicks: 22, last_seen: ago(6) }),
+    demoUser({ user_id: "demo_lena", email: "lena@brightcart.com", stage: "onboarding", engagement_score: 19, country: "DE", total_clicks: 7, total_time_seconds: 130, last_seen: ago(20) }),
+    demoUser({ user_id: "demo_sam", email: "sam@orbitdesk.co", stage: "going_quiet", engagement_score: 34, country: "GB", total_clicks: 12, last_seen: ago(24 * 16) }),
+    demoUser({ user_id: "demo_priya", email: "priya@deploya.dev", stage: "paid", engagement_score: 78, country: "US", region: "NY", total_clicks: 63, total_time_seconds: 1500, last_seen: ago(10) }),
+    demoUser({ user_id: "demo_tom", email: "tom@stackpad.io", stage: "churned", engagement_score: 8, country: "CA", total_clicks: 4, last_seen: ago(24 * 41) }),
+  ];
+  return {
+    workspace: { id: "demo", name: "Sample workspace", website_url: null, reply_to_configured: true },
+    range: "7d",
+    filtered: true,
+    users,
+    totals: {
+      users: users.length,
+      events: 412,
+      anonymousEvents: 0,
+      pageViews: 1280,
+      totalClicks: users.reduce((s, u) => s + u.total_clicks, 0),
+      identified: users.length,
+      totalTimeSeconds: users.reduce((s, u) => s + u.total_time_seconds, 0),
+    },
+    serverTime: new Date(now).toISOString(),
+  };
+}
+
+function DemoBanner({ onSwitch }: { onSwitch: () => void }) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+      <div className="flex items-start gap-2.5">
+        <FlaskConical className="h-4 w-4 mt-0.5 flex-shrink-0 text-amber-600" />
+        <p className="text-sm text-amber-900 leading-relaxed">
+          <strong>Sample data.</strong> This is ConversionCRM working with example
+          users so you can see scores, stages and the funnel before you install
+          anything. Your real users replace this the moment your widget is live.
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={onSwitch}
+        className="shrink-0 inline-flex items-center gap-1.5 rounded-md bg-amber-500 px-3.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-amber-600"
+      >
+        Switch to my real data <ArrowRight className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  );
+}
+
 /* ── Overview ────────────────────────────────────────────── */
 export function LiveDashboard() {
   const [range, setRange] = useDateRange();
   const { data, error, updatedAt } = useLiveData(range);
+
+  const [demoOff, setDemoOff] = useState(false);
+  useEffect(() => {
+    setDemoOff(localStorage.getItem("ccrm-demo-off") === "1");
+  }, []);
+  const demoData = useMemo(() => buildDemoData(), []);
+
+  // Sample data only while the real workspace has no users and the user
+  // hasn't switched it off.
+  const realEmpty = !!data && data.totals.users === 0;
+  const demoActive = realEmpty && !demoOff;
+  const view = demoActive ? demoData : data;
+
+  function switchToReal() {
+    localStorage.setItem("ccrm-demo-off", "1");
+    setDemoOff(true);
+  }
+  function showDemoAgain() {
+    localStorage.removeItem("ccrm-demo-off");
+    setDemoOff(false);
+  }
 
   return (
     <div className="space-y-5 sm:space-y-6">
@@ -678,10 +789,14 @@ export function LiveDashboard() {
             Live Overview
           </h1>
           <p className="text-gray-500 text-sm mt-0.5">
-            Real-time activity · {rangeLabel(data?.range ?? range)}
+            {demoActive ? "Sample data preview" : "Real-time activity"} ·{" "}
+            {rangeLabel(view?.range ?? range)}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          {!demoActive && data && data.totals.users > 0 && (
+            <ShareResultsButton data={data} />
+          )}
           <DateRangeToggle range={range} onChange={setRange} />
           <LiveBadge updatedAt={updatedAt} />
         </div>
@@ -693,44 +808,56 @@ export function LiveDashboard() {
         </div>
       )}
 
-      <Banners data={data} />
+      {demoActive && <DemoBanner onSwitch={switchToReal} />}
 
-      <FirstWinCard data={data} />
+      {!demoActive && <Banners data={data} />}
+
+      {!demoActive && <FirstWinCard data={data} />}
+
+      {realEmpty && demoOff && (
+        <button
+          type="button"
+          onClick={showDemoAgain}
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-sky-600 hover:text-sky-800"
+        >
+          <FlaskConical className="h-3.5 w-3.5" /> Show me the sample data again
+        </button>
+      )}
 
       {/* Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Metric
           label="Tracked Users"
-          value={data?.totals.users ?? "—"}
+          value={view?.totals.users ?? "—"}
           icon={Users}
           highlight
         />
         <Metric
           label="Page Views"
-          value={data ? formatCompact(data.totals.pageViews) : "—"}
+          value={view ? formatCompact(view.totals.pageViews) : "—"}
           icon={Eye}
         />
         <Metric
           label="Total Clicks"
-          value={data ? formatCompact(data.totals.totalClicks) : "—"}
+          value={view ? formatCompact(view.totals.totalClicks) : "—"}
           icon={MousePointerClick}
         />
         <Metric
           label="Time On Site"
           value={
-            data?.totals.totalTimeSeconds
-              ? formatDuration(data.totals.totalTimeSeconds)
+            view?.totals.totalTimeSeconds
+              ? formatDuration(view.totals.totalTimeSeconds)
               : "—"
           }
           icon={Clock}
         />
       </div>
 
-      <ActivationFunnel users={data?.users ?? null} />
+      <ActivationFunnel users={view?.users ?? null} />
 
       <OverviewUsersTable
-        users={data?.users ?? null}
-        scorePeriodLabel={scorePeriodLabel(data?.range ?? range)}
+        users={view?.users ?? null}
+        scorePeriodLabel={scorePeriodLabel(view?.range ?? range)}
       />
     </div>
   );

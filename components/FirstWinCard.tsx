@@ -2,7 +2,17 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { PartyPopper, Share2, Check, ArrowRight, Radio } from "lucide-react";
+import { PartyPopper, Share2, Check, ArrowRight, Radio, User } from "lucide-react";
+
+const STAGE_LABEL: Record<string, string> = {
+  signup: "Signup",
+  onboarding: "Onboarding",
+  active: "Active",
+  going_quiet: "Going Quiet",
+  conversion_ready: "Conversion Ready",
+  paid: "Paid",
+  churned: "Churned",
+};
 
 /**
  * The "first win" moment — fixes the weakest part of the activation audit
@@ -15,7 +25,12 @@ import { PartyPopper, Share2, Check, ArrowRight, Radio } from "lucide-react";
 
 type FirstWinData = {
   workspace: { name: string };
-  users: { email: string | null; user_id: string }[];
+  users: {
+    email: string | null;
+    user_id: string;
+    engagement_score: number;
+    stage: string;
+  }[];
   totals: { users: number };
 } | null;
 
@@ -74,7 +89,11 @@ export function FirstWinCard({ data }: { data: FirstWinData }) {
   // ── The win: only early-stage workspaces, and only until dismissed ──────────
   if (dismissed || count > 50) return null;
 
-  const firstUser = data.users[0]?.email ?? data.users[0]?.user_id ?? "your first user";
+  const u0 = data.users[0];
+  const firstUser = u0?.email ?? u0?.user_id ?? "your first user";
+  const firstScore = u0?.engagement_score ?? 0;
+  const firstStage = u0 ? STAGE_LABEL[u0.stage] ?? u0.stage : "";
+  const profileHref = u0 ? `/dashboard/users/${encodeURIComponent(u0.user_id)}` : "/dashboard/users";
   const shareText = `Just set up ConversionCRM on ${wsName} — now I can see every signup's engagement score, lifecycle stage, and exactly who's about to upgrade or slip away. Signups → paid, on autopilot. ${SITE}`;
 
   async function share() {
@@ -103,22 +122,37 @@ export function FirstWinCard({ data }: { data: FirstWinData }) {
           <PartyPopper className="h-5 w-5" />
         </span>
         <div className="min-w-0 flex-1">
-          <h2 className="text-base font-bold">You&apos;re live on {wsName} 🎉</h2>
+          <h2 className="text-base font-bold">
+            ConversionCRM just scored your first real user 🎉
+          </h2>
           <p className="mt-1 text-sm text-sky-50 leading-relaxed">
-            <strong className="text-white">{firstUser}</strong> just showed up —
-            and you can already see their engagement score, what they did, and
-            which lifecycle stage they&apos;re in. This is the whole point:{" "}
-            <strong className="text-white">
-              you now know who&apos;s about to convert and who&apos;s slipping
-              away
-            </strong>
-            , automatically.
+            <strong className="text-white">{firstUser}</strong> showed up and is
+            already scored and staged — no work from you. From here you know
+            exactly who&apos;s about to convert and who&apos;s slipping away,
+            automatically.
           </p>
+          {/* Named outcome: their actual score + stage */}
+          <div className="mt-3 inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs">
+            <span className="font-bold tabular-nums text-white text-sm">
+              {firstScore}/100
+            </span>
+            <span className="text-sky-100">engagement</span>
+            <span className="text-sky-200">·</span>
+            <span className="rounded-full bg-white/15 px-2 py-0.5 font-semibold text-white">
+              {firstStage}
+            </span>
+          </div>
           <div className="mt-3.5 flex flex-wrap items-center gap-2.5">
+            <Link
+              href={profileHref}
+              className="inline-flex items-center gap-1.5 rounded-md bg-white px-3.5 py-2 text-xs font-semibold text-[#0b3a5e] transition-colors hover:bg-sky-50"
+            >
+              <User className="h-3.5 w-3.5" /> See their profile
+            </Link>
             <button
               type="button"
               onClick={share}
-              className="inline-flex items-center gap-1.5 rounded-md bg-white px-3.5 py-2 text-xs font-semibold text-[#0b3a5e] transition-colors hover:bg-sky-50"
+              className="inline-flex items-center gap-1.5 rounded-md bg-white/15 px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-white/25"
             >
               {copied ? (
                 <>

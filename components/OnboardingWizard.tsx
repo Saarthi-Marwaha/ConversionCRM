@@ -7,12 +7,11 @@ import {
   Building2,
   Mail,
   Server,
-  Sparkles,
+  Target,
   Globe,
   ArrowRight,
   ArrowLeft,
-  HelpCircle,
-  X,
+  Lock,
   Check,
 } from "lucide-react";
 
@@ -22,7 +21,7 @@ const inputClass =
 const STEPS = [
   { id: "company", label: "Company", icon: Building2 },
   { id: "email", label: "Email delivery", icon: Mail },
-  { id: "aha", label: "Aha moment", icon: Sparkles },
+  { id: "win", label: "Your win", icon: Target },
   { id: "website", label: "Website", icon: Globe },
 ] as const;
 
@@ -42,9 +41,7 @@ function Field({
       <span className="text-sm font-medium text-gray-700">
         {label}
         {optional && (
-          <span className="text-gray-400 font-normal text-xs ml-1.5">
-            optional
-          </span>
+          <span className="text-gray-400 font-normal text-xs ml-1.5">optional</span>
         )}
       </span>
       <div className="mt-1.5">{children}</div>
@@ -57,93 +54,6 @@ function Field({
   );
 }
 
-/** Step-by-step modal — only offered for genuinely complex inputs (SMTP). */
-function SmtpHelpModal({ onClose }: { onClose: () => void }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      <div
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      <div className="relative bg-white rounded-lg shadow-card-lg max-w-md w-full p-6 max-h-[85vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-bold text-gray-900">
-            How to get your SMTP details
-          </h3>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="p-1.5 rounded-md text-gray-400 hover:bg-gray-50"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        <p className="text-xs font-semibold text-sky-900 mb-2">
-          Using Gmail / Google Workspace
-        </p>
-        <ol className="text-xs text-gray-600 space-y-2 leading-relaxed list-decimal pl-4 mb-4">
-          <li>
-            Go to{" "}
-            <span className="font-mono text-sky-700">
-              myaccount.google.com/apppasswords
-            </span>{" "}
-            (you need 2-step verification turned on).
-          </li>
-          <li>
-            Create an app password named &ldquo;ConversionCRM&rdquo; and copy
-            the 16-character code — that&apos;s your <strong>password</strong>{" "}
-            here (not your Gmail password).
-          </li>
-          <li>
-            Host: <span className="font-mono">smtp.gmail.com</span> · Port:{" "}
-            <span className="font-mono">465</span> · Security: SSL/TLS ·
-            Username: your full Gmail address.
-          </li>
-        </ol>
-
-        <p className="text-xs font-semibold text-sky-900 mb-2">
-          Using Outlook / Microsoft 365
-        </p>
-        <ol className="text-xs text-gray-600 space-y-2 leading-relaxed list-decimal pl-4 mb-4">
-          <li>
-            Host: <span className="font-mono">smtp.office365.com</span> ·
-            Port: <span className="font-mono">587</span> · Security: STARTTLS.
-          </li>
-          <li>
-            Username is your full email; create an app password under
-            Security settings if you use MFA.
-          </li>
-        </ol>
-
-        <p className="text-xs font-semibold text-sky-900 mb-2">
-          Any other provider (Zoho, SES, Postmark…)
-        </p>
-        <p className="text-xs text-gray-600 leading-relaxed mb-4">
-          Search &ldquo;<em>your provider</em> SMTP settings&rdquo; — every
-          provider publishes a host, a port (465 or 587), and tells you
-          whether to use SSL or STARTTLS. Username and password are usually
-          your account credentials or an app password.
-        </p>
-
-        <p className="text-[11px] text-gray-400 leading-relaxed">
-          No DNS setup is needed — your provider already signs its own mail,
-          so emails deliver exactly like ones sent from your inbox.
-        </p>
-
-        <button
-          type="button"
-          onClick={onClose}
-          className="mt-4 w-full bg-sky-500 hover:bg-sky-600 text-white text-sm font-semibold py-2.5 rounded-md transition-colors"
-        >
-          Got it
-        </button>
-      </div>
-    </div>
-  );
-}
-
 export function OnboardingWizard({
   userEmail,
   serverError,
@@ -152,62 +62,71 @@ export function OnboardingWizard({
   serverError?: string;
 }) {
   const [step, setStep] = useState(0);
-  const [showSmtpHelp, setShowSmtpHelp] = useState(false);
   const [clientError, setClientError] = useState<string | null>(null);
 
-  // ── All wizard state ──────────────────────────────
+  // ── Wizard state ──────────────────────────────────
   const [companyName, setCompanyName] = useState("");
   const [productName, setProductName] = useState("");
-  const [provider, setProvider] = useState<"resend" | "smtp">("resend");
   const [senderName, setSenderName] = useState("");
   const [replyTo, setReplyTo] = useState(userEmail);
-  const [smtpHost, setSmtpHost] = useState("");
-  const [smtpPort, setSmtpPort] = useState("465");
-  const [smtpUser, setSmtpUser] = useState("");
-  const [smtpPass, setSmtpPass] = useState("");
-  const [smtpSecure, setSmtpSecure] = useState<"ssl" | "starttls">("ssl");
-  const [smtpFrom, setSmtpFrom] = useState("");
+  const [smtpInterest, setSmtpInterest] = useState(false); // wants SMTP (Basic+)
   const [featureName, setFeatureName] = useState("");
   const [featureUrl, setFeatureUrl] = useState("");
   const [featureEvent, setFeatureEvent] = useState("");
+  const [valueEvent, setValueEvent] = useState("");
+  const [valuePrereq, setValuePrereq] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
 
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  const stepValid = useMemo(() => {
-    switch (step) {
+  // Returns a specific message for the first missing/invalid field, or null.
+  function validateStep(s: number): string | null {
+    switch (s) {
       case 0:
-        return companyName.trim().length > 0 && productName.trim().length > 0;
+        if (!companyName.trim()) return "Enter your company name to continue.";
+        if (!productName.trim()) return "Enter your product name to continue.";
+        return null;
       case 1:
-        if (!senderName.trim()) return false;
-        if (provider === "resend") return EMAIL_RE.test(replyTo.trim());
-        return (
-          smtpHost.trim().length > 0 &&
-          Number(smtpPort) > 0 &&
-          smtpUser.trim().length > 0 &&
-          smtpPass.length > 0
-        );
+        if (!senderName.trim()) return "Enter the sender name your users will see.";
+        if (!EMAIL_RE.test(replyTo.trim()))
+          return "Enter a valid reply-to email (where user replies should land).";
+        return null;
       case 2:
-        // Accept the link however it's typed — bare domain (no https/www) or
-        // path. The server normalizes it on submit.
-        return featureName.trim().length > 0 && featureUrl.trim().length > 0;
+        if (!featureUrl.trim()) return "Paste the link where the win happens.";
+        if (!featureName.trim()) return "Give the win a short name.";
+        return null;
       case 3:
-        return websiteUrl.trim().length > 3;
+        if (websiteUrl.trim().length < 4)
+          return "Enter the website URL where you'll install the widget.";
+        return null;
       default:
-        return false;
+        return null;
     }
-  }, [step, companyName, productName, provider, senderName, replyTo, smtpHost, smtpPort, smtpUser, smtpPass, featureName, featureUrl, websiteUrl]);
+  }
+
+  const stepValid = useMemo(
+    () => validateStep(step) === null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [step, companyName, productName, senderName, replyTo, featureName, featureUrl, websiteUrl]
+  );
 
   function next() {
-    if (!stepValid) {
-      setClientError("Fill in the highlighted fields to continue.");
+    const err = validateStep(step);
+    if (err) {
+      setClientError(err);
       return;
     }
     setClientError(null);
-    // Pre-fill the sender name from the product name so there's one less field
-    // standing between signup and the first win.
+    // Pre-fill downstream fields so there's less to type.
     if (step === 0 && !senderName.trim() && productName.trim()) {
       setSenderName(`${productName.trim()} Team`);
+    }
+    if (step === 2 && !valueEvent.trim()) {
+      // Default the value event to the aha event, then a slug of the name.
+      const derived =
+        featureEvent.trim() ||
+        featureName.trim().toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
+      if (derived) setValueEvent(derived);
     }
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
   }
@@ -224,11 +143,7 @@ export function OnboardingWizard({
               key={s.id}
               className={cn(
                 "flex items-center gap-1.5 text-xs font-semibold",
-                i < step
-                  ? "text-sky-600"
-                  : i === step
-                    ? "text-[#0b3a5e]"
-                    : "text-gray-300"
+                i < step ? "text-sky-600" : i === step ? "text-[#0b3a5e]" : "text-gray-300"
               )}
             >
               <span
@@ -254,8 +169,8 @@ export function OnboardingWizard({
           />
         </div>
         <p className="text-[11px] text-gray-400 mt-1.5">
-          Step {step + 1} of {STEPS.length} — everything here can be changed
-          later in Settings.
+          Step {step + 1} of {STEPS.length} — everything here can be changed later
+          in Settings. You start on the free plan, no card required.
         </p>
       </div>
 
@@ -305,20 +220,18 @@ export function OnboardingWizard({
                 How should emails be sent?
               </h1>
               <p className="text-gray-500 text-sm mt-1">
-                Lifecycle and composer emails go out through one of these —
-                toggle anytime.
+                We&apos;ll send your lifecycle emails for free. Replies land in
+                your inbox — change anytime in Settings.
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                onClick={() => setProvider("resend")}
+                onClick={() => setSmtpInterest(false)}
                 className={cn(
                   "rounded-md p-3.5 text-left transition-all",
-                  provider === "resend"
-                    ? "bg-sky-50 ring-2 ring-sky-400"
-                    : "bg-gray-50 hover:bg-gray-100"
+                  !smtpInterest ? "bg-sky-50 ring-2 ring-sky-400" : "bg-gray-50 hover:bg-gray-100"
                 )}
               >
                 <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
@@ -329,25 +242,38 @@ export function OnboardingWizard({
                   Zero setup. We send for you; replies land in your inbox.
                 </p>
               </button>
+              {/* SMTP is a Basic+ feature — show it, but never collect
+                  credentials a Free plan can't use (audit Fix 5). */}
               <button
                 type="button"
-                onClick={() => setProvider("smtp")}
+                onClick={() => setSmtpInterest(true)}
                 className={cn(
-                  "rounded-md p-3.5 text-left transition-all",
-                  provider === "smtp"
-                    ? "bg-sky-50 ring-2 ring-sky-400"
-                    : "bg-gray-50 hover:bg-gray-100"
+                  "relative rounded-md p-3.5 text-left transition-all",
+                  smtpInterest ? "bg-amber-50 ring-2 ring-amber-300" : "bg-gray-50 hover:bg-gray-100"
                 )}
               >
+                <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-gray-200 px-1.5 py-0.5 text-[10px] font-semibold text-gray-500">
+                  <Lock className="h-2.5 w-2.5" /> Basic
+                </span>
                 <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-                  <Server className="h-4 w-4 text-sky-500" />
+                  <Server className="h-4 w-4 text-gray-400" />
                   My own SMTP
                 </div>
                 <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                  Send from your domain via Gmail, Outlook, SES — any SMTP.
+                  Send from your domain. Unlocks on Basic.
                 </p>
               </button>
             </div>
+
+            {smtpInterest && (
+              <div className="rounded-md bg-amber-50 px-4 py-3 text-xs text-amber-800 leading-relaxed">
+                Sending from your own domain is a <strong>Basic</strong> feature.
+                For now you&apos;ll send through ConversionCRM for free — finish
+                setup, then add your SMTP details in{" "}
+                <strong>Settings → Email delivery</strong> after upgrading. Nothing
+                here is wasted.
+              </div>
+            )}
 
             <Field
               label="Sender name"
@@ -361,111 +287,22 @@ export function OnboardingWizard({
               />
             </Field>
 
-            {provider === "resend" && (
-              <Field
-                label="Reply-to inbox (Gmail or any email)"
-                hint="When users reply to automated emails, the reply lands here."
-              >
-                <input
-                  type="email"
-                  value={replyTo}
-                  onChange={(e) => setReplyTo(e.target.value)}
-                  placeholder="you@gmail.com"
-                  className={inputClass}
-                />
-              </Field>
-            )}
-
-            {provider === "smtp" && (
-              <div className="space-y-4 rounded-md bg-gray-50/70 p-4">
-                {/* Inline cue teaches in-place — no need to leave the flow for
-                    docs. The modal stays as an optional deeper reference. */}
-                <p className="rounded-md bg-sky-50 px-3 py-2 text-xs leading-relaxed text-sky-900">
-                  Paste these from your email provider.{" "}
-                  <strong>Gmail:</strong> host{" "}
-                  <span className="font-mono">smtp.gmail.com</span>, port 465,
-                  username your address, password an app password (not your
-                  login).{" "}
-                  <button
-                    type="button"
-                    onClick={() => setShowSmtpHelp(true)}
-                    className="inline-flex items-center gap-1 font-semibold text-sky-700 underline hover:text-sky-900"
-                  >
-                    <HelpCircle className="h-3 w-3" />
-                    Outlook, SES or other? Exact steps
-                  </button>
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="sm:col-span-2">
-                    <Field label="SMTP host">
-                      <input
-                        value={smtpHost}
-                        onChange={(e) => setSmtpHost(e.target.value)}
-                        placeholder="smtp.gmail.com"
-                        className={cn(inputClass, "bg-white")}
-                      />
-                    </Field>
-                  </div>
-                  <Field label="Port">
-                    <input
-                      type="number"
-                      value={smtpPort}
-                      onChange={(e) => setSmtpPort(e.target.value)}
-                      placeholder="465"
-                      className={cn(inputClass, "bg-white")}
-                    />
-                  </Field>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Field label="Username">
-                    <input
-                      value={smtpUser}
-                      onChange={(e) => setSmtpUser(e.target.value)}
-                      placeholder="you@yourdomain.com"
-                      autoComplete="off"
-                      className={cn(inputClass, "bg-white")}
-                    />
-                  </Field>
-                  <Field label="Password (app password)">
-                    <input
-                      type="password"
-                      value={smtpPass}
-                      onChange={(e) => setSmtpPass(e.target.value)}
-                      placeholder="••••••••"
-                      autoComplete="new-password"
-                      className={cn(inputClass, "bg-white")}
-                    />
-                  </Field>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Field label="Security">
-                    <select
-                      value={smtpSecure}
-                      onChange={(e) =>
-                        setSmtpSecure(e.target.value as "ssl" | "starttls")
-                      }
-                      className={cn(inputClass, "bg-white")}
-                    >
-                      <option value="ssl">SSL/TLS (port 465)</option>
-                      <option value="starttls">STARTTLS (port 587)</option>
-                    </select>
-                  </Field>
-                  <Field label="From address" optional>
-                    <input
-                      type="email"
-                      value={smtpFrom}
-                      onChange={(e) => setSmtpFrom(e.target.value)}
-                      placeholder="Defaults to username"
-                      className={cn(inputClass, "bg-white")}
-                    />
-                  </Field>
-                </div>
-              </div>
-            )}
+            <Field
+              label="Reply-to inbox (Gmail or any email)"
+              hint="When users reply to automated emails, the reply lands here."
+            >
+              <input
+                type="email"
+                value={replyTo}
+                onChange={(e) => setReplyTo(e.target.value)}
+                placeholder="you@gmail.com"
+                className={inputClass}
+              />
+            </Field>
           </div>
         )}
 
-        {/* ── Step 3: Aha moment ────────────────── */}
+        {/* ── Step 3: Your win (aha moment + value milestone) ─── */}
         {step === 2 && (
           <div className="space-y-5">
             <div>
@@ -473,17 +310,14 @@ export function OnboardingWizard({
                 What does &ldquo;it clicked&rdquo; look like for a user?
               </h1>
               <p className="text-gray-500 text-sm mt-1">
-                Think of the one thing a user does that means your product
-                actually <strong>worked</strong> for them — created their first
-                report, connected a tool, sent their first invoice. Paste the
-                link that action opens and we&apos;ll know the moment someone
-                reaches it. <strong>No code</strong> — the widget already tracks
-                every click.
+                Two quick things that make scoring sharp: the link a user clicks
+                when your product works, and the <strong>event</strong> that
+                proves they actually reached the outcome.
               </p>
             </div>
             <Field
-              label="Where does that win happen? (link)"
-              hint="Paste the link the button opens — a full URL or a path like /reports/new. When a user clicks through to it, that counts as them reaching the win."
+              label="Where does the win happen? (link)"
+              hint="Paste the link the button opens — a full URL or a path like /reports/new. Clicking through to it counts as reaching the win. No code needed."
             >
               <input
                 value={featureUrl}
@@ -493,23 +327,42 @@ export function OnboardingWizard({
                 autoFocus
               />
             </Field>
-            <Field label="Feature name">
+            <Field label="Name the win">
               <input
                 value={featureName}
                 onChange={(e) => setFeatureName(e.target.value)}
-                placeholder='e.g. "Create first report"'
+                placeholder='e.g. "Created first report"'
                 className={inputClass}
               />
             </Field>
             <Field
-              label="Custom event name"
-              optional
-              hint="If you also fire a track() call for this feature, name it here."
+              label="Value event"
+              hint="The event you fire when a user reaches the core outcome (e.g. report_created, project_created). This — not clicks — drives readiness and upgrade emails. We pre-fill a sensible default; confirm or change it."
             >
+              <input
+                value={valueEvent}
+                onChange={(e) => setValueEvent(e.target.value)}
+                placeholder="e.g. report_created"
+                className={inputClass}
+              />
+            </Field>
+            <Field
+              label="Near-value steps"
+              optional
+              hint="Prerequisite events a user does on the way to the win (comma-separated). Lets us spot users who are close but stalled."
+            >
+              <input
+                value={valuePrereq}
+                onChange={(e) => setValuePrereq(e.target.value)}
+                placeholder="e.g. project_created, data_imported"
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Custom aha event name" optional>
               <input
                 value={featureEvent}
                 onChange={(e) => setFeatureEvent(e.target.value)}
-                placeholder="e.g. report_created"
+                placeholder="e.g. report_opened"
                 className={inputClass}
               />
             </Field>
@@ -525,8 +378,8 @@ export function OnboardingWizard({
               </h1>
               <p className="text-gray-500 text-sm mt-1">
                 The dashboard shows events only from this site, filtering out
-                localhost noise. You&apos;ll get the install snippet right
-                after this step.
+                localhost noise. You&apos;ll get the install snippet right after
+                this step.
               </p>
             </div>
             <Field label="Your product's website URL">
@@ -539,10 +392,10 @@ export function OnboardingWizard({
               />
             </Field>
             <div className="rounded-md bg-sky-50 px-4 py-3 text-xs text-[#0b3a5e] leading-relaxed">
-              Finishing creates your workspace with a{" "}
-              <strong>production API key</strong> and takes you to Settings,
-              where the one-line install snippet (and an AI-agent prompt) are
-              ready to copy.
+              Finishing creates your workspace on the{" "}
+              <strong>free plan</strong> with a{" "}
+              <strong>production API key</strong> and takes you straight to your
+              install snippet — no pricing step, no card.
             </div>
           </div>
         )}
@@ -565,47 +418,41 @@ export function OnboardingWizard({
           </button>
 
           {step < STEPS.length - 1 ? (
+            // Always enabled — validate on click and name the missing field
+            // (audit Fix 7a) instead of silently greying the button out.
             <button
               type="button"
               onClick={next}
-              disabled={!stepValid}
-              className={cn(
-                "inline-flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-semibold text-white transition-colors",
-                stepValid
-                  ? "bg-sky-500 hover:bg-sky-600"
-                  : "bg-gray-300 cursor-not-allowed"
-              )}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-semibold text-white bg-sky-500 hover:bg-sky-600 transition-colors"
             >
               Next
               <ArrowRight className="h-4 w-4" />
             </button>
           ) : (
-            <form action={createWorkspace}>
-              {/* All collected state rides along as hidden fields */}
+            <form
+              action={createWorkspace}
+              onSubmit={(e) => {
+                const err = validateStep(3);
+                if (err) {
+                  e.preventDefault();
+                  setClientError(err);
+                }
+              }}
+            >
               <input type="hidden" name="company_name" value={companyName} />
               <input type="hidden" name="product_name" value={productName} />
               <input type="hidden" name="email_sender_name" value={senderName} />
-              <input type="hidden" name="email_provider" value={provider} />
+              <input type="hidden" name="email_provider" value="resend" />
               <input type="hidden" name="reply_to_email" value={replyTo} />
-              <input type="hidden" name="smtp_host" value={smtpHost} />
-              <input type="hidden" name="smtp_port" value={smtpPort} />
-              <input type="hidden" name="smtp_user" value={smtpUser} />
-              <input type="hidden" name="smtp_pass" value={smtpPass} />
-              <input type="hidden" name="smtp_secure" value={smtpSecure} />
-              <input type="hidden" name="smtp_from_email" value={smtpFrom} />
               <input type="hidden" name="key_feature_name" value={featureName} />
               <input type="hidden" name="key_feature_url" value={featureUrl} />
               <input type="hidden" name="key_feature_event" value={featureEvent} />
+              <input type="hidden" name="value_event" value={valueEvent} />
+              <input type="hidden" name="value_prereq" value={valuePrereq} />
               <input type="hidden" name="website_url" value={websiteUrl} />
               <button
                 type="submit"
-                disabled={!stepValid}
-                className={cn(
-                  "inline-flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-semibold text-white transition-colors",
-                  stepValid
-                    ? "bg-[#0b3a5e] hover:bg-[#0d4a78]"
-                    : "bg-gray-300 cursor-not-allowed"
-                )}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-semibold text-white bg-[#0b3a5e] hover:bg-[#0d4a78] transition-colors"
               >
                 Finish setup
                 <Check className="h-4 w-4" />
@@ -614,8 +461,6 @@ export function OnboardingWizard({
           )}
         </div>
       </div>
-
-      {showSmtpHelp && <SmtpHelpModal onClose={() => setShowSmtpHelp(false)} />}
     </div>
   );
 }

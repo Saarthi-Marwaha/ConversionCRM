@@ -5,6 +5,8 @@ import { headers } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { normalizeFeatureUrl } from "@/lib/scoring";
+import { PLANS } from "@/lib/plans";
+import { normalizeMilestoneConfig } from "@/lib/value-milestone";
 
 // ─────────────────────────────────────────────
 // Sign Up
@@ -212,11 +214,33 @@ export async function createWorkspace(formData: FormData) {
   // Production API key for this workspace's widget
   const apiKey = `ccrm_${crypto.randomUUID().replace(/-/g, "")}`;
 
-  const event = rawEvent
-    .toLowerCase()
-    .replace(/\s+/g, "_")
-    .replace(/[^a-z0-9_-]/g, "")
-    .slice(0, 64);
+  const slug = (s: string) =>
+    s.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_-]/g, "").slice(0, 64);
+
+  const event = slug(rawEvent);
+
+  // ── Value milestone (drives readiness + upgrade emails — see
+  //    lib/value-milestone.ts). Captured in the wizard; defaults to the aha
+  //    event, then a slug of the feature name, so it's never empty. ──
+  const valueEvent =
+    slug(get("value_event")) || event || slug(keyFeatureName) || "value_achieved";
+  const valuePrereq = get("value_prereq")
+    .split(/[,\n]/)
+    .map((s) => slug(s))
+    .filter(Boolean);
+  const valueMilestoneRaw = {
+    enabled: true,
+    label: keyFeatureName || "Value milestone",
+    matcher: { kind: "event", event: valueEvent },
+    vanityEvents: ["click", "page_view", "time_spent", "page_time"],
+    nearValue: valuePrereq.length
+      ? [{ kind: "prerequisites", events: valuePrereq, fraction: 0.8 }]
+      : [],
+  };
+  // Validate before persisting; null only if the matcher is malformed.
+  const valueMilestone = normalizeMilestoneConfig(valueMilestoneRaw)
+    ? valueMilestoneRaw
+    : null;
 
   const { error } = await admin.from("workspaces").insert({
     name: companyName,
@@ -227,11 +251,18 @@ export async function createWorkspace(formData: FormData) {
     key_feature_name: keyFeatureName,
     key_feature_url: normalizedFeatureUrl,
     key_feature_event: event || null,
+    value_milestone: valueMilestone,
     reply_to_email: resolvedReplyTo,
     email_sender_name: emailSenderName,
     email_provider: provider,
     ...smtp,
     trial_length_days: 14,
+    // ── Default to Free immediately — no pricing wall between "finish setup"
+    //    and the install snippet. Plan can be upgraded later in Billing. ──
+    plan: "free",
+    email_quota: PLANS.free.emailQuota,
+    plan_status: "active",
+    plan_selected_at: new Date().toISOString(),
   });
 
   if (error) {
@@ -239,6 +270,6 @@ export async function createWorkspace(formData: FormData) {
     fail("Failed to create workspace. Please try again.");
   }
 
-  // Fresh workspace has no plan yet — force the pricing choice (no bypass).
-  redirect("/pricing");
+  // Straight to the install snippet — value before any upsell.
+  redirect("/dashboard/guide?welcome=1");
 }
