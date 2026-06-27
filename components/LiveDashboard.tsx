@@ -739,9 +739,10 @@ function DemoBanner({ onSwitch }: { onSwitch: () => void }) {
       <div className="flex items-start gap-2.5">
         <FlaskConical className="h-4 w-4 mt-0.5 flex-shrink-0 text-amber-600" />
         <p className="text-sm text-amber-900 leading-relaxed">
-          <strong>Sample data.</strong> This is ConversionCRM working with example
-          users so you can see scores, stages and the funnel before you install
-          anything. Your real users replace this the moment your widget is live.
+          <strong>This is what your dashboard will look like once your snippet
+          is live.</strong> Sample users, scores, lifecycle stages and the
+          emails that would fire — so you can see the payoff before writing a
+          line of code. Your real users replace this the moment events arrive.
         </p>
       </div>
       <button

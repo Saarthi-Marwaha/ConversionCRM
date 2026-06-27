@@ -198,17 +198,19 @@ export async function createWorkspace(formData: FormData) {
     redirect("/login");
   }
 
-  // Check if workspace already exists (prevent double-submit)
   const admin = createSupabaseAdminClient();
+
+  // Idempotent: if this owner already has a workspace (double-submit, a retry
+  // after a partial failure, or a previous attempt that actually succeeded),
+  // treat it as done and send them straight to the install screen.
   const { data: existing } = await admin
     .from("workspaces")
     .select("id")
     .eq("owner_id", user.id)
-    .single();
+    .maybeSingle();
 
   if (existing) {
-    // Already onboarded — let the dashboard's plan gate route them.
-    redirect("/dashboard");
+    redirect("/dashboard/guide?welcome=1");
   }
 
   // Production API key for this workspace's widget
@@ -221,7 +223,9 @@ export async function createWorkspace(formData: FormData) {
 
   // ── Value milestone (drives readiness + upgrade emails — see
   //    lib/value-milestone.ts). Captured in the wizard; defaults to the aha
-  //    event, then a slug of the feature name, so it's never empty. ──
+  //    event, then a slug of the feature name, so it's never empty. It is
+  //    persisted in a SEPARATE, best-effort step AFTER creation so that a
+  //    not-yet-migrated `value_milestone` column can never block onboarding. ──
   const valueEvent =
     slug(get("value_event")) || event || slug(keyFeatureName) || "value_achieved";
   const valuePrereq = get("value_prereq")
@@ -237,12 +241,14 @@ export async function createWorkspace(formData: FormData) {
       ? [{ kind: "prerequisites", events: valuePrereq, fraction: 0.8 }]
       : [],
   };
-  // Validate before persisting; null only if the matcher is malformed.
   const valueMilestone = normalizeMilestoneConfig(valueMilestoneRaw)
     ? valueMilestoneRaw
     : null;
 
-  const { error } = await admin.from("workspaces").insert({
+  // ── Core insert — only long-stable columns, so creation never depends on a
+  //    pending migration. Retries transient failures and re-checks for an
+  //    existing row each retry, so a silent success is never duplicated. ──
+  const corePayload = {
     name: companyName,
     product_name: productName,
     owner_id: user.id,
@@ -251,23 +257,74 @@ export async function createWorkspace(formData: FormData) {
     key_feature_name: keyFeatureName,
     key_feature_url: normalizedFeatureUrl,
     key_feature_event: event || null,
-    value_milestone: valueMilestone,
     reply_to_email: resolvedReplyTo,
     email_sender_name: emailSenderName,
     email_provider: provider,
     ...smtp,
     trial_length_days: 14,
-    // ── Default to Free immediately — no pricing wall between "finish setup"
-    //    and the install snippet. Plan can be upgraded later in Billing. ──
+    // Default to Free immediately — no pricing wall between finishing setup
+    // and the install snippet. Upgrades live in Billing.
     plan: "free",
     email_quota: PLANS.free.emailQuota,
     plan_status: "active",
     plan_selected_at: new Date().toISOString(),
-  });
+  };
 
-  if (error) {
-    console.error("[createWorkspace]", error);
-    fail("Failed to create workspace. Please try again.");
+  let created = false;
+  for (let attempt = 0; attempt < 3 && !created; attempt++) {
+    if (attempt > 0) {
+      await new Promise((r) => setTimeout(r, 250 * attempt));
+      // A prior attempt may have actually committed before the error surfaced.
+      const { data: nowExists } = await admin
+        .from("workspaces")
+        .select("id")
+        .eq("owner_id", user.id)
+        .maybeSingle();
+      if (nowExists) {
+        created = true;
+        break;
+      }
+    }
+
+    const { data: row, error } = await admin
+      .from("workspaces")
+      .insert(corePayload)
+      .select("id")
+      .maybeSingle();
+
+    if (!error && row) {
+      created = true;
+      break;
+    }
+    // Unique violation on owner = another attempt already created it.
+    if (error?.code === "23505") {
+      created = true;
+      break;
+    }
+    console.error(
+      `[createWorkspace] insert attempt ${attempt + 1} failed:`,
+      error?.code,
+      error?.message
+    );
+  }
+
+  if (!created) {
+    fail("Couldn't create your workspace just now — please click Finish setup again.");
+  }
+
+  // Best-effort: attach the value milestone. A missing column (migration 024
+  // not yet applied) or any other issue must NOT fail onboarding.
+  if (valueMilestone) {
+    const { error: vmErr } = await admin
+      .from("workspaces")
+      .update({ value_milestone: valueMilestone })
+      .eq("owner_id", user.id);
+    if (vmErr) {
+      console.warn(
+        "[createWorkspace] value_milestone not stored (apply migration 024):",
+        vmErr.message
+      );
+    }
   }
 
   // Straight to the install snippet — value before any upsell.
