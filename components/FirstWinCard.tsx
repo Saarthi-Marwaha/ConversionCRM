@@ -43,7 +43,7 @@ export function FirstWinCard({ data }: { data: FirstWinData }) {
       <div className="rounded-xl border border-sky-100 bg-gradient-to-br from-sky-50 to-white p-5 sm:p-6">
         <div className="flex items-start gap-3">
           <span className="relative mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-sky-100">
-            <Radio className="h-4.5 w-4.5 text-sky-600" />
+            <Radio className="h-5 w-5 text-sky-600" />
           </span>
           <div className="min-w-0">
             <h2 className="text-base font-bold text-gray-900">
