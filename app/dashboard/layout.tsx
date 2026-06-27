@@ -13,8 +13,10 @@ export default async function DashboardLayout({
 }) {
   const { workspace, userEmail } = await getActiveWorkspace();
 
-  // No workspace (and auth not bypassed) — send to login
-  if (!workspace) redirect("/login");
+  // Signed in but no workspace yet = onboarding stage. Send them to finish
+  // setup — NOT to /login (which the middleware bounces back to /dashboard,
+  // causing an infinite redirect loop where the page never loads).
+  if (!workspace) redirect("/onboarding");
 
   // Hard plan gate — no plan chosen yet means no dashboard. There is no way
   // past /pricing for a logged-in workspace until a plan is selected.
