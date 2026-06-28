@@ -62,7 +62,7 @@ const nextConfig = {
       { source: "/vs-hubspot.html",   destination: "/compare/hubspot",  permanent: true },
       { source: "/vs-intercom.html",  destination: "/compare/intercom", permanent: true },
       { source: "/vs-mailchimp.html", destination: "/compare/mailchimp",permanent: true },
-      { source: "/vs-mixpanel.html",  destination: "/compare",          permanent: true },
+      { source: "/vs-mixpanel.html",  destination: "/compare/mixpanel", permanent: true },
 
       // Bare section index pages with a .html suffix (e.g. /compare.html).
       // These have no :slug, so the per-slug rules below never match them.
@@ -71,6 +71,25 @@ const nextConfig = {
       { source: "/blog.html",      destination: "/blog",      permanent: true },
       { source: "/resources.html", destination: "/resources", permanent: true },
       { source: "/index.html",     destination: "/",          permanent: true },
+
+      // ── Old .html URLs whose stripped slug does NOT exist. These MUST come
+      //    before the generic /:section/:slug.html rule below (which would
+      //    otherwise land on a non-existent slug → 404). Each goes straight to
+      //    a real 200 page — no redirect chains. ──
+      { source: "/compare/vs-hubspot.html",   destination: "/compare/hubspot",   permanent: true },
+      { source: "/compare/vs-intercom.html",  destination: "/compare/intercom",  permanent: true },
+      { source: "/compare/vs-mailchimp.html", destination: "/compare/mailchimp", permanent: true },
+      { source: "/compare/vs-mixpanel.html",  destination: "/compare/mixpanel",  permanent: true },
+      { source: "/blog/index.html",           destination: "/blog",              permanent: true },
+
+      // Old /solutions/*.html slugs (never existed) → closest live solutions page.
+      { source: "/solutions/convert-free-users-to-paid.html",       destination: "/solutions/b2b-saas",         permanent: true },
+      { source: "/solutions/customer-activation-software.html",     destination: "/solutions/day-1-retention",  permanent: true },
+      { source: "/solutions/free-trial-conversion-software.html",   destination: "/solutions/startups",         permanent: true },
+      { source: "/solutions/in-app-conversion-tools.html",          destination: "/solutions/developers",       permanent: true },
+      { source: "/solutions/trial-conversion-rate-optimization.html", destination: "/solutions/b2b-saas",       permanent: true },
+      { source: "/solutions/product-led-growth-software.html",      destination: "/solutions/product-managers", permanent: true },
+      { source: "/solutions/saas-onboarding-software.html",         destination: "/solutions/day-1-retention",  permanent: true },
 
       // .html-suffix variants of clean URLs (GSC "Crawled - not indexed")
       // Any stale link to /compare/customerio.html etc. 301s to the clean URL.
