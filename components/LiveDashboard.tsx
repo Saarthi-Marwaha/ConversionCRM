@@ -12,6 +12,13 @@ import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { FirstWinCard } from "@/components/FirstWinCard";
 import { ShareResultsButton } from "@/components/ShareResultsButton";
+import { SetupChecklist } from "@/components/SetupChecklist";
+
+export type DashboardSetup = {
+  workspaceId: string;
+  ahaConfigured: boolean;
+  valueMilestoneConfigured: boolean;
+};
 import type { EmailTrigger, LifecycleStage } from "@/types";
 import { emptyScoreBreakdown } from "@/lib/scoring";
 import type { WeeklyScoreBreakdown } from "@/lib/scoring";
@@ -757,7 +764,7 @@ function DemoBanner({ onSwitch }: { onSwitch: () => void }) {
 }
 
 /* ── Overview ────────────────────────────────────────────── */
-export function LiveDashboard() {
+export function LiveDashboard({ setup }: { setup?: DashboardSetup }) {
   const [range, setRange] = useDateRange();
   const { data, error, updatedAt } = useLiveData(range);
 
@@ -807,6 +814,15 @@ export function LiveDashboard() {
         <div className="bg-red-50 text-red-700 text-sm rounded-lg px-4 py-3 shadow-soft">
           Couldn&apos;t reach the live feed: {error}
         </div>
+      )}
+
+      {setup && (
+        <SetupChecklist
+          workspaceId={setup.workspaceId}
+          ahaConfigured={setup.ahaConfigured}
+          valueMilestoneConfigured={setup.valueMilestoneConfigured}
+          eventsCount={data?.totals.events ?? null}
+        />
       )}
 
       {demoActive && <DemoBanner onSwitch={switchToReal} />}
